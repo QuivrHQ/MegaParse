@@ -3,7 +3,7 @@ from setuptools import setup, find_packages
 setup(
     name="megaparse",
     version="0.0.1",
-    description="A package for parsing various file formats",
+    description="Parse complex files (PDF,Docx,PPTX) for LLM consumption",
     long_description=open("README.md").read(),
     long_description_content_type="text/markdown",
     author="Quivr",
