@@ -14,14 +14,8 @@ MegaParse is a powerful and versatile parser that can handle various types of do
 - **Open Source**: Freedom is beautiful, and so is MegaParse. Open source and free to use.
 
 ## Support
-- [x] PDF
-- [x] Powerpoint
-- [x] Word
-
-- [x] Tables
-- [x] TOC
-- [x] Headers   
-- [x] Footers
+- Files: ✅ PDF ✅ Powerpoint ✅ Word
+- Content: ✅ Tables ✅ TOC ✅ Headers ✅ Footers ✅ Images
 
 ### Example
 
