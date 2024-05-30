@@ -19,4 +19,5 @@ jobs:
           changelog-notes-type: github
           package-name: release-please-action
           bump-patch-for-minor-pre-major: true
+          extra-files: "setup.py"
           token: ${{ secrets.RELEASE_PLEASE_TOKEN }}
