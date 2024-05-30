@@ -1,0 +1,11 @@
+*.md
+/images
+/output
+/input
+*.pptx
+.env
+__pycache__/
+dist/**
+megaparse.egg-info/
+*.pyc
+build/*
