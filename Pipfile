@@ -13,6 +13,8 @@ pdf2docx = "*"
 
 [dev-packages]
 ipykernel = "*"
+setuptools = "*"
+wheel = "*"
 
 [requires]
 python_version = "3.12"
