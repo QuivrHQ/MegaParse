@@ -13,6 +13,21 @@ MegaParse is a powerful and versatile parser that can handle various types of do
 - **Wide File Compatibility**: Supports Text, PDF, Powerpoint presentations, Excel, CSV, Word documents.
 - **Open Source**: Freedom is beautiful, and so is MegaParse. Open source and free to use.
 
+## Support
+- [x] PDF
+- [x] Powerpoint
+- [x] Word
+
+- [x] Tables
+- [x] TOC
+- [x] Headers   
+- [x] Footers
+
+### Example
+
+<div align="center">
+    <img src="https://raw.githubusercontent.com/QuivrHQ/MegaParse/main/images/tables.png" alt="Quivr-logo" width="50%"  style="padding-bottom: 20px"/>
+</div>
 
 ## Installation
 
