@@ -17,7 +17,7 @@ jobs:
         with:
           release-type: python
           changelog-notes-type: github
-          package-name: release-please-action
+          package-name: megaparse
           bump-patch-for-minor-pre-major: true
           extra-files: "setup.py"
           token: ${{ secrets.RELEASE_PLEASE_TOKEN }}
