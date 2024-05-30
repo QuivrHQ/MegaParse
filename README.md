@@ -51,3 +51,12 @@ content = megaparse.convert()
 print(content)
 megaparse.save_md(content, "./test.md")
 ```
+
+## Next Steps
+
+- [ ] Add Unstructured Parser Support
+- [ ] Improve Table Parsing
+- [ ] Improve Image Parsing and description
+- [ ] Add TOC for Docx
+- [ ] Add Hyperlinks for Docx
+- [ ] Order Headers for Docx to Markdown
