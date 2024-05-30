@@ -1,0 +1,7 @@
+*.md
+/images
+/output
+/input
+*.pptx
+.env
+__pycache__/

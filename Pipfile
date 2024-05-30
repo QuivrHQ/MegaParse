@@ -1,0 +1,18 @@
+[[source]]
+url = "https://pypi.org/simple"
+verify_ssl = true
+name = "pypi"
+
+[packages]
+python-docx = "*"
+mammoth = "*"
+python-pptx = "*"
+nest-asyncio = "*"
+llama-parse = "*"
+pdf2docx = "*"
+
+[dev-packages]
+ipykernel = "*"
+
+[requires]
+python_version = "3.12"
