@@ -10,6 +10,9 @@ python-pptx = "*"
 nest-asyncio = "*"
 llama-parse = "*"
 pdf2docx = "*"
+unstructured = {extras = ["pdf"], version = "*"}
+langchain = "*"
+langchain-community = "*"
 
 [dev-packages]
 ipykernel = "*"
