@@ -16,7 +16,7 @@ from typing import List, Set
 from llama_parse import LlamaParse
 from llama_parse.utils import ResultType, Language
 from llama_index.core.schema import Document as LlamaDocument
-from markdown_processor import MarkdownProcessor
+from megaparse.markdown_processor import MarkdownProcessor
 
 import nest_asyncio
 
