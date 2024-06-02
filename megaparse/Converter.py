@@ -233,7 +233,7 @@ class PDFConverter:
         unstructured_parser = UnstructuredParser()
         return unstructured_parser.convert(file_path)
 
-    def convert(self, file_path: str) -> str:
+    def convert(self, file_path: str, gpt4o_cleaner = False) -> str:
         parsed_md = ""
         if self.llama_parse_api_key:
             parsed_md = self._llama_parse(self.llama_parse_api_key, file_path)
@@ -248,7 +248,7 @@ class PDFConverter:
                 strict=self.handle_header,
                 remove_pagination=self.handle_pagination,
             )
-            md_cleaned = md_processor.process()
+            md_cleaned = md_processor.process(gpt4o_cleaner=gpt4o_cleaner)
             return md_cleaned
 
     def save_md(self, md_content: str, file_path: Path | str) -> None:
@@ -261,7 +261,7 @@ class MegaParse:
         self.file_path = file_path
         self.llama_parse_api_key = llama_parse_api_key
 
-    def convert(self) -> str:
+    def convert(self, **kwargs) -> str:
         file_extension: str = os.path.splitext(self.file_path)[1]
 
         if file_extension == ".docx":
@@ -277,7 +277,7 @@ class MegaParse:
         else:
             print(self.file_path, file_extension)
             raise ValueError(f"Unsupported file extension: {file_extension}")
-        return converter.convert(self.file_path)
+        return converter.convert(self.file_path, **kwargs)
 
     def save_md(self, md_content: str, file_path: Path | str) -> None:
         os.makedirs(os.path.dirname(file_path), exist_ok=True)
