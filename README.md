@@ -31,6 +31,8 @@ pip install megaparse
 
 ## Usage
 
+Add your OpenAI API key to the .env file
+
 ```python
 from megaparse import MegaParse
 
