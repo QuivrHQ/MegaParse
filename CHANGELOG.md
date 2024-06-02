@@ -1,5 +1,13 @@
 # Changelog
 
+## 0.0.5 (2024-06-02)
+
+## What's Changed
+* feat: Add instructions for installing poppler and tesseract by @StanGirard in https://github.com/QuivrHQ/MegaParse/pull/10
+
+
+**Full Changelog**: https://github.com/QuivrHQ/MegaParse/compare/v0.0.4...v0.0.5
+
 ## 0.0.4 (2024-06-02)
 
 ## What's Changed
