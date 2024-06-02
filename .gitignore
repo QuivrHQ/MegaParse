@@ -8,3 +8,5 @@ dist/**
 megaparse.egg-info/
 *.pyc
 build/*
+
+!megaparse/tests/output_tests/MegaFake_report.md

@@ -31,18 +31,6 @@ pip install megaparse
 
 ## Usage
 
-1. Create an account on [Llama Cloud](https://cloud.llamaindex.ai/) and get your API key.
-
-2. Create a new file in the root directory of the project and name it `.env`.
-
-3. Add the following line to the `.env` file and replace `llx-your_api_key` with your actual API key.
-
-```bash
-LLAMA_CLOUD_API_KEY=llx-your_api_key
-```
-
-4. Now you can use the following code to convert a PDF to Markdown and save it to a file.
-
 ```python
 from megaparse import MegaParse
 
@@ -52,9 +40,31 @@ print(content)
 megaparse.save_md(content, "./test.md")
 ```
 
+### Use LlamaParse
+
+1. Create an account on [Llama Cloud](https://cloud.llamaindex.ai/) and get your API key.
+
+2. Call Megaparse with the `llama_parse_api_key` parameter
+
+```python
+from megaparse import MegaParse
+
+megaparse = MegaParse(file_path="./test.pdf", llama_parse_api_key="llx-your_api_key")
+content = megaparse.convert()
+print(content)
+```
+
+## BenchMark
+
+**Diff megaparse unstructured:** 120
+**Diff llama parse:** 31
+**Diff megaparse llama:** 26
+
+
+*Lower is better*
+
 ## Next Steps
 
-- [ ] Add Unstructured Parser Support
 - [ ] Improve Table Parsing
 - [ ] Improve Image Parsing and description
 - [ ] Add TOC for Docx
