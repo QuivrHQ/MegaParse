@@ -17,6 +17,11 @@ from llama_parse import LlamaParse
 from llama_parse.utils import ResultType, Language
 from llama_index.core.schema import Document as LlamaDocument
 from megaparse.markdown_processor import MarkdownProcessor
+from megaparse.unstructured import UnstructuredParser
+from pathlib import Path
+from llama_index.core import download_loader
+from unstructured.partition.auto import partition
+
 
 import nest_asyncio
 
@@ -201,12 +206,16 @@ class PPTXConverter:
 
 class PDFConverter:
     def __init__(
-        self, api_key: str, handle_pagination: bool = True, handle_header: bool = True
+        self,
+        llama_parse_api_key: str,
+        handle_pagination: bool = True,
+        handle_header: bool = True,
     ) -> None:
         self.handle_pagination = handle_pagination
         self.handle_header = handle_header
-        self.api_key = api_key
+        self.llama_parse_api_key = llama_parse_api_key
 
+    def _llama_parse(self, api_key: str, file_path: str):
         parsing_instructions = "Do not take into account the page breaks (no --- between pages), do not repeat the header and the footer so the tables are merged. Keep the same format for similar tables."
         self.parser = LlamaParse(
             api_key=str(api_key),
@@ -216,10 +225,20 @@ class PDFConverter:
             language=Language.FRENCH,
             parsing_instruction=parsing_instructions,  # Optionally you can define a parsing instruction
         )
-
-    def convert(self, file_path: str) -> str:
         documents: List[LlamaDocument] = self.parser.load_data(file_path)
         parsed_md = documents[0].get_content()
+        return parsed_md
+
+    def _unstructured_parse(self, file_path: str):
+        unstructured_parser = UnstructuredParser()
+        return unstructured_parser.convert(file_path)
+
+    def convert(self, file_path: str) -> str:
+        parsed_md = ""
+        if self.llama_parse_api_key:
+            parsed_md = self._llama_parse(self.llama_parse_api_key, file_path)
+        else:
+            parsed_md = self._unstructured_parse(file_path)
 
         if not (self.handle_pagination or self.handle_header):
             return parsed_md
@@ -238,9 +257,9 @@ class PDFConverter:
 
 
 class MegaParse:
-    def __init__(self, file_path: str) -> None:
+    def __init__(self, file_path: str, llama_parse_api_key: str | None = None) -> None:
         self.file_path = file_path
-        self.api_key = os.getenv("LLAMA_CLOUD_API_KEY")
+        self.llama_parse_api_key = llama_parse_api_key
 
     def convert(self) -> str:
         file_extension: str = os.path.splitext(self.file_path)[1]
@@ -254,12 +273,13 @@ class MegaParse:
                 file_path=self.file_path, file_extension=file_extension
             )
         elif file_extension == ".pdf":
-            converter = PDFConverter(api_key=self.api_key)
+            converter = PDFConverter(llama_parse_api_key=self.llama_parse_api_key)
         else:
             print(self.file_path, file_extension)
             raise ValueError(f"Unsupported file extension: {file_extension}")
         return converter.convert(self.file_path)
 
     def save_md(self, md_content: str, file_path: Path | str) -> None:
-        with open(file_path, "w") as f:
+        os.makedirs(os.path.dirname(file_path), exist_ok=True)
+        with open(file_path, "w+") as f:
             f.write(md_content)
