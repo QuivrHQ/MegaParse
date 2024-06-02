@@ -2,7 +2,7 @@ from setuptools import setup, find_packages
 
 setup(
     name="megaparse",
-    version="0.0.4",
+    version="0.0.5",
     description="Parse complex files (PDF,Docx,PPTX) for LLM consumption",
     long_description=open("README.md").read(),
     long_description_content_type="text/markdown",
