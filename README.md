@@ -31,7 +31,11 @@ pip install megaparse
 
 ## Usage
 
-Add your OpenAI API key to the .env file
+1. Add your OpenAI API key to the .env file
+
+2. Install poppler on your computer (images and PDFs)
+3. 
+4. Install tesseract on your computer (images and PDFs)
 
 ```python
 from megaparse import MegaParse
