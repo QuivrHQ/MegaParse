@@ -19,9 +19,8 @@ MegaParse is a powerful and versatile parser that can handle various types of do
 
 ### Example
 
-<div align="center">
-    <img src="https://raw.githubusercontent.com/QuivrHQ/MegaParse/main/images/tables.png" alt="Quivr-logo" width="50%"  style="padding-bottom: 20px"/>
-</div>
+https://github.com/QuivrHQ/MegaParse/assets/19614572/1b4cdb73-8dc2-44ef-b8b4-a7509bc8d4f3
+
 
 ## Installation
 
