@@ -1,5 +1,15 @@
 # Changelog
 
+## 0.0.6 (2024-06-03)
+
+## What's Changed
+* add: gpt cleaner for header and footer by @chloedia in https://github.com/QuivrHQ/MegaParse/pull/13
+
+## New Contributors
+* @chloedia made their first contribution in https://github.com/QuivrHQ/MegaParse/pull/13
+
+**Full Changelog**: https://github.com/QuivrHQ/MegaParse/compare/v0.0.5...v0.0.6
+
 ## 0.0.5 (2024-06-02)
 
 ## What's Changed
