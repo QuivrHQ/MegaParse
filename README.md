@@ -62,10 +62,14 @@ print(content)
 
 ## BenchMark
 
-**Diff megaparse unstructured:** 120
-**Diff llama parse:** 31
-**Diff megaparse llama:** 26
-
+<!---BENCHMARK-->
+| Parser | Diff |
+|---|---|
+| Megaparse with LLamaParse and GPTCleaner | 84 |
+| **Megaparse** | 100 |
+| Megaparse with LLamaParse | 104 |
+| LLama Parse | 108 |
+<!---END_BENCHMARK-->
 
 *Lower is better*
 
