@@ -1,5 +1,13 @@
 # Changelog
 
+## 0.0.7 (2024-06-03)
+
+## What's Changed
+* feat: Update benchmark results in README.md by @StanGirard in https://github.com/QuivrHQ/MegaParse/pull/15
+
+
+**Full Changelog**: https://github.com/QuivrHQ/MegaParse/compare/v0.0.6...v0.0.7
+
 ## 0.0.6 (2024-06-03)
 
 ## What's Changed
