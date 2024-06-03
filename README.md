@@ -80,3 +80,8 @@ print(content)
 - [ ] Add TOC for Docx
 - [ ] Add Hyperlinks for Docx
 - [ ] Order Headers for Docx to Markdown
+
+
+## Star History
+
+[![Star History Chart](https://api.star-history.com/svg?repos=QuivrHQ/MegaParse&type=Date)](https://star-history.com/#QuivrHQ/MegaParse&Date)
