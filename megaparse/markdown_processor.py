@@ -1,6 +1,6 @@
 import os
 from collections import Counter
-from typing import LiteralString
+from typing import Literal
 from langchain_openai import ChatOpenAI
 
 
@@ -29,7 +29,9 @@ class MarkdownProcessor:
 
     def remove_duplicates(self, paragraphs: list) -> tuple:
         """Remove duplicate paragraphs and identify unique and duplicate paragraphs."""
-        unique_paragraphs = list(set([self.clean(paragraph) for paragraph in paragraphs]))
+        unique_paragraphs = list(
+            set([self.clean(paragraph) for paragraph in paragraphs])
+        )
         duplicate_paragraphs = []
         cleaned_paragraphs = []
 
@@ -45,21 +47,30 @@ class MarkdownProcessor:
 
     def identify_header_components(self, duplicate_paragraphs: list) -> dict:
         """Identify words in duplicate paragraphs that are likely header components."""
-        header_components = list(set([self.clean(paragraph) for paragraph in duplicate_paragraphs]))
+        header_components = list(
+            set([self.clean(paragraph) for paragraph in duplicate_paragraphs])
+        )
         header_components = " ".join(header_components).strip().split(" ")
         header_components_count = Counter(header_components)
-        header_components_count = {k.replace(":", ""): v for k, v in header_components_count.items() if v > 1 and len(k) > 3}
+        header_components_count = {
+            k.replace(":", ""): v
+            for k, v in header_components_count.items()
+            if v > 1 and len(k) > 3
+        }
         return header_components_count
 
-    def remove_header_lines(self, paragraphs: list, header_components_count: dict) -> list:
+    def remove_header_lines(
+        self, paragraphs: list, header_components_count: dict
+    ) -> list:
         """Remove paragraphs that contain any of the header words or the word 'Page' if remove_pagination is true."""
+
         def should_remove(paragraph):
             if self.remove_pagination and "Page" in paragraph:
                 return True
             return any(word in paragraph for word in header_components_count.keys())
 
         return [paragraph for paragraph in paragraphs if not should_remove(paragraph)]
-    
+
     def merge_tables(self, md_content: str):
         md_content = md_content.replace("|\n\n|", "|\n|")
         return md_content
@@ -85,15 +96,13 @@ class MarkdownProcessor:
         Answer with only the cleaned document in markdown format. 
         Result : """
 
-        messages.append(("human", self.md_result)) #type: ignore
+        messages.append(("human", self.md_result))  # type: ignore
 
         result = llm.invoke(messages)
 
         return result.content
 
-
-
-    def process(self, gpt4o_cleaner = False):
+    def process(self, gpt4o_cleaner=False):
         """Process the markdown result by removing duplicate paragraphs and headers."""
 
         if gpt4o_cleaner:
@@ -102,13 +111,19 @@ class MarkdownProcessor:
         else:
             pages = self.split_into_pages()
             paragraphs = self.split_into_paragraphs(pages)
-            #other_pages_paragraphs = self.split_into_paragraphs(pages[1:])
+            # other_pages_paragraphs = self.split_into_paragraphs(pages[1:])
 
-            cleaned_paragraphs, duplicate_paragraphs = self.remove_duplicates(paragraphs)
-            header_components_count = self.identify_header_components(duplicate_paragraphs)
+            cleaned_paragraphs, duplicate_paragraphs = self.remove_duplicates(
+                paragraphs
+            )
+            header_components_count = self.identify_header_components(
+                duplicate_paragraphs
+            )
 
             if self.strict:
-                final_paragraphs = self.remove_header_lines(cleaned_paragraphs[5:], header_components_count)
+                final_paragraphs = self.remove_header_lines(
+                    cleaned_paragraphs[5:], header_components_count
+                )
                 final_paragraphs = cleaned_paragraphs[:5] + final_paragraphs
             else:
                 final_paragraphs = cleaned_paragraphs
@@ -119,4 +134,3 @@ class MarkdownProcessor:
 
         cleaned_result = self.merge_tables(str(cleaned_result))
         return cleaned_result
-
