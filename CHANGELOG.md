@@ -1,5 +1,13 @@
 # Changelog
 
+## 0.0.9 (2024-06-04)
+
+## What's Changed
+* chore: Update README.md to include optional use of LlamaParse for improved results by @StanGirard in https://github.com/QuivrHQ/MegaParse/pull/19
+
+
+**Full Changelog**: https://github.com/QuivrHQ/MegaParse/compare/v0.0.8...v0.0.9
+
 ## 0.0.8 (2024-06-04)
 
 **Full Changelog**: https://github.com/QuivrHQ/MegaParse/compare/v0.0.7...v0.0.8
