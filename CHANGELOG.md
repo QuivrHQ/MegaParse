@@ -1,5 +1,9 @@
 # Changelog
 
+## 0.0.8 (2024-06-04)
+
+**Full Changelog**: https://github.com/QuivrHQ/MegaParse/compare/v0.0.7...v0.0.8
+
 ## 0.0.7 (2024-06-03)
 
 ## What's Changed
