@@ -1,5 +1,16 @@
 # Changelog
 
+## 0.0.10 (2024-06-04)
+
+## What's Changed
+* Change from LiteralString to Literal (typing) by @dSupertramp in https://github.com/QuivrHQ/MegaParse/pull/21
+* chore: Add Dockerfile and Makefile for project setup by @StanGirard in https://github.com/QuivrHQ/MegaParse/pull/23
+
+## New Contributors
+* @dSupertramp made their first contribution in https://github.com/QuivrHQ/MegaParse/pull/21
+
+**Full Changelog**: https://github.com/QuivrHQ/MegaParse/compare/v0.0.9...v0.0.10
+
 ## 0.0.9 (2024-06-04)
 
 ## What's Changed
