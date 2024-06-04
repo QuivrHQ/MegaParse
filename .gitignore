@@ -10,3 +10,5 @@ megaparse.egg-info/
 build/*
 
 !megaparse/tests/output_tests/MegaFake_report.md
+megaparse/cdp/CDP_QUAL_CHART_01_CHARTE PRODUITS_2023.12.13.pdf
+*.pkl

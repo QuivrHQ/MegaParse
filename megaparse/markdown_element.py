@@ -145,7 +145,7 @@ class MarkdownElementNodeParser(BaseElementNodeParser):
                 table_lines = element.element.split("\n")
                 table_columns = [len(line.split("|")) for line in table_lines]
                 # for the lines that have less columns than the first line, we will add empty columns
-                # Modfiied by Chloé
+                # Modfied by Chloé
                 for i, columns in enumerate(table_columns):
                     if columns < table_columns[0]:
                         table_lines[i] += " |" * (table_columns[0] - columns)
@@ -170,7 +170,10 @@ class MarkdownElementNodeParser(BaseElementNodeParser):
                 # if the element is a table, convert it to a dataframe
                 if should_keep:
                     if perfect_table:
-                        table = md_to_df(element.element)
+                        table_content = "|".join([el.strip() if el != '\n' else el for el in element.element.split("|")])
+                        table = md_to_df(table_content)
+                        
+
                         table = self.move_duplicates_to_end(table)
 
 
@@ -220,25 +223,27 @@ class MarkdownElementNodeParser(BaseElementNodeParser):
     def move_duplicates_to_end(self, df: pd.DataFrame):
         dupe_cols = df.loc[:, df.columns.str.contains(r"\.\d+$")]
 
-        if dupe_cols.empty:
-            return df
-        
-        original_cols = df.loc[:, ~df.columns.str.contains(r"\.\d+$")]
+        if not dupe_cols.empty:
+            
+            original_cols = df.loc[:, ~df.columns.str.contains(r"\.\d+$")]
 
-        n_repetition = set([col.split(".")[-1] for col in dupe_cols.columns])
+            n_repetition = set([col.split(".")[-1] for col in dupe_cols.columns])
 
-        concat_df = original_cols
+            concat_df = original_cols
 
-        for i in n_repetition:
-            dupe_df = dupe_cols.filter(regex=r"\." + i + "$")
-            dupe_df.columns = dupe_df.columns.str.replace(r"\.\d+$", "", regex=True)
+            for i in n_repetition:
+                dupe_df = dupe_cols.filter(regex=r"\." + i + "$")
+                dupe_df.columns = dupe_df.columns.str.replace(r"\.\d+$", "", regex=True)
 
-            concat_df = pd.concat([concat_df, dupe_df,], axis=0)
+                concat_df = pd.concat([concat_df, dupe_df,], axis=0)
+        else:
+            concat_df = df
 
         def contains_alnum(row):
             return row.astype(str).str.contains(r'[a-zA-Z0-9]').any()
 
         # Filter rows that contain letters or numbers
+        concat_df = concat_df.map(lambda x: x.strip() if isinstance(x, str) else x)
         concat_df = concat_df[concat_df.apply(contains_alnum, axis=1)]
         concat_df = concat_df.apply(lambda col: col.map(lambda x: x.replace("**", "").replace("*", "") if isinstance(x, str) else x))
         concat_df = concat_df.reset_index(drop=True)
