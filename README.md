@@ -45,7 +45,7 @@ print(content)
 megaparse.save_md(content, "./test.md")
 ```
 
-### Use LlamaParse
+### (Optional) Use LlamaParse for Improved Results
 
 1. Create an account on [Llama Cloud](https://cloud.llamaindex.ai/) and get your API key.
 
