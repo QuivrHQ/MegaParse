@@ -37,7 +37,7 @@ pip install megaparse
 3. Install tesseract on your computer (images and PDFs)
 
 ```python
-from megaparse import MegaParse
+from megaparse.Converter import MegaParse
 
 megaparse = MegaParse(file_path="./test.pdf")
 content = megaparse.convert()
@@ -52,7 +52,7 @@ megaparse.save_md(content, "./test.md")
 2. Call Megaparse with the `llama_parse_api_key` parameter
 
 ```python
-from megaparse import MegaParse
+from megaparse.Converter import MegaParse
 
 megaparse = MegaParse(file_path="./test.pdf", llama_parse_api_key="llx-your_api_key")
 content = megaparse.convert()
