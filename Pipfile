@@ -19,6 +19,7 @@ poppler-utils = "*"
 markdownify = "*"
 langchain-openai = "*"
 langchain-core = "*"
+python-dotenv = "*"
 
 [dev-packages]
 ipykernel = "*"

@@ -1,10 +1,17 @@
 import os
 from collections import Counter
-from typing import Literal
+from typing import List, Tuple, Dict
 from langchain_openai import ChatOpenAI
+from dotenv import load_dotenv
 
 
 class MarkdownProcessor:
+    """
+    Class for MarkdownProcessor.
+    """
+
+    load_dotenv()
+
     def __init__(self, md_result: str, strict: bool, remove_pagination: bool):
         self.md_result = md_result
         self.strict = strict
@@ -12,23 +19,52 @@ class MarkdownProcessor:
 
     @staticmethod
     def clean(text: str) -> str:
-        """Clean the input text by removing newlines, double asterisks, and trimming whitespace."""
+        """
+        Clean the input text by removing newlines, double asterisks, and trimming whitespace.
+
+        Args:
+            text (str): Input text
+
+        Returns:
+            str: Cleaned text
+        """
         text = text.replace("\n", "")
         text = text.replace("**", "")
         text = text.strip()
         return text
 
-    def split_into_pages(self) -> list:
-        """Split the markdown result into pages using triple newlines as the delimiter."""
+    def split_into_pages(self) -> List[str]:
+        """
+        Split the markdown result into pages using triple newlines as the delimiter.
+
+        Returns:
+            List[str]: Splitted markdown
+        """
         return self.md_result.split("\n\n\n")
 
     @staticmethod
-    def split_into_paragraphs(pages: list) -> list:
-        """Split pages into paragraphs using double newlines as the delimiter."""
+    def split_into_paragraphs(pages: list) -> List[str]:
+        """
+        Split pages into paragraphs using double newlines as the delimiter.
+
+        Args:
+            pages (list): Pages
+
+        Returns:
+            List[str]: Splitted pages
+        """
         return "\n\n".join(pages).split("\n\n")
 
-    def remove_duplicates(self, paragraphs: list) -> tuple:
-        """Remove duplicate paragraphs and identify unique and duplicate paragraphs."""
+    def remove_duplicates(self, paragraphs: list) -> Tuple[str, List[str]]:
+        """
+        Remove duplicate paragraphs and identify unique and duplicate paragraphs.
+
+        Args:
+            paragraphs (list): Paragraphs
+
+        Returns:
+            Tuple[str, List[str]]: Cleaned paragraphs and duplicate paragraphs
+        """
         unique_paragraphs = list(
             set([self.clean(paragraph) for paragraph in paragraphs])
         )
@@ -42,11 +78,18 @@ class MarkdownProcessor:
                 unique_paragraphs.remove(cleaned_paragraph)
             else:
                 duplicate_paragraphs.append(paragraph)
-
         return cleaned_paragraphs, duplicate_paragraphs
 
-    def identify_header_components(self, duplicate_paragraphs: list) -> dict:
-        """Identify words in duplicate paragraphs that are likely header components."""
+    def identify_header_components(self, duplicate_paragraphs: list) -> Dict:
+        """
+        Identify words in duplicate paragraphs that are likely header components.
+
+        Args:
+            duplicate_paragraphs (list): Duplicate paragraphs
+
+        Returns:
+            Dict: Header components
+        """
         header_components = list(
             set([self.clean(paragraph) for paragraph in duplicate_paragraphs])
         )
@@ -60,9 +103,18 @@ class MarkdownProcessor:
         return header_components_count
 
     def remove_header_lines(
-        self, paragraphs: list, header_components_count: dict
-    ) -> list:
-        """Remove paragraphs that contain any of the header words or the word 'Page' if remove_pagination is true."""
+        self, paragraphs: List[str], header_components_count: Dict
+    ) -> List[str]:
+        """
+        Remove paragraphs that contain any of the header words or the word 'Page' if remove_pagination is true.
+
+        Args:
+            paragraphs (List[str]): Paragraphs
+            header_components_count (Dict): Header components
+
+        Returns:
+            List[str]: New paragraphs
+        """
 
         def should_remove(paragraph):
             if self.remove_pagination and "Page" in paragraph:
@@ -71,17 +123,32 @@ class MarkdownProcessor:
 
         return [paragraph for paragraph in paragraphs if not should_remove(paragraph)]
 
-    def merge_tables(self, md_content: str):
+    def merge_tables(self, md_content: str) -> str:
+        """
+        Merge tables inside Markdown content.
+
+        Args:
+            md_content (str): Markdown content
+
+        Returns:
+            str: Merged tables
+        """
         md_content = md_content.replace("|\n\n|", "|\n|")
         return md_content
 
-    def save_cleaned_result(self, cleaned_result: str, output_path: str):
-        """Save the cleaned paragraphs to a markdown file."""
+    def save_cleaned_result(self, cleaned_result: str, output_path: str) -> None:
+        """
+        Save the cleaned paragraphs to a markdown file.
+
+        Args:
+            cleaned_result (str): Cleaned result
+            output_path (str): Output path
+        """
         with open(output_path, "w") as f:
             f.write(cleaned_result)
 
     def remove_header_llm(self):
-        llm = ChatOpenAI(model="gpt-4o")
+        llm = ChatOpenAI(model="gpt-4o", api_key=os.getenv("OPENAI_API_KEY"))
         # Define the prompt
         messages = [
             (
@@ -102,9 +169,16 @@ class MarkdownProcessor:
 
         return result.content
 
-    def process(self, gpt4o_cleaner=False):
-        """Process the markdown result by removing duplicate paragraphs and headers."""
+    def process(self, gpt4o_cleaner=False) -> str:
+        """
+        Process the markdown result by removing duplicate paragraphs and headers.
 
+        Args:
+            gpt4o_cleaner (bool, optional): GPT-4o cleaner. Defaults to False.
+
+        Returns:
+            str: Cleaned result
+        """
         if gpt4o_cleaner:
             cleaned_result = self.remove_header_llm()
 

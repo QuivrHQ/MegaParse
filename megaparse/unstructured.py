@@ -2,9 +2,12 @@ import markdownify
 from langchain_openai import ChatOpenAI
 from langchain_core.prompts import PromptTemplate
 from unstructured.partition.pdf import partition_pdf
+from dotenv import load_dotenv
+import os
 
 
 class UnstructuredParser:
+    load_dotenv()
 
     # Function to convert element category to markdown format
     def convert_to_markdown(self, elements):
@@ -73,7 +76,7 @@ class UnstructuredParser:
         )
 
     def improve_table_elements(self, elements):
-        llm = ChatOpenAI(model="gpt-4o")
+        llm = ChatOpenAI(model="gpt-4o", api_key=os.getenv("OPENAI_API_KEY"))
 
         # Define the prompt
         messages = [
