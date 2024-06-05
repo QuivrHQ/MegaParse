@@ -233,7 +233,7 @@ class PDFConverter:
         unstructured_parser = UnstructuredParser()
         return unstructured_parser.convert(file_path)
 
-    def convert(self, file_path: str, gpt4o_cleaner = False) -> str:
+    def convert(self, file_path: str, gpt4o_cleaner=False) -> str:
         parsed_md = ""
         if self.llama_parse_api_key:
             parsed_md = self._llama_parse(self.llama_parse_api_key, file_path)
