@@ -47,7 +47,7 @@ def get_query_engine(source_path: Path, top_k: int = 5):
     else:
         cleaned_nodes_charte = pickle.load(open("./charte.pkl", "rb"))
 
-    llm = OpenAI(model="gpt-4o", temperature=0.1)
+    llm = OpenAI(model="gpt-4o", temperature=0.0) #0.1
 
     vector_index = VectorStoreIndex(cleaned_nodes_charte)
     #vector_retriever = vector_index.as_retriever(similarity_top_k=top_k, outpuy_cls = Ingredient)
