@@ -42,7 +42,7 @@ class Converter:
 
 class DOCXConverter(Converter):
     def __init__(self) -> None:
-        pass
+        self.header_handled = False
 
     def convert(self, file_path: str) -> str:
         doc = Document(file_path)
@@ -261,17 +261,29 @@ class MegaParse:
         self.file_path = file_path
         self.llama_parse_api_key = llama_parse_api_key
 
+    # def convert(self, **kwargs) -> str:
+    #     file_extension: str = os.path.splitext(self.file_path)[1]
+    #     if file_extension == ".docx":
+    #         converter = DOCXConverter(
+    #             file_path=self.file_path, file_extension=file_extension
+    #         )
+    #     elif file_extension == ".pptx":
+    #         converter = PPTXConverter(
+    #             file_path=self.file_path, file_extension=file_extension
+    #         )
+    #     elif file_extension == ".pdf":
+    #         converter = PDFConverter(llama_parse_api_key=self.llama_parse_api_key)
+    #     else:
+    #         print(self.file_path, file_extension)
+    #         raise ValueError(f"Unsupported file extension: {file_extension}")
+    #     return converter.convert(self.file_path, **kwargs)
+
     def convert(self, **kwargs) -> str:
         file_extension: str = os.path.splitext(self.file_path)[1]
-
         if file_extension == ".docx":
-            converter = DOCXConverter(
-                file_path=self.file_path, file_extension=file_extension
-            )
+            converter = DOCXConverter()
         elif file_extension == ".pptx":
-            converter = PPTXConverter(
-                file_path=self.file_path, file_extension=file_extension
-            )
+            converter = PPTXConverter()
         elif file_extension == ".pdf":
             converter = PDFConverter(llama_parse_api_key=self.llama_parse_api_key)
         else:
