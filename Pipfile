@@ -20,6 +20,8 @@ markdownify = "*"
 langchain-openai = "*"
 langchain-core = "*"
 uvloop = "*"
+scikit-learn = "*"
+seaborn = "*"
 
 [dev-packages]
 ipykernel = "*"

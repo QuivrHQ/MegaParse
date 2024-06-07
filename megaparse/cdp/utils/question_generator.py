@@ -52,7 +52,7 @@ class QuestionGenerator:
                 text_rows.append("|" + row_text + "|")
         return "\n".join(text_rows)
 
-    def generate_questions(self, xlsx_path: Path, tab_name: str, language_verification: bool = False):
+    def generate_questions(self, xlsx_path: Path, tab_name: str, language_verification: bool = False) -> list[str]:
         xls = pd.ExcelFile(xlsx_path)
         sheets = pd.read_excel(xls, tab_name)
 
@@ -84,10 +84,10 @@ class QuestionGenerator:
             )
             llm_chain = prompt | llm
             questions = llm_chain.invoke({"questions": questions_content})
-            return questions.content
+            return str(questions.content).split("\n")
 
 
-        return questions_content
+        return str(questions_content).split("\n")
 
 
 
