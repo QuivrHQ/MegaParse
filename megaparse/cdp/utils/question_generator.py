@@ -1,8 +1,12 @@
 from pathlib import Path
+from typing import List
 from langchain_core.prompts import PromptTemplate
 from langchain_openai import ChatOpenAI
 import pandas as pd
 from bs4 import BeautifulSoup
+from pydantic import BaseModel, Field
+from langchain.output_parsers import PydanticOutputParser
+
 
 GENERIC_PROMPT = """You will be generating questions to verify the compliance of items based on a provided document. Here is the document:
 <document>
@@ -37,6 +41,10 @@ The questions must be specific to a unique ingredient at each time.
 The question will be asked directly to the "Charte Qualité" team, they won't have access to the provided document.
 """
 
+class QuestionType(BaseModel):
+    """Represent a list of questions translated in a specific language."""
+    language: str = Field(description="Language of the generated questions.")
+    questions: List[str] = Field(description="List of generated questions in the right language.")
 
 
 class QuestionGenerator:
@@ -62,7 +70,7 @@ class QuestionGenerator:
 
         prompt = PromptTemplate(
             template=self.generic_prompt,
-            input_variables=["DOCUMENT", "DOCUMENT_CONTEXT"]
+            input_variables=["DOCUMENT", "DOCUMENT_CONTEXT"],
         )
 
         llm = ChatOpenAI(model="gpt-4o", temperature=0.1)
@@ -75,17 +83,23 @@ class QuestionGenerator:
 
         if language_verification:
             print("Verifying language and translating questions ...")
-            llm = ChatOpenAI(model="gpt-4o", temperature=0.1)
-            prompt = PromptTemplate(
-                template="""Traduit ces questions en francais : {questions} 
-                
-                Renvois un une liste avec les questions directement : """,
-                input_variables=["questions"],
-            )
-            llm_chain = prompt | llm
-            questions = llm_chain.invoke({"questions": questions_content})
-            return str(questions.content).split("\n")
+            model = ChatOpenAI(model="gpt-4o", temperature=0.0)
 
+            # Set up a parser + inject instructions into the prompt template.
+            parser = PydanticOutputParser(pydantic_object=QuestionType)
+
+            prompt = PromptTemplate(
+                template="Translate the following questions in french.\n{format_instructions}\n{questions}\n",
+                input_variables=["questions"],
+                partial_variables={"format_instructions": parser.get_format_instructions()},
+            )
+
+            # And a query intended to prompt a language model to populate the data structure.
+            prompt_and_model = prompt | model
+            questions = prompt_and_model.invoke({"questions": questions_content})
+            translated_question: QuestionType = parser.invoke(questions)
+
+            return translated_question.questions
 
         return str(questions_content).split("\n")
 
