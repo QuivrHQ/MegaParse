@@ -22,6 +22,7 @@ langchain-core = "*"
 uvloop = "*"
 scikit-learn = "*"
 seaborn = "*"
+llama-index-postprocessor-cohere-rerank = "*"
 
 [dev-packages]
 ipykernel = "*"

@@ -24,7 +24,7 @@ Extract the individual raw items from the items table. For composed items, break
 For each raw item, formulate a specific question to verify its compliance with the requirements outlined in the document. The question should be in the format: "Is [item information] compliant with the requirements?"
 When generating each question, include all relevant information about the item so that the question can be answered without needing to refer back to the items table. This is important because the team verifying the items will not have access to the table.
 Before providing the final questions, write out your thought process and reasoning inside <scratchpad> tags. Explain how you extracted the raw items and formulated each question.
-Finally, output the generated questions inside <questions> tags, with each question on a separate line.
+Finally, avoiding repetitive questions, output the generated questions inside <questions> tags, with each question on a separate line.
 
 Remember, the goal is to create specific, informative questions for each raw item to verify compliance with the requirements outlined in the document. Make sure to provide all necessary context within the questions themselves.
 """
@@ -34,10 +34,12 @@ DOCUMENT_CONTEXT = """
 The document is a list of specificity for a pastry product, every ingredient listed must be verified to be accepted by the Coup de Pates company.
 Extract the individual raw ingredients from the ingredients table. For composed ingredients, break them down into their sub-ingredients. Focus on the raw ingredients only, not the composed ingredients themselves.
 When generating each question, include all relevant information about the ingredient so that the question can be answered without needing to refer back to the ingredients table. This is important because the team verifying the ingredients will not have access to the table.
-Look for the most detail in each ingredient, such as the labels (RSPCO, élevés en cage), do not add the country it is from.
+Look for the most detail in each ingredient, such as the labels (RSPCO, élevés en cage), do not add the country it is from, do not add the name of the parent ingredient (ex: BASE VERTE)
+Note that a recipe that is not precised to be gluten free is by default not gluten free.
 Do not ask for an ingredient that is not raw, only raw ingredients are to be verified such as sugar, additifs, oil, colorants, etc.
 
 The questions must be specific to a unique ingredient at each time.
+The number of questions should match the number of unique ingredients in the document.
 The question will be asked directly to the "Charte Qualité" team, they won't have access to the provided document.
 """
 
@@ -61,7 +63,7 @@ class QuestionGenerator:
         return "\n".join(text_rows)
 
     def generate_questions(self, xlsx_path: Path, tab_name: str, language_verification: bool = False) -> list[str]:
-        xls = pd.ExcelFile(xlsx_path)
+        xls = pd.ExcelFile(xlsx_path) #type: ignore
         sheets = pd.read_excel(xls, tab_name)
 
         target_text = self.table_to_text(sheets)
@@ -73,7 +75,7 @@ class QuestionGenerator:
             input_variables=["DOCUMENT", "DOCUMENT_CONTEXT"],
         )
 
-        llm = ChatOpenAI(model="gpt-4o", temperature=0.1)
+        llm = ChatOpenAI(model="gpt-4o", temperature=0.0)
         llm_chain = prompt | llm
 
         questions = llm_chain.invoke({"DOCUMENT": target_text, "DOCUMENT_CONTEXT": self.document_context})

@@ -1,7 +1,7 @@
 from pathlib import Path
 
 from pydantic import BaseModel, Field
-from megaparse.cdp.utils.query_engine import DecisionEnum
+from megaparse.cdp.utils.query_engine import DecisionEnum, DiffQueryEngine
 from megaparse.cdp.utils.question_generator import QuestionGenerator
 from tqdm import tqdm
 from llama_index.core.query_engine import BaseQueryEngine
@@ -13,6 +13,7 @@ import difflib
 from sklearn.metrics import confusion_matrix, accuracy_score, precision_score, recall_score
 import numpy as np
 import time
+import asyncio
 from megaparse.cdp.utils.evaluation_utils import map_keys
 
 # Rajouter un pyproject package manager)
@@ -34,10 +35,10 @@ class ContextType(BaseModel):
 
 """
 class DifferenceAgent:
-    def __init__(self, query_engine : BaseQueryEngine, document_context : str | None = None, question_generator: QuestionGenerator | None = None):
+    def __init__(self, diff_query_engine : DiffQueryEngine, document_context : str | None = None, question_generator: QuestionGenerator | None = None):
         self.document_context = document_context
         self.question_generator = question_generator if question_generator else QuestionGenerator(document_context = document_context)
-        self.query_engine = query_engine
+        self.diff_query_engine = diff_query_engine
 
         self.questions = None
         self.generated_df = pd.DataFrame()
@@ -65,31 +66,71 @@ class DifferenceAgent:
         print("Querying generated questions to the reference document...")
         analysis = []
 
-        for question in tqdm(self.questions):
-            for i in range(n_retry):
-                try:
-                    response: ResponseType = self.query_engine.query(f"{question[:-1]} {additional_context.context} ?").response #type: ignore
-                
-                except Exception as e:
-                    if verbose:
-                        print(f"Error with question: {question}")
-                        print("Retry ...")
-                        if i == 2:
-                            print(f"{n_retry} repeted errors with the same question, deleting the question.")
-                            analysis.append({
-                                'decision': None,
-                                'name': None,
-                                'detailed_answer': None
-                            })
-                            break
-                        continue
-                break
+        async def query_all(questions):
+            return await asyncio.gather(*[query_one(question) for question in questions]) #type: ignore
+
+        async def query_one(question):
+            response = ResponseType(
+                name=None,
+                detailed_answer=None,
+                decision=None
+            )
             
-            analysis.append({
-                'decision': response.decision.value, #type: ignore
-                'name': response.name, #type: ignore
-                'detailed_answer': response.detailed_answer #type: ignore
+            for i in range(n_retry):
+                try : 
+                    response: ResponseType = await self.diff_query_engine.query_engine.aquery(question[:-1]) #type: ignore
+                    nodes_to_update = [response.source_nodes[int(i)] for i in response.response.used_chunks] #type: ignore
+                    self.diff_query_engine.update_query_engine(nodes_to_update)
+
+                except Exception as e:
+                    print(e)
+                    if verbose:
+                            print(f"Error with question: {question}")
+                            print("Retry ...")
+                            if i == 2:
+                                print(f"{n_retry} repeted errors with the same question, deleting the question.")
+                                # analysis.append({
+                                #     'decision': None,
+                                #     'name': None,
+                                #     'detailed_answer': None
+                                # })
+                                break
+                            continue
+                break
+            return ({
+                'decision': response.decision.value if response.decision else response.decision,
+                'name': response.name, 
+                'detailed_answer': response.detailed_answer 
             })
+
+
+        # for question in tqdm(self.questions):
+        #     for i in range(n_retry):
+        #         try:
+
+        #             response: ResponseType = self.query_engine.aquery(f"{question[:-1]} {additional_context.context} ?").response #type: ignore
+                
+        #         except Exception as e:
+        #             if verbose:
+        #                 print(f"Error with question: {question}")
+        #                 print("Retry ...")
+        #                 if i == 2:
+        #                     print(f"{n_retry} repeted errors with the same question, deleting the question.")
+        #                     analysis.append({
+        #                         'decision': None,
+        #                         'name': None,
+        #                         'detailed_answer': None
+        #                     })
+        #                     break
+        #                 continue
+        #         break
+            
+        #     analysis.append({
+        #         'decision': response.decision.value, #type: ignore
+        #         'name': response.name, #type: ignore
+        #         'detailed_answer': response.detailed_answer #type: ignore
+        #     })
+        analysis = asyncio.run(query_all(self.questions)) #type: ignore
         generated_df = pd.DataFrame(analysis)
         return generated_df
     #FIXME: Evaluate à part
