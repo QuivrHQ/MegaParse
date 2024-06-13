@@ -1,7 +1,6 @@
 *.md
 /output
 /input
-*.pptx
 .env
 __pycache__/
 dist/**
