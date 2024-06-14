@@ -32,7 +32,7 @@ def map_keys(source_keys: list[str], target_keys: list[str], method: MethodEnum 
         parser = PydanticOutputParser(pydantic_object=MappingType)
 
         prompt = PromptTemplate(
-            template="Translate the following mapping from target to source keys (if there are no equivalent set the value to 'no_match'):\n\n{format_instructions}\n\nTarget keys: {target_keys}\nSource keys: {source_keys}\n\nTranslated mapping:",
+            template="Translate the following mapping from target to source keys (if there are no equivalent set the value to 'no_match'). Map as much as possible if they could be the same.:\n\n{format_instructions}\n\nTarget keys: {target_keys}\nSource keys: {source_keys}\n\nTranslated mapping:",
             input_variables=["source_keys", "target_keys"],
             partial_variables={"format_instructions": parser.get_format_instructions()},
         )

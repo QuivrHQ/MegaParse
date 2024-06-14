@@ -26,7 +26,7 @@ When generating each question, include all relevant information about the item s
 Before providing the final questions, write out your thought process and reasoning inside <scratchpad> tags. Explain how you extracted the raw items and formulated each question.
 Finally, avoiding repetitive questions, output the generated questions inside <questions> tags, with each question on a separate line.
 
-Remember, the goal is to create specific, informative questions for each raw item to verify compliance with the requirements outlined in the document. Make sure to provide all necessary context within the questions themselves.
+Remember, the goal is to create specific, informative questions for each raw item to verify compliance with the requirements outlined in the document. Make sure to provide all necessary context within the questions themselves. Write the most question possible.
 """
 # answer in the language of the question only 
 
@@ -35,12 +35,16 @@ The document is a list of specificity for a pastry product, every ingredient lis
 Extract the individual raw ingredients from the ingredients table. For composed ingredients, break them down into their sub-ingredients. Focus on the raw ingredients only, not the composed ingredients themselves.
 When generating each question, include all relevant information about the ingredient so that the question can be answered without needing to refer back to the ingredients table. This is important because the team verifying the ingredients will not have access to the table.
 Look for the most detail in each ingredient, such as the labels (RSPCO, élevés en cage), do not add the country it is from, do not add the name of the parent ingredient (ex: BASE VERTE)
-Note that a recipe that is not precised to be gluten free is by default not gluten free.
+Note that a recipe that is not precised to be gluten free is by default not gluten free, also try to note which king of product it is (a pastry ? a salted dish ?)
 Do not ask for an ingredient that is not raw, only raw ingredients are to be verified such as sugar, additifs, oil, colorants, etc.
 
 The questions must be specific to a unique ingredient at each time.
 The number of questions should match the number of unique ingredients in the document.
 The question will be asked directly to the "Charte Qualité" team, they won't have access to the provided document.
+
+Exemple : 
+Document states : The product is composed of a green base containing sugar, flour, and eggs from outdors raised chicken.
+questions : ["Is Sugar compliant with the requirements?", "Is Flour compliant with the requirements?", "Is Eggs from outdors raised chicken compliant with the requirements?]
 """
 
 class QuestionType(BaseModel):
