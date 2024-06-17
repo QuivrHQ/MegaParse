@@ -318,6 +318,19 @@ class MegaParse:
             print(self.file_path, file_extension)
             raise ValueError(f"Unsupported file extension: {file_extension}")
         return converter.convert(self.file_path, **kwargs)
+    
+    def convert_tab(self, tab_name: str, **kwargs) -> str:
+        file_extension: str = os.path.splitext(self.file_path)[1]
+        if file_extension == ".xlsx":
+            converter = XLSXConverter()
+        else:
+            print(self.file_path, file_extension)
+            raise ValueError(f"Unsupported file extension for tabs: {file_extension}")
+        
+        return converter.convert_tab(self.file_path, tab_name= tab_name)
+
+
+
 
     def save_md(self, md_content: str, file_path: Path | str) -> None:
         os.makedirs(os.path.dirname(file_path), exist_ok=True)
