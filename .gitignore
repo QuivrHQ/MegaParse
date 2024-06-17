@@ -9,5 +9,8 @@ megaparse.egg-info/
 build/*
 ENV 
 venv
+*/evaluations/*
+*/cdp/*
+*.pkl
 
 !megaparse/tests/output_tests/MegaFake_report.md
