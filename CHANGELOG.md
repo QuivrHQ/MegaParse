@@ -1,5 +1,16 @@
 # Changelog
 
+## 0.0.11 (2024-06-17)
+
+## What's Changed
+* Fix OpenAI key error. Add docstrings. Polish code by @dSupertramp in https://github.com/QuivrHQ/MegaParse/pull/24
+* Fix DOCX reader. Add input tests by @dSupertramp in https://github.com/QuivrHQ/MegaParse/pull/25
+* add: xlsx convertor by @chloedia in https://github.com/QuivrHQ/MegaParse/pull/29
+* add: convert_tab by @chloedia in https://github.com/QuivrHQ/MegaParse/pull/31
+
+
+**Full Changelog**: https://github.com/QuivrHQ/MegaParse/compare/v0.0.10...v0.0.11
+
 ## 0.0.10 (2024-06-04)
 
 ## What's Changed
