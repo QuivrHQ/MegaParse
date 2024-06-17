@@ -83,7 +83,6 @@ class DifferenceAgent:
                     self.diff_query_engine.update_query_engine(nodes_to_update)
 
                 except Exception as e:
-                    print(e)
                     if verbose:
                             print(f"Error with question: {question}")
                             print("Retry ...")

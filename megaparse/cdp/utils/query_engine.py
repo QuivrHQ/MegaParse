@@ -19,6 +19,7 @@ from llama_index.core import QueryBundle
 from llama_index.core.postprocessor.types import BaseNodePostprocessor
 from llama_index.core.schema import NodeWithScore
 import math
+from llama_index.core import PromptTemplate
 
 
 # class Ingredient(BaseModel):
@@ -120,6 +121,26 @@ class DiffQueryEngine():
                                                     AddChunkId()],
                                                     
                                                     response_mode = "tree_summarize")
+        qa_prompt_tmpl_str = """\
+            Context information is below.
+            ---------------------
+            {context_str}
+            ---------------------
+            Given the context information and not prior knowledge, every explanations has to be based on elements of the context. \
+            Answer the query asking about criteria on a specific topic. Note that if it is not detailed in the context, classify the answer as "Authorized".
+
+            Query: {query_str}
+            Answer: \
+            """
+
+        qa_prompt_tmpl = PromptTemplate(
+            qa_prompt_tmpl_str
+        )
+
+        self.query_engine.update_prompts(
+            {"response_synthesizer:summary_template": qa_prompt_tmpl}
+        )
+        
 
     
 
@@ -132,7 +153,6 @@ class DiffQueryEngine():
         
         for node in self.cleaned_nodes:
             if node.id_ in modified_nodes_ids:
-                print("Node found")
                 node.metadata["info_density"] += 1
 
         vector_index = VectorStoreIndex(self.cleaned_nodes)
