@@ -21,7 +21,7 @@ from megaparse.unstructured import UnstructuredParser
 from pathlib import Path
 from llama_index.core import download_loader
 from unstructured.partition.auto import partition
-
+import pandas as pd
 
 import nest_asyncio
 
@@ -39,6 +39,32 @@ class Converter:
         with open(file_path, "w") as f:
             f.write(md_content)
 
+class XLSXConverter(Converter):
+    def __init__(self) -> None:
+        pass
+
+    def convert(self, file_path: str) -> str:
+        xls = pd.ExcelFile(file_path) #type: ignore
+        sheets = pd.read_excel(xls)
+
+        target_text = self.table_to_text(sheets)
+
+        return target_text
+    
+    def convert_tab(self, file_path: str, tab_name: str) -> str:
+        xls = pd.ExcelFile(file_path)
+        sheets = pd.read_excel(xls, tab_name) 
+        target_text = self.table_to_text(sheets) 
+        return target_text
+    
+    def table_to_text(self, df):
+        text_rows = []
+        for _, row in df.iterrows():
+            row_text = " | ".join(str(value) for value in row.values if pd.notna(value))
+            if row_text:
+                text_rows.append("|" + row_text + "|")
+        return "\n".join(text_rows)
+    
 
 class DOCXConverter(Converter):
     def __init__(self) -> None:
@@ -286,6 +312,8 @@ class MegaParse:
             converter = PPTXConverter()
         elif file_extension == ".pdf":
             converter = PDFConverter(llama_parse_api_key=self.llama_parse_api_key)
+        elif file_extension == ".xlsx":
+            converter = XLSXConverter()
         else:
             print(self.file_path, file_extension)
             raise ValueError(f"Unsupported file extension: {file_extension}")
