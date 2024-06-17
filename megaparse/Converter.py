@@ -1,50 +1,84 @@
+from abc import ABC, abstractmethod
 import os
-from docx.document import Document as DocumentObject
-from docx import Document
-from docx.table import Table
-from docx.text.paragraph import Paragraph
-from docx.oxml.text.paragraph import CT_P
-from docx.oxml.table import CT_Tbl
-from docx.text.run import Run
-from typing import List
-from pathlib import Path
 from collections import Counter
-from pptx import Presentation
-from pptx.presentation import Presentation as PresentationObject
-from pptx.enum.shapes import MSO_SHAPE_TYPE
-from typing import List, Set
-from llama_parse import LlamaParse
-from llama_parse.utils import ResultType, Language
-from llama_index.core.schema import Document as LlamaDocument
-from megaparse.markdown_processor import MarkdownProcessor
-from megaparse.unstructured import UnstructuredParser
 from pathlib import Path
-from llama_index.core import download_loader
-from unstructured.partition.auto import partition
-
+from typing import List, Set
 
 import nest_asyncio
+import pandas as pd
+from docx import Document
+from docx.document import Document as DocumentObject
+from docx.oxml.table import CT_Tbl
+from docx.oxml.text.paragraph import CT_P
+from docx.table import Table
+from docx.text.paragraph import Paragraph
+from docx.text.run import Run
+from llama_index.core import download_loader
+from llama_index.core.schema import Document as LlamaDocument
+from llama_parse import LlamaParse
+from llama_parse.utils import Language, ResultType
+from pptx import Presentation
+from pptx.enum.shapes import MSO_SHAPE_TYPE
+from pptx.presentation import Presentation as PresentationObject
+from unstructured.partition.auto import partition
+
+from megaparse.markdown_processor import MarkdownProcessor
+from megaparse.unstructured import UnstructuredParser
 
 nest_asyncio.apply()
 
 
-class Converter:
+class Converter(ABC):
     def __init__(self) -> None:
         pass
-
+    @abstractmethod
     def convert(self, file_path: str) -> str:
+        """
+        Convert the file at the given path.
+
+        This method should be implemented by subclasses.
+
+        :param file_path: The path to the file to convert.
+        :param kwargs: Additional keyword arguments.
+        :return: The result of the conversion.
+        """
         raise NotImplementedError("Subclasses should implement this method")
 
     def save_md(self, md_content: str, file_path: Path | str) -> None:
         with open(file_path, "w") as f:
             f.write(md_content)
 
+class XLSXConverter(Converter):
+    def __init__(self) -> None:
+        pass
+
+    def convert(self, file_path: str) -> str:
+        xls = pd.ExcelFile(file_path) #type: ignore
+        sheets = pd.read_excel(xls)
+
+        target_text = self.table_to_text(sheets)
+
+        return target_text
+    
+    def convert_tab(self, file_path: str, tab_name: str) -> str:
+        xls = pd.ExcelFile(file_path)
+        sheets = pd.read_excel(xls) 
+        target_text = self.table_to_text(sheets) 
+        return target_text
+    
+    def table_to_text(self, df):
+        text_rows = []
+        for _, row in df.iterrows():
+            row_text = " | ".join(str(value) for value in row.values if pd.notna(value))
+            if row_text:
+                text_rows.append("|" + row_text + "|")
+        return "\n".join(text_rows)
 
 class DOCXConverter(Converter):
     def __init__(self) -> None:
         self.header_handled = False
 
-    def convert(self, file_path: str) -> str:
+    def convert(self, file_path: str, **kwargs) -> str:
         doc = Document(file_path)
         md_content = []
         # Handle header
@@ -127,7 +161,7 @@ class DOCXConverter(Converter):
             f.write(md_content)
 
 
-class PPTXConverter:
+class PPTXConverter(Converter):
     def __init__(self, add_images=False) -> None:
         self.header_handled = False
         self.add_images = add_images
@@ -204,7 +238,7 @@ class PPTXConverter:
             f.write(md_content)
 
 
-class PDFConverter:
+class PDFConverter(Converter):
     def __init__(
         self,
         llama_parse_api_key: str,
@@ -286,6 +320,8 @@ class MegaParse:
             converter = PPTXConverter()
         elif file_extension == ".pdf":
             converter = PDFConverter(llama_parse_api_key=self.llama_parse_api_key)
+        elif file_extension == ".xlsx":
+            converter = XLSXConverter()
         else:
             print(self.file_path, file_extension)
             raise ValueError(f"Unsupported file extension: {file_extension}")

@@ -19,7 +19,14 @@ poppler-utils = "*"
 markdownify = "*"
 langchain-openai = "*"
 langchain-core = "*"
+
 python-dotenv = "*"
+
+uvloop = "*"
+scikit-learn = "*"
+seaborn = "*"
+llama-index-postprocessor-cohere-rerank = "*"
+
 
 [dev-packages]
 ipykernel = "*"
