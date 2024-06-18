@@ -1377,14 +1377,6 @@
             "markers": "python_version >= '3.7'",
             "version": "==1.7.1"
         },
-        "markdownify": {
-            "hashes": [
-                "sha256:1fb08c618b30e0ee7a31a39b998f44a18fb28ab254f55f4af06b6d35a2179e27",
-                "sha256:a3805abd8166dbb7b27783c5599d91f54f10d79894b2621404d85b333c7ce561"
-            ],
-            "index": "pypi",
-            "version": "==0.12.1"
-        },
         "markupsafe": {
             "hashes": [
                 "sha256:00e046b6dd71aa03a41079792f8473dc494d564611a8f89bbbd7cb93295ebdcf",
