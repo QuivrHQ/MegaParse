@@ -1,5 +1,14 @@
 # Changelog
 
+## 0.0.12 (2024-06-18)
+
+## What's Changed
+* fix:delete markdownify dependency by @chloedia in https://github.com/QuivrHQ/MegaParse/pull/33
+* fix: fake fix README.md by @chloedia in https://github.com/QuivrHQ/MegaParse/pull/34
+
+
+**Full Changelog**: https://github.com/QuivrHQ/MegaParse/compare/v0.0.11...v0.0.12
+
 ## 0.0.11 (2024-06-17)
 
 ## What's Changed
