@@ -1,4 +1,3 @@
-import markdownify
 from langchain_openai import ChatOpenAI
 from langchain_core.prompts import PromptTemplate
 from unstructured.partition.pdf import partition_pdf
