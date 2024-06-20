@@ -22,6 +22,9 @@ from pathlib import Path
 from llama_index.core import download_loader
 from unstructured.partition.auto import partition
 import pandas as pd
+import fitz
+import io
+from PIL import Image
 
 import nest_asyncio
 
@@ -39,24 +42,25 @@ class Converter:
         with open(file_path, "w") as f:
             f.write(md_content)
 
+
 class XLSXConverter(Converter):
     def __init__(self) -> None:
         pass
 
     def convert(self, file_path: str) -> str:
-        xls = pd.ExcelFile(file_path) #type: ignore
+        xls = pd.ExcelFile(file_path)  # type: ignore
         sheets = pd.read_excel(xls)
 
         target_text = self.table_to_text(sheets)
 
         return target_text
-    
+
     def convert_tab(self, file_path: str, tab_name: str) -> str:
         xls = pd.ExcelFile(file_path)
-        sheets = pd.read_excel(xls, tab_name) 
-        target_text = self.table_to_text(sheets) 
+        sheets = pd.read_excel(xls, tab_name)
+        target_text = self.table_to_text(sheets)
         return target_text
-    
+
     def table_to_text(self, df):
         text_rows = []
         for _, row in df.iterrows():
@@ -64,7 +68,7 @@ class XLSXConverter(Converter):
             if row_text:
                 text_rows.append("|" + row_text + "|")
         return "\n".join(text_rows)
-    
+
 
 class DOCXConverter(Converter):
     def __init__(self) -> None:
@@ -287,23 +291,6 @@ class MegaParse:
         self.file_path = file_path
         self.llama_parse_api_key = llama_parse_api_key
 
-    # def convert(self, **kwargs) -> str:
-    #     file_extension: str = os.path.splitext(self.file_path)[1]
-    #     if file_extension == ".docx":
-    #         converter = DOCXConverter(
-    #             file_path=self.file_path, file_extension=file_extension
-    #         )
-    #     elif file_extension == ".pptx":
-    #         converter = PPTXConverter(
-    #             file_path=self.file_path, file_extension=file_extension
-    #         )
-    #     elif file_extension == ".pdf":
-    #         converter = PDFConverter(llama_parse_api_key=self.llama_parse_api_key)
-    #     else:
-    #         print(self.file_path, file_extension)
-    #         raise ValueError(f"Unsupported file extension: {file_extension}")
-    #     return converter.convert(self.file_path, **kwargs)
-
     def convert(self, **kwargs) -> str:
         file_extension: str = os.path.splitext(self.file_path)[1]
         if file_extension == ".docx":
@@ -318,7 +305,7 @@ class MegaParse:
             print(self.file_path, file_extension)
             raise ValueError(f"Unsupported file extension: {file_extension}")
         return converter.convert(self.file_path, **kwargs)
-    
+
     def convert_tab(self, tab_name: str, **kwargs) -> str:
         file_extension: str = os.path.splitext(self.file_path)[1]
         if file_extension == ".xlsx":
@@ -326,13 +313,29 @@ class MegaParse:
         else:
             print(self.file_path, file_extension)
             raise ValueError(f"Unsupported file extension for tabs: {file_extension}")
-        
-        return converter.convert_tab(self.file_path, tab_name= tab_name)
 
-
-
+        return converter.convert_tab(self.file_path, tab_name=tab_name)
 
     def save_md(self, md_content: str, file_path: Path | str) -> None:
         os.makedirs(os.path.dirname(file_path), exist_ok=True)
         with open(file_path, "w+") as f:
             f.write(md_content)
+
+    def save_images(self, images_dir: str, file_path: Path | str) -> None:
+        file_extension: str = os.path.splitext(self.file_path)[1]
+        if file_extension != ".pdf":
+            print(self.file_path, file_extension)
+            raise ValueError(f"Unsupported file extension for tabs: {file_extension}")
+        else:
+            pdf_file = fitz.open(file_path)
+            for page_number in range(1, len(pdf_file)):
+                page = pdf_file[page_number]
+                for image_index, img in enumerate(page.get_images(), start=1):
+                    xref = img[0]
+                    base_image = pdf_file.extract_image(xref)
+                    image_bytes = base_image["image"]
+                    image_ext = base_image["ext"]
+                    pil_image = Image.open(io.BytesIO(image_bytes))
+                    os.makedirs(images_dir, exist_ok=True)
+                    image_path = f"{images_dir}/image_{image_index}_page_{page_number}.{image_ext}"
+                    pil_image.save(image_path)
