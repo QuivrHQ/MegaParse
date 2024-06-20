@@ -7,6 +7,7 @@
 MegaParse is a powerful and versatile parser that can handle various types of documents with ease. Whether you're dealing with text, PDFs, Powerpoint presentations, Word documents MegaParse has got you covered. Focus on having no information loss during parsing.
 
 ## Key Features 🎯
+
 - **Versatile Parser**: MegaParse is a powerful and versatile parser that can handle various types of documents with ease.
 - **No Information Loss**: Focus on having no information loss during parsing.
 - **Fast and Efficient**: Designed with speed and efficiency at its core.
@@ -14,12 +15,13 @@ MegaParse is a powerful and versatile parser that can handle various types of do
 - **Open Source**: Freedom is beautiful, and so is MegaParse. Open source and free to use.
 
 ## Support
+
 - Files: ✅ PDF ✅ Powerpoint ✅ Word
 - Content: ✅ Tables ✅ TOC ✅ Headers ✅ Footers ✅ Images
 
 ### Example
-https://github.com/QuivrHQ/MegaParse/assets/19614572/1b4cdb73-8dc2-44ef-b8b4-a7509bc8d4f3
 
+https://github.com/QuivrHQ/MegaParse/assets/19614572/1b4cdb73-8dc2-44ef-b8b4-a7509bc8d4f3
 
 ## Installation
 
@@ -44,6 +46,12 @@ print(content)
 megaparse.save_md(content, "./test.md")
 ```
 
+You can extract images and save in local:
+
+```python
+megaparse.save_images(images_dir="./output_images", file_path="./test.pdf")
+```
+
 ### (Optional) Use LlamaParse for Improved Results
 
 1. Create an account on [Llama Cloud](https://cloud.llamaindex.ai/) and get your API key.
@@ -61,15 +69,17 @@ print(content)
 ## BenchMark
 
 <!---BENCHMARK-->
-| Parser | Diff |
-|---|---|
-| Megaparse with LLamaParse and GPTCleaner | 84 |
-| **Megaparse** | 100 |
-| Megaparse with LLamaParse | 104 |
-| LLama Parse | 108 |
+
+| Parser                                   | Diff |
+| ---------------------------------------- | ---- |
+| Megaparse with LLamaParse and GPTCleaner | 84   |
+| **Megaparse**                            | 100  |
+| Megaparse with LLamaParse                | 104  |
+| LLama Parse                              | 108  |
+
 <!---END_BENCHMARK-->
 
-*Lower is better*
+_Lower is better_
 
 ## Next Steps
 
@@ -78,7 +88,6 @@ print(content)
 - [ ] Add TOC for Docx
 - [ ] Add Hyperlinks for Docx
 - [ ] Order Headers for Docx to Markdown
-
 
 ## Star History
 
