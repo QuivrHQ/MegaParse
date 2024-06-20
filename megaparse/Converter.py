@@ -22,7 +22,7 @@ from pathlib import Path
 from llama_index.core import download_loader
 from unstructured.partition.auto import partition
 import pandas as pd
-import fitz
+from pypdf import PdfReader
 import io
 from PIL import Image
 
@@ -327,15 +327,17 @@ class MegaParse:
             print(self.file_path, file_extension)
             raise ValueError(f"Unsupported file extension for tabs: {file_extension}")
         else:
-            pdf_file = fitz.open(file_path)
-            for page_number in range(1, len(pdf_file)):
-                page = pdf_file[page_number]
-                for image_index, img in enumerate(page.get_images(), start=1):
-                    xref = img[0]
-                    base_image = pdf_file.extract_image(xref)
-                    image_bytes = base_image["image"]
-                    image_ext = base_image["ext"]
-                    pil_image = Image.open(io.BytesIO(image_bytes))
-                    os.makedirs(images_dir, exist_ok=True)
-                    image_path = f"{images_dir}/image_{image_index}_page_{page_number}.{image_ext}"
-                    pil_image.save(image_path)
+            if not os.path.exists(images_dir):
+                os.makedirs(images_dir)
+            reader = PdfReader(file_path)
+            for page_num, page in enumerate(reader.pages, start=1):
+                count = 0
+                for image_file_object in page.images:
+                    with open(
+                        os.path.join(
+                            images_dir, f"image_{count+1}_page_{page_num}.png"
+                        ),
+                        "wb",
+                    ) as fp:
+                        fp.write(image_file_object.data)
+                        count += 1
