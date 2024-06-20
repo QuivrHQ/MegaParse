@@ -34,7 +34,7 @@ class Converter:
     def __init__(self) -> None:
         pass
 
-    def convert(self, file_path: str) -> str:
+    def convert(self, file_path: Path | str) -> str:
         raise NotImplementedError("Subclasses should implement this method")
 
     def save_md(self, md_content: str, file_path: Path | str) -> None:
@@ -46,7 +46,7 @@ class XLSXConverter(Converter):
     def __init__(self) -> None:
         pass
 
-    def convert(self, file_path: str) -> str:
+    def convert(self, file_path: Path | str) -> str:
         xls = pd.ExcelFile(file_path)  # type: ignore
         sheets = pd.read_excel(xls)
 
@@ -54,7 +54,7 @@ class XLSXConverter(Converter):
 
         return target_text
 
-    def convert_tab(self, file_path: str, tab_name: str) -> str:
+    def convert_tab(self, file_path: Path | str, tab_name: str) -> str:
         xls = pd.ExcelFile(file_path)
         sheets = pd.read_excel(xls, tab_name)
         target_text = self.table_to_text(sheets)
@@ -73,7 +73,7 @@ class DOCXConverter(Converter):
     def __init__(self) -> None:
         self.header_handled = False
 
-    def convert(self, file_path: str) -> str:
+    def convert(self, file_path: Path | str) -> str:
         doc = Document(file_path)
         md_content = []
         # Handle header
@@ -174,7 +174,7 @@ class PPTXConverter:
         self.header_handled = False
         self.add_images = add_images
 
-    def convert(self, file_path: str) -> str:
+    def convert(self, file_path: Path | str) -> str:
         prs = Presentation(file_path)
         md_content = []
         unique_slides: Set[str] = set()
@@ -270,7 +270,7 @@ class PDFConverter:
         self.handle_header = handle_header
         self.llama_parse_api_key = llama_parse_api_key
 
-    def _llama_parse(self, api_key: str, file_path: str):
+    def _llama_parse(self, api_key: str, file_path: Path | str):
         parsing_instructions = "Do not take into account the page breaks (no --- between pages), do not repeat the header and the footer so the tables are merged. Keep the same format for similar tables."
         self.parser = LlamaParse(
             api_key=str(api_key),
@@ -284,11 +284,11 @@ class PDFConverter:
         parsed_md = documents[0].get_content()
         return parsed_md
 
-    def _unstructured_parse(self, file_path: str):
+    def _unstructured_parse(self, file_path: Path | str):
         unstructured_parser = UnstructuredParser()
         return unstructured_parser.convert(file_path)
 
-    def convert(self, file_path: str, gpt4o_cleaner=False) -> str:
+    def convert(self, file_path: Path | str, gpt4o_cleaner=False) -> str:
         parsed_md = ""
         if self.llama_parse_api_key:
             parsed_md = self._llama_parse(self.llama_parse_api_key, file_path)
@@ -311,7 +311,7 @@ class PDFConverter:
             f.write(md_content)
 
     @staticmethod
-    def save_images(file_path: str, images_dir: str) -> None:
+    def save_images(file_path: Path | str, images_dir: str) -> None:
         if not os.path.exists(images_dir):
             os.makedirs(images_dir)
         reader = PdfReader(file_path)
@@ -327,7 +327,9 @@ class PDFConverter:
 
 
 class MegaParse:
-    def __init__(self, file_path: str, llama_parse_api_key: str | None = None) -> None:
+    def __init__(
+        self, file_path: Path | str, llama_parse_api_key: str | None = None
+    ) -> None:
         self.file_path = file_path
         self.llama_parse_api_key = llama_parse_api_key
 
