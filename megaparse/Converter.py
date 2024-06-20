@@ -23,8 +23,7 @@ from llama_index.core import download_loader
 from unstructured.partition.auto import partition
 import pandas as pd
 from pypdf import PdfReader
-import io
-from PIL import Image
+import zipfile
 
 import nest_asyncio
 
@@ -156,6 +155,19 @@ class DOCXConverter(Converter):
         with open(file_path, "w") as f:
             f.write(md_content)
 
+    @staticmethod
+    def save_images(file_path: Path | str, images_dir: str) -> None:
+        if not os.path.exists(images_dir):
+            os.makedirs(images_dir)
+        archive = zipfile.ZipFile(file_path)
+        img_num = 1
+        for file in archive.filelist:
+            if file.filename.startswith("word/media/"):
+                img_path = os.path.join(images_dir, f"image_{img_num}.png")
+                with open(img_path, "wb") as fp:
+                    fp.write(archive.read(file))
+                img_num += 1
+
 
 class PPTXConverter:
     def __init__(self, add_images=False) -> None:
@@ -233,6 +245,19 @@ class PPTXConverter:
         with open(file_path, "w") as f:
             f.write(md_content)
 
+    @staticmethod
+    def save_images(file_path: Path | str, images_dir: str) -> None:
+        if not os.path.exists(images_dir):
+            os.makedirs(images_dir)
+        archive = zipfile.ZipFile(file_path)
+        img_num = 1
+        for file in archive.filelist:
+            if file.filename.startswith("ppt/media/"):
+                img_path = os.path.join(images_dir, f"image_{img_num}.png")
+                with open(img_path, "wb") as fp:
+                    fp.write(archive.read(file))
+                img_num += 1
+
 
 class PDFConverter:
     def __init__(
@@ -285,6 +310,21 @@ class PDFConverter:
         with open(file_path, "w") as f:
             f.write(md_content)
 
+    @staticmethod
+    def save_images(file_path: str, images_dir: str) -> None:
+        if not os.path.exists(images_dir):
+            os.makedirs(images_dir)
+        reader = PdfReader(file_path)
+        for page_num, page in enumerate(reader.pages, start=1):
+            count = 0
+            for image_file_object in page.images:
+                with open(
+                    os.path.join(images_dir, f"image_{count+1}_page_{page_num}.png"),
+                    "wb",
+                ) as fp:
+                    fp.write(image_file_object.data)
+                    count += 1
+
 
 class MegaParse:
     def __init__(self, file_path: str, llama_parse_api_key: str | None = None) -> None:
@@ -321,23 +361,15 @@ class MegaParse:
         with open(file_path, "w+") as f:
             f.write(md_content)
 
-    def save_images(self, images_dir: str, file_path: Path | str) -> None:
-        file_extension: str = os.path.splitext(self.file_path)[1]
-        if file_extension != ".pdf":
-            print(self.file_path, file_extension)
-            raise ValueError(f"Unsupported file extension for tabs: {file_extension}")
+    def save_images(self, file_path: Path | str, images_dir: str) -> None:
+        file_extension = os.path.splitext(file_path)[1]
+        if file_extension == ".docx":
+            DOCXConverter.save_images(file_path, images_dir)
+        elif file_extension == ".pptx":
+            PPTXConverter.save_images(file_path, images_dir)
+        elif file_extension == ".pdf":
+            PDFConverter.save_images(file_path, images_dir)
         else:
-            if not os.path.exists(images_dir):
-                os.makedirs(images_dir)
-            reader = PdfReader(file_path)
-            for page_num, page in enumerate(reader.pages, start=1):
-                count = 0
-                for image_file_object in page.images:
-                    with open(
-                        os.path.join(
-                            images_dir, f"image_{count+1}_page_{page_num}.png"
-                        ),
-                        "wb",
-                    ) as fp:
-                        fp.write(image_file_object.data)
-                        count += 1
+            raise ValueError(
+                f"Unsupported file extension for saving images: {file_extension}"
+            )
