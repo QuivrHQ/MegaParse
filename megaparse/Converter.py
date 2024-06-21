@@ -47,6 +47,8 @@ class XLSXConverter(Converter):
         pass
 
     def convert(self, file_path: Path | str) -> str:
+      if isinstance(file_path, str):
+           file_path = Path(file_path) 
         xls = pd.ExcelFile(file_path)  # type: ignore
         sheets = pd.read_excel(xls)
 
