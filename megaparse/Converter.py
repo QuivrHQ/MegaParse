@@ -319,7 +319,7 @@ class PDFConverter:
             count = 0
             for image_file_object in page.images:
                 with open(
-                    os.path.join(images_dir, f"image_{count+1}_page_{page_num}.png"),
+                    os.path.join(images_dir, f"image_{page_num}_page_{page_num}.png"),
                     "wb",
                 ) as fp:
                     fp.write(image_file_object.data)
