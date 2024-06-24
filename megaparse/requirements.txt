@@ -77,7 +77,6 @@ llama-parse==0.4.4; python_version < '4.0' and python_full_version >= '3.8.1'
 llamaindex-py-client==0.1.19; python_version >= '3.8' and python_version < '4'
 lxml==5.2.2; python_version >= '3.6'
 mammoth==1.7.1; python_version >= '3.7'
-markdownify==0.12.1
 markupsafe==2.1.5; python_version >= '3.7'
 marshmallow==3.21.2; python_version >= '3.8'
 matplotlib==3.9.0; python_version >= '3.9'
