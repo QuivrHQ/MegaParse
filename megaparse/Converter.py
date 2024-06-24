@@ -1,3 +1,4 @@
+import asyncio
 import os
 from docx.document import Document as DocumentObject
 from docx import Document
@@ -32,7 +33,7 @@ class Converter:
     def __init__(self) -> None:
         pass
 
-    def convert(self, file_path: str) -> str:
+    async def convert(self, file_path: str) -> str:
         raise NotImplementedError("Subclasses should implement this method")
 
     def save_md(self, md_content: str, file_path: Path | str) -> None:
@@ -43,7 +44,7 @@ class XLSXConverter(Converter):
     def __init__(self) -> None:
         pass
 
-    def convert(self, file_path: str) -> str:
+    async def convert(self, file_path: str) -> str:
         xls = pd.ExcelFile(file_path) #type: ignore
         sheets = pd.read_excel(xls)
 
@@ -70,7 +71,7 @@ class DOCXConverter(Converter):
     def __init__(self) -> None:
         self.header_handled = False
 
-    def convert(self, file_path: str) -> str:
+    async def convert(self, file_path: str) -> str:
         doc = Document(file_path)
         md_content = []
         # Handle header
@@ -158,7 +159,7 @@ class PPTXConverter:
         self.header_handled = False
         self.add_images = add_images
 
-    def convert(self, file_path: str) -> str:
+    async def convert(self, file_path: str) -> str:
         prs = Presentation(file_path)
         md_content = []
         unique_slides: Set[str] = set()
@@ -241,7 +242,7 @@ class PDFConverter:
         self.handle_header = handle_header
         self.llama_parse_api_key = llama_parse_api_key
 
-    def _llama_parse(self, api_key: str, file_path: str):
+    async def _llama_parse(self, api_key: str, file_path: str):
         parsing_instructions = "Do not take into account the page breaks (no --- between pages), do not repeat the header and the footer so the tables are merged. Keep the same format for similar tables."
         self.parser = LlamaParse(
             api_key=str(api_key),
@@ -250,8 +251,9 @@ class PDFConverter:
             verbose=True,
             language=Language.FRENCH,
             parsing_instruction=parsing_instructions,  # Optionally you can define a parsing instruction
+            split_by_page = False
         )
-        documents: List[LlamaDocument] = self.parser.load_data(file_path)
+        documents: List[LlamaDocument] = await self.parser.aload_data(file_path)
         parsed_md = documents[0].get_content()
         return parsed_md
 
@@ -259,10 +261,10 @@ class PDFConverter:
         unstructured_parser = UnstructuredParser()
         return unstructured_parser.convert(file_path)
 
-    def convert(self, file_path: str, gpt4o_cleaner=False) -> str:
+    async def convert(self, file_path: str, gpt4o_cleaner=False) -> str:
         parsed_md = ""
         if self.llama_parse_api_key:
-            parsed_md = self._llama_parse(self.llama_parse_api_key, file_path)
+            parsed_md = await self._llama_parse(self.llama_parse_api_key, file_path)
         else:
             parsed_md = self._unstructured_parse(file_path)
 
@@ -311,13 +313,15 @@ class MegaParse:
         elif file_extension == ".pptx":
             converter = PPTXConverter()
         elif file_extension == ".pdf":
-            converter = PDFConverter(llama_parse_api_key=self.llama_parse_api_key)
+            converter = PDFConverter(llama_parse_api_key=str(self.llama_parse_api_key))
         elif file_extension == ".xlsx":
             converter = XLSXConverter()
         else:
             print(self.file_path, file_extension)
             raise ValueError(f"Unsupported file extension: {file_extension}")
-        return converter.convert(self.file_path, **kwargs)
+        
+        loop = asyncio.get_event_loop()
+        return loop.run_until_complete(converter.convert(self.file_path, **kwargs))
     
     def convert_tab(self, tab_name: str, **kwargs) -> str:
         file_extension: str = os.path.splitext(self.file_path)[1]
