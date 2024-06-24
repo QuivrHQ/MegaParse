@@ -1,5 +1,13 @@
 # Changelog
 
+## 0.0.14 (2024-06-24)
+
+## What's Changed
+* fix: remove nest asycio by @chloedia in https://github.com/QuivrHQ/MegaParse/pull/40
+
+
+**Full Changelog**: https://github.com/QuivrHQ/MegaParse/compare/v0.0.13...v0.0.14
+
 ## 0.0.13 (2024-06-24)
 
 ## What's Changed
