@@ -1,5 +1,13 @@
 # Changelog
 
+## 0.0.13 (2024-06-24)
+
+## What's Changed
+* fix: use aload_data by @chloedia in https://github.com/QuivrHQ/MegaParse/pull/38
+
+
+**Full Changelog**: https://github.com/QuivrHQ/MegaParse/compare/v0.0.12...v0.0.13
+
 ## 0.0.12 (2024-06-18)
 
 ## What's Changed
