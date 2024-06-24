@@ -24,10 +24,6 @@ from llama_index.core import download_loader
 from unstructured.partition.auto import partition
 import pandas as pd
 
-import nest_asyncio
-
-nest_asyncio.apply()
-
 
 class Converter:
     def __init__(self) -> None:
@@ -251,7 +247,6 @@ class PDFConverter:
             verbose=True,
             language=Language.FRENCH,
             parsing_instruction=parsing_instructions,  # Optionally you can define a parsing instruction
-            split_by_page = False
         )
         documents: List[LlamaDocument] = await self.parser.aload_data(file_path)
         parsed_md = documents[0].get_content()
