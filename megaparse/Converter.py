@@ -23,6 +23,7 @@ from pathlib import Path
 from llama_index.core import download_loader
 from unstructured.partition.auto import partition
 import pandas as pd
+from megaparse.multimodal_convertor.llm_megaparse import LMM_Megaparse
 
 
 class Converter:
@@ -231,12 +232,14 @@ class PDFConverter:
     def __init__(
         self,
         llama_parse_api_key: str,
+        lmm_megaparse : bool = True,
         handle_pagination: bool = True,
         handle_header: bool = True,
     ) -> None:
         self.handle_pagination = handle_pagination
         self.handle_header = handle_header
         self.llama_parse_api_key = llama_parse_api_key
+        self.lmm_megaparse = lmm_megaparse
 
     async def _llama_parse(self, api_key: str, file_path: str):
         parsing_instructions = "Do not take into account the page breaks (no --- between pages), do not repeat the header and the footer so the tables are merged. Keep the same format for similar tables."
@@ -255,11 +258,17 @@ class PDFConverter:
     def _unstructured_parse(self, file_path: str):
         unstructured_parser = UnstructuredParser()
         return unstructured_parser.convert(file_path)
+    
+    async def _lmm_parse(self, file_path: str):
+        lmm_parser = LMM_Megaparse()
+        return await lmm_parser.parse(file_path)
 
     async def convert(self, file_path: str, gpt4o_cleaner=False) -> str:
         parsed_md = ""
         if self.llama_parse_api_key:
             parsed_md = await self._llama_parse(self.llama_parse_api_key, file_path)
+        elif self.lmm_megaparse:
+            parsed_md = await self._lmm_parse(file_path)
         else:
             parsed_md = self._unstructured_parse(file_path)
 
