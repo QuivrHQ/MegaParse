@@ -30,7 +30,7 @@ Follow these instructions to complete the task:
 3. If you encounter any unclear formatting in the original content, use your judgment to add appropriate markdown formatting to improve readability and structure.
 
 4. For tables, headers, and table of contents, add the following tags:
-   - Tables: Enclose the entire table in [TABLE] and [/TABLE] tags
+   - Tables: Enclose the entire table in [TABLE] and [/TABLE] tags. Merge content of tables if it is continued in the next page.
    - Headers (complete chain of characters repeated at the start of each page): Enclose in [HEADER] and [/HEADER] tags inside the markdown file.
    - Table of contents: Enclose in [TOC] and [/TOC] tags
 
@@ -151,7 +151,6 @@ class MegaParseVision:
         """
         tag_pattern = '|'.join(map(re.escape, TagEnum.__members__.values()))
         tag_regex = rf'\[({tag_pattern})\](.*?)\[/\1\]'
-
         # handle the HEADER tag specially
         header_pattern = rf'\[{TagEnum.HEADER.value}\](.*?)\[/{TagEnum.HEADER.value}\]'
         headers = re.findall(header_pattern, parsed_file, re.DOTALL)
@@ -164,12 +163,12 @@ class MegaParseVision:
 
         # Remove all other tags
         def remove_tag(match):
-            return match.group(2)  # Return only the content inside the tag
+            return match.group(2)
         cleaned_content = re.sub(tag_regex, remove_tag, parsed_file, flags=re.DOTALL)
 
         cleaned_content = re.sub(r'^```.*$\n?', '', cleaned_content, flags=re.MULTILINE)
-
         cleaned_content = re.sub(r'\n\s*\n', '\n\n', cleaned_content)
+        cleaned_content = cleaned_content.replace("|\n\n|", "|\n|")
         cleaned_content = cleaned_content.strip()
         
         return cleaned_content

@@ -23,7 +23,7 @@ from pathlib import Path
 from llama_index.core import download_loader
 from unstructured.partition.auto import partition
 import pandas as pd
-from megaparse.multimodal_convertor.llm_megaparse import MegaParseVision
+from megaparse.multimodal_convertor.megaparse_vision import MegaParseVision
 
 
 class Converter:
