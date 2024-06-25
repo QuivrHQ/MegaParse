@@ -60,7 +60,7 @@ class TagEnum(str, Enum):
     IMAGE = "IMAGE"
 
 
-class LMM_Megaparse:
+class MegaParseVision:
     def __init__(self, model: ModelEnum = ModelEnum.GPT4O):
         if model == ModelEnum.GPT4O:
             self.model = ChatOpenAI(model="gpt-4o")
@@ -176,7 +176,7 @@ class LMM_Megaparse:
 
 
 if __name__ == "__main__":
-    parser = LMM_Megaparse()
+    parser = MegaParseVision()
     responses = asyncio.run(parser.parse("megaparse/tests/input_tests/MegaFake_report.pdf"))
     print(responses)
     print("Done!")

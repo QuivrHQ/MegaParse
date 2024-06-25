@@ -23,7 +23,7 @@ from pathlib import Path
 from llama_index.core import download_loader
 from unstructured.partition.auto import partition
 import pandas as pd
-from megaparse.multimodal_convertor.llm_megaparse import LMM_Megaparse
+from megaparse.multimodal_convertor.llm_megaparse import MegaParseVision
 
 
 class Converter:
@@ -260,7 +260,7 @@ class PDFConverter:
         return unstructured_parser.convert(file_path)
     
     async def _lmm_parse(self, file_path: str):
-        lmm_parser = LMM_Megaparse()
+        lmm_parser = MegaParseVision()
         return await lmm_parser.parse(file_path)
 
     async def convert(self, file_path: str, gpt4o_cleaner=False) -> str:
