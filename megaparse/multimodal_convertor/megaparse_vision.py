@@ -83,9 +83,15 @@ class MegaParseVision:
         """
         Process a PDF file and convert its pages to base64 encoded images.
 
-        :param file_path: Path to the PDF file
-        :param image_format: Format to save the images (default: PNG)
-        :return: List of base64 encoded images
+        Args:
+            file_path (str): Path to the PDF file
+            image_format (str, optional):  Format to save the images . Defaults to "PNG".
+
+        Raises:
+            ValueError: Error processing PDF file
+
+        Returns:
+            List[str]: List of base64 encoded images
         """
         try:
             images = convert_from_path(file_path)
@@ -111,8 +117,11 @@ class MegaParseVision:
         """
         Send images to the language model for processing.
 
-        :param images_data: List of base64 encoded images
-        :return: Processed content as a string
+        Args:
+            images_data (List[str]): List of base64 encoded images
+
+        Returns:
+            str: Processed content as a string
         """
         images_prompt = [
             {
@@ -134,9 +143,12 @@ class MegaParseVision:
         """
         Parse a PDF file and process its content using the language model.
 
-        :param file_path: Path to the PDF file
-        :param batch_size: Number of pages to process concurrently
-        :return: List of processed content strings
+        Args:
+            file_path (str): Path to the PDF file
+            batch_size (int, optional): Number of pages to process concurrently. Defaults to 3.
+
+        Returns:
+            str: List of processed content strings
         """
         pdf_base64 = self.process_file(file_path)
         tasks = [
