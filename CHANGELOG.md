@@ -1,5 +1,13 @@
 # Changelog
 
+## 0.0.15 (2024-06-26)
+
+## What's Changed
+* add: llm megaparser by @chloedia in https://github.com/QuivrHQ/MegaParse/pull/42
+
+
+**Full Changelog**: https://github.com/QuivrHQ/MegaParse/compare/v0.0.14...v0.0.15
+
 ## 0.0.14 (2024-06-24)
 
 ## What's Changed
