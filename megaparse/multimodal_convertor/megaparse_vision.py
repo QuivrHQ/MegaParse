@@ -186,9 +186,13 @@ class MegaParseVision:
 
         return cleaned_content
 
+    async def convert(self, file_path: str, batch_size: int = 3) -> str:
+        result = asyncio.run(self.parse(file_path))
+        return result
 
-if __name__ == "__main__":
-    parser = MegaParseVision()
-    responses = asyncio.run(parser.parse("../tests/input_tests/MegaFake_report.pdf"))
-    print(responses)
-    print("Done!")
+
+# if __name__ == "__main__":
+#     parser = MegaParseVision()
+#     responses = asyncio.run(parser.parse("../tests/input_tests/MegaFake_report.pdf"))
+#     print(responses)
+#     print("Done!")
