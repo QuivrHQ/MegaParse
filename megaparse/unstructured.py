@@ -1,5 +1,4 @@
 from langchain_openai import ChatOpenAI
-from langchain_core.prompts import PromptTemplate
 from unstructured.partition.pdf import partition_pdf
 from dotenv import load_dotenv
 import os
@@ -11,7 +10,6 @@ class UnstructuredParser:
     # Function to convert element category to markdown format
     def convert_to_markdown(self, elements):
         markdown_content = ""
-        element_hierarchy = {}
 
         for el in elements:
             markdown_content += self.get_markdown_line(el)
@@ -49,7 +47,7 @@ class UnstructuredParser:
         elif element_type == "Table":
             markdown_line = el["metadata"]["text_as_html"]
         elif element_type == "PageBreak":
-            markdown_line = f"---\n\n"
+            markdown_line = "---\n\n"
         elif element_type == "Image":
             markdown_line = f"![Image]({el['metadata'].get('image_path', '')})\n\n"
         elif element_type == "Formula":

@@ -24,6 +24,8 @@ from pathlib import Path
 from llama_index.core import download_loader
 from unstructured.partition.auto import partition
 import pandas as pd
+from pypdf import PdfReader
+import zipfile
 from megaparse.multimodal_convertor.megaparse_vision import MegaParseVision
 
 
@@ -38,6 +40,7 @@ class Converter:
         with open(file_path, "w") as f:
             f.write(md_content)
 
+
 class XLSXConverter(Converter):
     def __init__(self) -> None:
         pass
@@ -49,13 +52,13 @@ class XLSXConverter(Converter):
         target_text = self.table_to_text(sheets)
 
         return target_text
-    
-    def convert_tab(self, file_path: str, tab_name: str) -> str:
+
+    def convert_tab(self, file_path: Path | str, tab_name: str) -> str:
         xls = pd.ExcelFile(file_path)
-        sheets = pd.read_excel(xls, tab_name) 
-        target_text = self.table_to_text(sheets) 
+        sheets = pd.read_excel(xls, tab_name)
+        target_text = self.table_to_text(sheets)
         return target_text
-    
+
     def table_to_text(self, df):
         text_rows = []
         for _, row in df.iterrows():
@@ -63,7 +66,7 @@ class XLSXConverter(Converter):
             if row_text:
                 text_rows.append("|" + row_text + "|")
         return "\n".join(text_rows)
-    
+
 
 class DOCXConverter(Converter):
     def __init__(self) -> None:
@@ -151,6 +154,19 @@ class DOCXConverter(Converter):
         with open(file_path, "w") as f:
             f.write(md_content)
 
+    @staticmethod
+    def save_images(file_path: Path | str, images_dir: str) -> None:
+        if not os.path.exists(images_dir):
+            os.makedirs(images_dir)
+        archive = zipfile.ZipFile(file_path)
+        img_num = 1
+        for file in archive.filelist:
+            if file.filename.startswith("word/media/"):
+                img_path = os.path.join(images_dir, f"image_{img_num}.png")
+                with open(img_path, "wb") as fp:
+                    fp.write(archive.read(file))
+                img_num += 1
+
 
 class PPTXConverter:
     def __init__(self, add_images=False) -> None:
@@ -228,6 +244,19 @@ class PPTXConverter:
         with open(file_path, "w") as f:
             f.write(md_content)
 
+    @staticmethod
+    def save_images(file_path: Path | str, images_dir: str) -> None:
+        if not os.path.exists(images_dir):
+            os.makedirs(images_dir)
+        archive = zipfile.ZipFile(file_path)
+        img_num = 1
+        for file in archive.filelist:
+            if file.filename.startswith("ppt/media/"):
+                img_path = os.path.join(images_dir, f"image_{img_num}.png")
+                with open(img_path, "wb") as fp:
+                    fp.write(archive.read(file))
+                img_num += 1
+
 
 class MethodEnum(str, Enum):
     """Method to use for the conversion"""
@@ -268,13 +297,14 @@ class PDFConverter:
         parsed_md = documents[0].get_content()
         return parsed_md
 
-    def _unstructured_parse(self, file_path: str):
+    def _unstructured_parse(self, file_path: Path | str):
         unstructured_parser = UnstructuredParser()
         return unstructured_parser.convert(file_path)
     
     async def _lmm_parse(self, file_path: str):
         lmm_parser = MegaParseVision()
         return await lmm_parser.parse(file_path)
+
 
     async def convert(self, file_path: str, gpt4o_cleaner=False) -> str:
         parsed_md = ""
@@ -303,9 +333,26 @@ class PDFConverter:
         with open(file_path, "w") as f:
             f.write(md_content)
 
+    @staticmethod
+    def save_images(file_path: Path | str, images_dir: str) -> None:
+        if not os.path.exists(images_dir):
+            os.makedirs(images_dir)
+        reader = PdfReader(file_path)
+        for page_num, page in enumerate(reader.pages, start=1):
+            count = 0
+            for image_file_object in page.images:
+                with open(
+                    os.path.join(images_dir, f"image_{page_num}_page_{page_num}.png"),
+                    "wb",
+                ) as fp:
+                    fp.write(image_file_object.data)
+                    count += 1
+
 
 class MegaParse:
-    def __init__(self, file_path: str, llama_parse_api_key: str | None = None) -> None:
+    def __init__(
+        self, file_path: Path | str, llama_parse_api_key: str | None = None
+    ) -> None:
         self.file_path = file_path
         self.llama_parse_api_key = llama_parse_api_key
 
@@ -322,7 +369,6 @@ class MegaParse:
         else:
             print(self.file_path, file_extension)
             raise ValueError(f"Unsupported file extension: {file_extension}")
-        
         loop = asyncio.get_event_loop()
         return loop.run_until_complete(converter.convert(self.file_path, **kwargs))
     
@@ -333,13 +379,23 @@ class MegaParse:
         else:
             print(self.file_path, file_extension)
             raise ValueError(f"Unsupported file extension for tabs: {file_extension}")
-        
-        return converter.convert_tab(self.file_path, tab_name= tab_name)
 
-
-
+        return converter.convert_tab(self.file_path, tab_name=tab_name)
 
     def save_md(self, md_content: str, file_path: Path | str) -> None:
         os.makedirs(os.path.dirname(file_path), exist_ok=True)
         with open(file_path, "w+") as f:
             f.write(md_content)
+
+    def save_images(self, file_path: Path | str, images_dir: str) -> None:
+        file_extension = os.path.splitext(file_path)[1]
+        if file_extension == ".docx":
+            DOCXConverter.save_images(file_path, images_dir)
+        elif file_extension == ".pptx":
+            PPTXConverter.save_images(file_path, images_dir)
+        elif file_extension == ".pdf":
+            PDFConverter.save_images(file_path, images_dir)
+        else:
+            raise ValueError(
+                f"Unsupported file extension for saving images: {file_extension}"
+            )
