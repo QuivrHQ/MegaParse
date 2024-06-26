@@ -4,6 +4,7 @@ from typing import List
 from pypdf import PdfReader, PdfWriter
 from langchain_core.messages import HumanMessage
 from langchain_openai import ChatOpenAI
+from langchain_anthropic import ChatAnthropic
 import base64
 from pdf2image import convert_from_path
 import asyncio
@@ -73,7 +74,10 @@ class MegaParseVision:
         if model == ModelEnum.GPT4O:
             self.model = ChatOpenAI(model="gpt-4o", api_key=os.getenv("OPENAI_API_KEY"))
         elif model == ModelEnum.CLAUDE:
-            raise NotImplementedError("Claude support not yet implemented")
+            self.model = ChatAnthropic(
+                model="claude-3-5-sonnet-20240620",
+                api_key=os.getenv("ANTHROPIC_API_KEY"),
+            )
         else:
             raise ValueError(f"Model {model} not supported")
 
@@ -195,16 +199,8 @@ class MegaParseVision:
         cleaned_content = re.sub(r"\n\s*\n", "\n\n", cleaned_content)
         cleaned_content = cleaned_content.replace("|\n\n|", "|\n|")
         cleaned_content = cleaned_content.strip()
-
         return cleaned_content
 
-    async def convert(self, file_path: str, batch_size: int = 3) -> str:
-        result = asyncio.run(self.parse(file_path))
-        return result
-
-
-# if __name__ == "__main__":
-#     parser = MegaParseVision()
-#     responses = asyncio.run(parser.parse("../tests/input_tests/MegaFake_report.pdf"))
-#     print(responses)
-#     print("Done!")
+        async def convert(self, file_path: str, batch_size: int = 3) -> str:
+            result = asyncio.run(self.parse(file_path))
+            return result
