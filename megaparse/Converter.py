@@ -38,24 +38,25 @@ class Converter:
         with open(file_path, "w") as f:
             f.write(md_content)
 
+
 class XLSXConverter(Converter):
     def __init__(self) -> None:
         pass
 
     async def convert(self, file_path: str) -> str:
-        xls = pd.ExcelFile(file_path) #type: ignore
+        xls = pd.ExcelFile(file_path)  # type: ignore
         sheets = pd.read_excel(xls)
 
         target_text = self.table_to_text(sheets)
 
         return target_text
-    
+
     def convert_tab(self, file_path: str, tab_name: str) -> str:
         xls = pd.ExcelFile(file_path)
-        sheets = pd.read_excel(xls, tab_name) 
-        target_text = self.table_to_text(sheets) 
+        sheets = pd.read_excel(xls, tab_name)
+        target_text = self.table_to_text(sheets)
         return target_text
-    
+
     def table_to_text(self, df):
         text_rows = []
         for _, row in df.iterrows():
@@ -63,7 +64,7 @@ class XLSXConverter(Converter):
             if row_text:
                 text_rows.append("|" + row_text + "|")
         return "\n".join(text_rows)
-    
+
 
 class DOCXConverter(Converter):
     def __init__(self) -> None:
@@ -231,6 +232,7 @@ class PPTXConverter:
 
 class MethodEnum(str, Enum):
     """Method to use for the conversion"""
+
     LLAMA_PARSE = "llama_parse"
     UNSTRUCTURED = "unstructured"
     MEGAPARSE_VISION = "megaparse_vision"
@@ -271,7 +273,7 @@ class PDFConverter:
     def _unstructured_parse(self, file_path: str):
         unstructured_parser = UnstructuredParser()
         return unstructured_parser.convert(file_path)
-    
+
     async def _lmm_parse(self, file_path: str):
         lmm_parser = MegaParseVision()
         return await lmm_parser.parse(file_path)
@@ -279,7 +281,9 @@ class PDFConverter:
     async def convert(self, file_path: str, gpt4o_cleaner=False) -> str:
         parsed_md = ""
         if self.method == MethodEnum.LLAMA_PARSE:
-            assert self.llama_parse_api_key is not None, "LLama Parse API key is required for this method"
+            assert (
+                self.llama_parse_api_key is not None
+            ), "LLama Parse API key is required for this method"
             parsed_md = await self._llama_parse(self.llama_parse_api_key, file_path)
         elif self.method == MethodEnum.MEGAPARSE_VISION:
             parsed_md = await self._lmm_parse(file_path)
@@ -322,10 +326,10 @@ class MegaParse:
         else:
             print(self.file_path, file_extension)
             raise ValueError(f"Unsupported file extension: {file_extension}")
-        
+
         loop = asyncio.get_event_loop()
         return loop.run_until_complete(converter.convert(self.file_path, **kwargs))
-    
+
     def convert_tab(self, tab_name: str, **kwargs) -> str:
         file_extension: str = os.path.splitext(self.file_path)[1]
         if file_extension == ".xlsx":
@@ -333,11 +337,8 @@ class MegaParse:
         else:
             print(self.file_path, file_extension)
             raise ValueError(f"Unsupported file extension for tabs: {file_extension}")
-        
-        return converter.convert_tab(self.file_path, tab_name= tab_name)
 
-
-
+        return converter.convert_tab(self.file_path, tab_name=tab_name)
 
     def save_md(self, md_content: str, file_path: Path | str) -> None:
         os.makedirs(os.path.dirname(file_path), exist_ok=True)
