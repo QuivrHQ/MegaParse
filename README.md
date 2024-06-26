@@ -69,14 +69,13 @@ print(content)
 ## BenchMark
 
 <!---BENCHMARK-->
-
-| Parser                                   | Diff |
-| ---------------------------------------- | ---- |
-| Megaparse with LLamaParse and GPTCleaner | 84   |
-| **Megaparse**                            | 100  |
-| Megaparse with LLamaParse                | 104  |
-| LLama Parse                              | 108  |
-
+| Parser | Diff |
+|---|---|
+| LMM megaparse | 39 |
+| Megaparse with LLamaParse and GPTCleaner | 74 |
+| Megaparse with LLamaParse | 97 |
+| LLama Parse | 102 |
+| **Megaparse** | 105 |
 <!---END_BENCHMARK-->
 
 _Lower is better_

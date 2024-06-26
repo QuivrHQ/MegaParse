@@ -1,4 +1,5 @@
 import asyncio
+from enum import Enum
 import os
 from docx.document import Document as DocumentObject
 from docx import Document
@@ -25,6 +26,7 @@ from unstructured.partition.auto import partition
 import pandas as pd
 from pypdf import PdfReader
 import zipfile
+from megaparse.multimodal_convertor.megaparse_vision import MegaParseVision
 
 
 class Converter:
@@ -256,16 +258,30 @@ class PPTXConverter:
                 img_num += 1
 
 
+class MethodEnum(str, Enum):
+    """Method to use for the conversion"""
+    LLAMA_PARSE = "llama_parse"
+    UNSTRUCTURED = "unstructured"
+    MEGAPARSE_VISION = "megaparse_vision"
+
+
 class PDFConverter:
     def __init__(
         self,
         llama_parse_api_key: str,
+        method: MethodEnum | str = MethodEnum.UNSTRUCTURED,
         handle_pagination: bool = True,
         handle_header: bool = True,
     ) -> None:
         self.handle_pagination = handle_pagination
         self.handle_header = handle_header
         self.llama_parse_api_key = llama_parse_api_key
+        if isinstance(method, str):
+            try:
+                method = MethodEnum(method)
+            except ValueError:
+                raise ValueError(f"Method {method} not supported")
+        self.method = method
 
     async def _llama_parse(self, api_key: str, file_path: str):
         parsing_instructions = "Do not take into account the page breaks (no --- between pages), do not repeat the header and the footer so the tables are merged. Keep the same format for similar tables."
@@ -284,14 +300,23 @@ class PDFConverter:
     def _unstructured_parse(self, file_path: Path | str):
         unstructured_parser = UnstructuredParser()
         return unstructured_parser.convert(file_path)
+    
+    async def _lmm_parse(self, file_path: str):
+        lmm_parser = MegaParseVision()
+        return await lmm_parser.parse(file_path)
 
 
     async def convert(self, file_path: str, gpt4o_cleaner=False) -> str:
         parsed_md = ""
-        if self.llama_parse_api_key:
+        if self.method == MethodEnum.LLAMA_PARSE:
+            assert self.llama_parse_api_key is not None, "LLama Parse API key is required for this method"
             parsed_md = await self._llama_parse(self.llama_parse_api_key, file_path)
-        else:
+        elif self.method == MethodEnum.MEGAPARSE_VISION:
+            parsed_md = await self._lmm_parse(file_path)
+        elif self.method == MethodEnum.UNSTRUCTURED:
             parsed_md = self._unstructured_parse(file_path)
+        else:
+            raise ValueError(f"Method {self.method} not supported")
 
         if not (self.handle_pagination or self.handle_header):
             return parsed_md
