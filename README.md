@@ -20,7 +20,6 @@ MegaParse is a powerful and versatile parser that can handle various types of do
 ### Example
 https://github.com/QuivrHQ/MegaParse/assets/19614572/1b4cdb73-8dc2-44ef-b8b4-a7509bc8d4f3
 
-
 ## Installation
 
 ```bash
