@@ -1,5 +1,15 @@
 # Changelog
 
+## 0.0.17 (2024-06-27)
+
+## What's Changed
+* markdown by @chloedia in https://github.com/QuivrHQ/MegaParse/pull/48
+* fix:Update README.md by @chloedia in https://github.com/QuivrHQ/MegaParse/pull/49
+* fix: Update README.md by @chloedia in https://github.com/QuivrHQ/MegaParse/pull/50
+
+
+**Full Changelog**: https://github.com/QuivrHQ/MegaParse/compare/v0.0.16...v0.0.17
+
 ## 0.0.16 (2024-06-27)
 
 ## What's Changed
