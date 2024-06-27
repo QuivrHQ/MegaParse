@@ -16,6 +16,5 @@ setup(
         "llama-parse",
         "pdf2docx",
         "unstructured",
-        "markdownify"
     ],
 )
