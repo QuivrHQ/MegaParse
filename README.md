@@ -73,7 +73,6 @@ print(content)
 
 *Lower is better*
 
-
 ## Next Steps
 
 - [ ] Improve Table Parsing
