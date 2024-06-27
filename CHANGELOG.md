@@ -1,5 +1,13 @@
 # Changelog
 
+## 0.0.16 (2024-06-27)
+
+## What's Changed
+* Fix: Update README.md by @chloedia in https://github.com/QuivrHQ/MegaParse/pull/47
+
+
+**Full Changelog**: https://github.com/QuivrHQ/MegaParse/compare/v0.0.15...v0.0.16
+
 ## 0.0.15 (2024-06-26)
 
 ## What's Changed
