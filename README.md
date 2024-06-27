@@ -63,9 +63,10 @@ print(content)
 <!---BENCHMARK-->
 | Parser | Diff |
 |---|---|
-| LMM megaparse | 39 |
+| LMM megaparse | 36 |
 | Megaparse with LLamaParse and GPTCleaner | 74 |
 | Megaparse with LLamaParse | 97 |
+| Unstructured Augmented Parse | 99 |
 | LLama Parse | 102 |
 | **Megaparse** | 105 |
 <!---END_BENCHMARK-->

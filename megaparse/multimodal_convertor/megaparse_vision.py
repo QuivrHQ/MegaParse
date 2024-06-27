@@ -1,5 +1,6 @@
 from enum import Enum
 from io import BytesIO
+from pathlib import Path
 from typing import List
 from pypdf import PdfReader, PdfWriter
 from langchain_core.messages import HumanMessage
@@ -121,7 +122,7 @@ class MegaParseVision:
         response = await self.model.ainvoke([message])
         return str(response.content)
     
-    async def parse(self, file_path: str, batch_size: int = 3) -> str:
+    async def parse(self, file_path: str | Path, batch_size: int = 3) -> str:
         """
         Parse a PDF file and process its content using the language model.
         
@@ -129,6 +130,8 @@ class MegaParseVision:
         :param batch_size: Number of pages to process concurrently
         :return: List of processed content strings
         """
+        if isinstance(file_path, Path):
+            file_path = str(file_path)
         pdf_base64 = self.process_file(file_path)
         tasks = [self.send_to_mlm(pdf_base64[i:i+batch_size]) for i in range(0, len(pdf_base64), batch_size)]
         self.parsed_chunks = await asyncio.gather(*tasks)
