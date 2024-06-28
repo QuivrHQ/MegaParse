@@ -38,8 +38,8 @@ pip install megaparse
 from megaparse.Converter import MegaParse
 
 megaparse = MegaParse(file_path="./test.pdf")
-content = megaparse.convert()
-print(content)
+document = megaparse.load()
+print(document.content)
 megaparse.save_md(content, "./test.md")
 ```
 
@@ -53,8 +53,8 @@ megaparse.save_md(content, "./test.md")
 from megaparse.Converter import MegaParse
 
 megaparse = MegaParse(file_path="./test.pdf", llama_parse_api_key="llx-your_api_key")
-content = megaparse.convert()
-print(content)
+document = megaparse.load()
+print(document.content)
 ```
 
 ## BenchMark
