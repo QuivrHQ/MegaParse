@@ -1,5 +1,14 @@
 # Changelog
 
+## 0.0.18 (2024-06-28)
+
+## What's Changed
+* fix: add __init__.py by @chloedia in https://github.com/QuivrHQ/MegaParse/pull/54
+* fix: Update README.md by @chloedia in https://github.com/QuivrHQ/MegaParse/pull/56
+
+
+**Full Changelog**: https://github.com/QuivrHQ/MegaParse/compare/v0.0.17...v0.0.18
+
 ## 0.0.17 (2024-06-27)
 
 ## What's Changed
