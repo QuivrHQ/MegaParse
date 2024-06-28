@@ -1,5 +1,13 @@
 # Changelog
 
+## 0.0.19 (2024-06-28)
+
+## What's Changed
+* add: choose unstructured strategy by @chloedia in https://github.com/QuivrHQ/MegaParse/pull/57
+
+
+**Full Changelog**: https://github.com/QuivrHQ/MegaParse/compare/v0.0.18...v0.0.19
+
 ## 0.0.18 (2024-06-28)
 
 ## What's Changed
