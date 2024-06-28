@@ -251,7 +251,9 @@ class PDFConverter:
         llama_parse_api_key: str,
         method: MethodEnum | str = MethodEnum.UNSTRUCTURED,
         model = ModelEnum.NONE,
+        strategy = "fast",
     ) -> None:
+        self.strategy = strategy
         self.llama_parse_api_key = llama_parse_api_key
         if isinstance(method, str):
             try:
@@ -276,7 +278,7 @@ class PDFConverter:
 
     def _unstructured_parse(self, file_path: str | Path, model: ModelEnum = ModelEnum.NONE):
         unstructured_parser = UnstructuredParser()
-        return unstructured_parser.convert(file_path, model= model)
+        return unstructured_parser.convert(file_path, model= model, strategy=self.strategy)
     
     async def _lmm_parse(self, file_path: str | Path):
         lmm_parser = MegaParseVision()
@@ -314,11 +316,12 @@ class PDFConverter:
 
 
 class MegaParse:
-    def __init__(self, file_path: str| Path, llama_parse_api_key: str | None = None) -> None:
+    def __init__(self, file_path: str| Path, llama_parse_api_key: str | None = None, strategy = "fast") -> None:
         if isinstance(file_path, str):
             file_path = Path(file_path)
         self.file_path = file_path
         self.llama_parse_api_key = llama_parse_api_key
+        self.strategy = strategy
 
     def load(self, **kwargs) -> LangChainDocument:
         file_extension: str = os.path.splitext(self.file_path)[1]
@@ -327,7 +330,7 @@ class MegaParse:
         elif file_extension == ".pptx":
             converter = PPTXConverter()
         elif file_extension == ".pdf":
-            converter = PDFConverter(llama_parse_api_key=str(self.llama_parse_api_key))
+            converter = PDFConverter(llama_parse_api_key=str(self.llama_parse_api_key),strategy=self.strategy)
         elif file_extension == ".xlsx":
             converter = XLSXConverter()
         else:

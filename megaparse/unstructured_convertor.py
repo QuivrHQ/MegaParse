@@ -78,9 +78,9 @@ class UnstructuredParser:
 
         return markdown_line
 
-    def partition_pdf_file(self, path):
+    def partition_pdf_file(self, path, strategy="fast"):
         return partition_pdf(
-            filename=path, infer_table_structure=True, strategy="hi_res"
+            filename=path, infer_table_structure=True, strategy=strategy
         )
 
     def improve_layout(self, elements, remove_repeated_headers=True, model: ModelEnum = ModelEnum.GPT4O):
@@ -145,9 +145,9 @@ class UnstructuredParser:
 
         return improved_elements
 
-    def convert(self, path, model: ModelEnum = ModelEnum.GPT4O):
+    def convert(self, path, model: ModelEnum = ModelEnum.GPT4O, strategy="fast"):
         # Partition the PDF
-        elements = self.partition_pdf_file(path)
+        elements = self.partition_pdf_file(path, strategy=strategy)
 
         # Improve table elements
         improved_elements = self.improve_layout(elements, model=model)

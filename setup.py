@@ -12,7 +12,6 @@ setup(
         "python-docx",
         "mammoth",
         "python-pptx",
-        "nest-asyncio",
         "llama-parse",
         "pdf2docx",
         "unstructured",
