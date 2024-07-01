@@ -32,35 +32,39 @@ class Converter:
     def __init__(self) -> None:
         pass
 
-    async def convert(self, file_path: str| Path) -> LangChainDocument:
+    async def convert(self, file_path: str | Path) -> LangChainDocument:
         raise NotImplementedError("Subclasses should implement this method")
 
     def save_md(self, md_content: str, file_path: Path | str) -> None:
         with open(file_path, "w") as f:
             f.write(md_content)
 
+
 class XLSXConverter(Converter):
     def __init__(self) -> None:
         pass
 
-    async def convert(self, file_path: str| Path) -> LangChainDocument:
+    async def convert(self, file_path: str | Path) -> LangChainDocument:
         if isinstance(file_path, str):
             file_path = Path(file_path)
-        xls = pd.ExcelFile(file_path) #type: ignore
+        xls = pd.ExcelFile(file_path)  # type: ignore
         sheets = pd.read_excel(xls)
 
         target_text = self.table_to_text(sheets)
 
-        return LangChainDocument(page_content=target_text, metadata={"filename": file_path.name, "type": "xlsx"})
-    
-    def convert_tab(self, file_path: str|Path, tab_name: str) -> str:
+        return LangChainDocument(
+            page_content=target_text,
+            metadata={"filename": file_path.name, "type": "xlsx"},
+        )
+
+    def convert_tab(self, file_path: str | Path, tab_name: str) -> str:
         if isinstance(file_path, str):
             file_path = Path(file_path)
         xls = pd.ExcelFile(str(file_path))
-        sheets = pd.read_excel(xls, tab_name) 
-        target_text = self.table_to_text(sheets) 
+        sheets = pd.read_excel(xls, tab_name)
+        target_text = self.table_to_text(sheets)
         return target_text
-    
+
     def table_to_text(self, df):
         text_rows = []
         for _, row in df.iterrows():
@@ -68,13 +72,13 @@ class XLSXConverter(Converter):
             if row_text:
                 text_rows.append("|" + row_text + "|")
         return "\n".join(text_rows)
-    
+
 
 class DOCXConverter(Converter):
     def __init__(self) -> None:
         self.header_handled = False
 
-    async def convert(self, file_path: str|Path) -> LangChainDocument:
+    async def convert(self, file_path: str | Path) -> LangChainDocument:
         if isinstance(file_path, str):
             file_path = Path(file_path)
         doc = Document(str(file_path))
@@ -92,7 +96,10 @@ class DOCXConverter(Converter):
                 md_content += self._handle_table(Table(element, doc))
             # Add more handlers here (image, header, footer, etc)
 
-        return LangChainDocument(page_content="\n".join(md_content), metadata={"filename": file_path.name, "type": "docx"})
+        return LangChainDocument(
+            page_content="\n".join(md_content),
+            metadata={"filename": file_path.name, "type": "docx"},
+        )
 
     def _handle_header(self, header) -> str:
         if not self.header_handled:
@@ -164,7 +171,7 @@ class PPTXConverter:
         self.header_handled = False
         self.add_images = add_images
 
-    async def convert(self, file_path: str|Path) -> LangChainDocument:
+    async def convert(self, file_path: str | Path) -> LangChainDocument:
         if isinstance(file_path, str):
             file_path = Path(file_path)
         prs = Presentation(str(file_path))
@@ -193,7 +200,10 @@ class PPTXConverter:
                 slide_md_str = f"## Slide {i+1}\n{slide_md_str}"
                 md_content.append(slide_md_str)
 
-        return LangChainDocument(page_content = "\n".join(md_content), metadata = {"filename": file_path.name, "type": "pptx"})
+        return LangChainDocument(
+            page_content="\n".join(md_content),
+            metadata={"filename": file_path.name, "type": "pptx"},
+        )
 
     def _handle_header(self, placeholders) -> str:
         if not self.header_handled:
@@ -240,6 +250,7 @@ class PPTXConverter:
 
 class MethodEnum(str, Enum):
     """Method to use for the conversion"""
+
     LLAMA_PARSE = "llama_parse"
     UNSTRUCTURED = "unstructured"
     MEGAPARSE_VISION = "megaparse_vision"
@@ -250,8 +261,8 @@ class PDFConverter:
         self,
         llama_parse_api_key: str,
         method: MethodEnum | str = MethodEnum.UNSTRUCTURED,
-        model = ModelEnum.NONE,
-        strategy = "fast",
+        model=ModelEnum.NONE,
+        strategy="fast",
     ) -> None:
         self.strategy = strategy
         self.llama_parse_api_key = llama_parse_api_key
@@ -262,7 +273,7 @@ class PDFConverter:
                 raise ValueError(f"Method {method} not supported")
         self.method = method
 
-    async def _llama_parse(self, api_key: str, file_path: str|Path):
+    async def _llama_parse(self, api_key: str, file_path: str | Path):
         parsing_instructions = "Do not take into account the page breaks (no --- between pages), do not repeat the header and the footer so the tables are merged. Keep the same format for similar tables."
         self.parser = LlamaParse(
             api_key=str(api_key),
@@ -276,21 +287,32 @@ class PDFConverter:
         parsed_md = documents[0].get_content()
         return parsed_md
 
-    def _unstructured_parse(self, file_path: str | Path, model: ModelEnum = ModelEnum.NONE):
+    def _unstructured_parse(
+        self, file_path: str | Path, model: ModelEnum = ModelEnum.NONE
+    ):
         unstructured_parser = UnstructuredParser()
-        return unstructured_parser.convert(file_path, model= model, strategy=self.strategy)
-    
+        return unstructured_parser.convert(
+            file_path, model=model, strategy=self.strategy
+        )
+
     async def _lmm_parse(self, file_path: str | Path):
         lmm_parser = MegaParseVision()
         return await lmm_parser.parse(file_path)
 
-    async def convert(self, file_path: str | Path, model: ModelEnum = ModelEnum.NONE, gpt4o_cleaner=False) -> LangChainDocument:
+    async def convert(
+        self,
+        file_path: str | Path,
+        model: ModelEnum = ModelEnum.NONE,
+        gpt4o_cleaner=False,
+    ) -> LangChainDocument:
         if isinstance(file_path, str):
             file_path = Path(file_path)
 
         parsed_md = ""
         if self.method == MethodEnum.LLAMA_PARSE:
-            assert self.llama_parse_api_key is not None, "LLama Parse API key is required for this method"
+            assert (
+                self.llama_parse_api_key is not None
+            ), "LLama Parse API key is required for this method"
             parsed_md = await self._llama_parse(self.llama_parse_api_key, file_path)
         elif self.method == MethodEnum.MEGAPARSE_VISION:
             parsed_md = await self._lmm_parse(file_path)
@@ -300,7 +322,10 @@ class PDFConverter:
             raise ValueError(f"Method {self.method} not supported")
 
         if not gpt4o_cleaner:
-            return LangChainDocument(page_content=parsed_md, metadata={"filename": file_path.name, "type": "pdf"})
+            return LangChainDocument(
+                page_content=parsed_md,
+                metadata={"filename": file_path.name, "type": "pdf"},
+            )
         else:
             md_processor = MarkdownProcessor(
                 parsed_md,
@@ -308,7 +333,10 @@ class PDFConverter:
                 remove_pagination=True,
             )
             md_cleaned = md_processor.process(gpt4o_cleaner=gpt4o_cleaner)
-            return LangChainDocument(page_content=md_cleaned, metadata={"filename": file_path.name, "type": "pdf"})
+            return LangChainDocument(
+                page_content=md_cleaned,
+                metadata={"filename": file_path.name, "type": "pdf"},
+            )
 
     def save_md(self, md_content: str, file_path: Path | str) -> None:
         with open(file_path, "w") as f:
@@ -316,7 +344,12 @@ class PDFConverter:
 
 
 class MegaParse:
-    def __init__(self, file_path: str| Path, llama_parse_api_key: str | None = None, strategy = "fast") -> None:
+    def __init__(
+        self,
+        file_path: str | Path,
+        llama_parse_api_key: str | None = None,
+        strategy="fast",
+    ) -> None:
         if isinstance(file_path, str):
             file_path = Path(file_path)
         self.file_path = file_path
@@ -330,16 +363,19 @@ class MegaParse:
         elif file_extension == ".pptx":
             converter = PPTXConverter()
         elif file_extension == ".pdf":
-            converter = PDFConverter(llama_parse_api_key=str(self.llama_parse_api_key),strategy=self.strategy)
+            converter = PDFConverter(
+                llama_parse_api_key=str(self.llama_parse_api_key),
+                strategy=self.strategy,
+            )
         elif file_extension == ".xlsx":
             converter = XLSXConverter()
         else:
             print(self.file_path, file_extension)
             raise ValueError(f"Unsupported file extension: {file_extension}")
-        
+
         loop = asyncio.get_event_loop()
         return loop.run_until_complete(converter.convert(self.file_path, **kwargs))
-    
+
     def load_tab(self, tab_name: str, **kwargs) -> LangChainDocument:
         file_extension: str = os.path.splitext(self.file_path)[1]
         if file_extension == ".xlsx":
@@ -347,12 +383,33 @@ class MegaParse:
         else:
             print(self.file_path, file_extension)
             raise ValueError(f"Unsupported file extension for tabs: {file_extension}")
-        
-        result = converter.convert_tab(self.file_path, tab_name= tab_name)
-        return LangChainDocument(page_content=result, metadata={"filename": self.file_path.name, "type": "xlsx"})
 
+        result = converter.convert_tab(self.file_path, tab_name=tab_name)
+        return LangChainDocument(
+            page_content=result,
+            metadata={"filename": self.file_path.name, "type": "xlsx"},
+        )
 
     def save_md(self, md_content: str, file_path: Path | str) -> None:
         os.makedirs(os.path.dirname(file_path), exist_ok=True)
         with open(file_path, "w+") as f:
             f.write(md_content)
+
+    def save_images(self, images_dir: str, file_path: Path | str) -> None:
+        file_extension: str = os.path.splitext(self.file_path)[1]
+        if file_extension != ".pdf":
+            print(self.file_path, file_extension)
+            raise ValueError(f"Unsupported file extension for tabs: {file_extension}")
+        else:
+            pdf_file = fitz.open(file_path)
+            for page_number in range(1, len(pdf_file)):
+                page = pdf_file[page_number]
+                for image_index, img in enumerate(page.get_images(), start=1):
+                    xref = img[0]
+                    base_image = pdf_file.extract_image(xref)
+                    image_bytes = base_image["image"]
+                    image_ext = base_image["ext"]
+                    pil_image = Image.open(io.BytesIO(image_bytes))
+                    os.makedirs(images_dir, exist_ok=True)
+                    image_path = f"{images_dir}/image_{image_index}_page_{page_number}.{image_ext}"
+                    pil_image.save(image_path)
