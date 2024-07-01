@@ -98,11 +98,11 @@ class DOCXConverter(Converter):
         if not self.header_handled:
             parts = []
             for paragraph in header.paragraphs:
-                parts.append(f"# {paragraph.text}")
+                parts.append(f"{paragraph.text}")
             for table in header.tables:
                 parts += self._handle_header_table(table)
             self.header_handled = True
-            return "\n".join(parts)
+            return "[HEADER]\n" + "\n".join(parts) + "\n[/HEADER]"
         return ""
 
     def _handle_header_table(self, table: Table) -> List[str]:
@@ -128,30 +128,28 @@ class DOCXConverter(Converter):
             parts = []
             for run in paragraph.runs:
                 if run.text != "":
-                    parts.append(self._handle_run(run))
+                    # parts.append(self._handle_run(run))
+                    parts.append(run.text)
+
             return "".join(parts)
 
     def _handle_run(self, run: Run) -> str:
         text: str = run.text
         if run.bold:
-            if len(text) < 200:
-                # FIXME : handle table needs to be improved -> have the paragraph they are in
-                text = f"## {text}"
-            else:
-                text = f"**{text}**"
+            text = f"**{text}**"
         if run.italic:
             text = f"*{text}*"
         return text
 
     def _handle_table(self, table: Table) -> List[str]:
-        row_content = []
+        row_content = ["[TABLE]\n"]
         for i, row in enumerate(table.rows):
             row_content.append(
-                "| " + " | ".join(cell.text.strip() for cell in row.cells) + " |"
+                "| " + " | ".join(cell.text.strip().replace('\n', '; ') for cell in row.cells) + " |"
             )
             if i == 0:
                 row_content.append("|" + "---|" * len(row.cells))
-
+        row_content.append("\n[/TABLE]")
         return row_content
 
     def save_md(self, md_content: str, file_path: Path | str) -> None:
@@ -200,11 +198,11 @@ class PPTXConverter:
             parts = []
             for placeholder in placeholders:
                 if placeholder.placeholder_format.idx == 0:  # Title placeholder
-                    parts.append(f"# {placeholder.text}")
+                    parts.append(f"{placeholder.text}")
                 elif placeholder.placeholder_format.idx == 1:  # Subtitle placeholder
-                    parts.append(f"## {placeholder.text}")
+                    parts.append(f"{placeholder.text}")
             self.header_handled = True
-            return "\n".join(parts)
+            return "[HEADER]\n" + "\n".join(parts) + "\n[/HEADER]"
         return ""
 
     def _handle_paragraph(self, text: str) -> str:
@@ -224,13 +222,15 @@ class PPTXConverter:
         return f"![Image {shape.shape_id}](../{image_filename})"
 
     def _handle_table(self, table) -> List[str]:
-        row_content = []
+        row_content = ["[TABLE]\n"]
         for i, row in enumerate(table.rows):
             row_content.append(
-                "| " + " | ".join(cell.text.strip() for cell in row.cells) + " |"
+                "| " + " | ".join(cell.text.strip().replace("\n", "; ") for cell in row.cells) + " |"
             )
             if i == 0:
                 row_content.append("|" + "---|" * len(row.cells))
+        
+        row_content.append("\n[/TABLE]")
         return row_content
 
     def save_md(self, md_content: str, file_path: Path | str) -> None:
