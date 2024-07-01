@@ -4,7 +4,10 @@ FROM python:3.11.6-slim-bullseye
 # Install GEOS library, Rust, and other dependencies, then clean up
 RUN apt-get clean && apt-get update && apt-get install -y \
     poppler-utils \
-    tesseract-ocr 
+    tesseract-ocr \
+    ffmpeg \
+    libsm6 \
+    libxext6
 
 WORKDIR /code
 
