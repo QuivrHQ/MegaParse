@@ -19,6 +19,7 @@ langchain-openai = "*"
 langchain-core = "*"
 python-dotenv = "*"
 ollama = "*"
+pypdf = "*"
 
 [dev-packages]
 ipykernel = "*"
