@@ -1,5 +1,48 @@
 # Changelog
 
+## 0.0.19 (2024-06-28)
+
+## What's Changed
+* add: choose unstructured strategy by @chloedia in https://github.com/QuivrHQ/MegaParse/pull/57
+
+
+**Full Changelog**: https://github.com/QuivrHQ/MegaParse/compare/v0.0.18...v0.0.19
+
+## 0.0.18 (2024-06-28)
+
+## What's Changed
+* fix: add __init__.py by @chloedia in https://github.com/QuivrHQ/MegaParse/pull/54
+* fix: Update README.md by @chloedia in https://github.com/QuivrHQ/MegaParse/pull/56
+
+
+**Full Changelog**: https://github.com/QuivrHQ/MegaParse/compare/v0.0.17...v0.0.18
+
+## 0.0.17 (2024-06-27)
+
+## What's Changed
+* markdown by @chloedia in https://github.com/QuivrHQ/MegaParse/pull/48
+* fix:Update README.md by @chloedia in https://github.com/QuivrHQ/MegaParse/pull/49
+* fix: Update README.md by @chloedia in https://github.com/QuivrHQ/MegaParse/pull/50
+
+
+**Full Changelog**: https://github.com/QuivrHQ/MegaParse/compare/v0.0.16...v0.0.17
+
+## 0.0.16 (2024-06-27)
+
+## What's Changed
+* Fix: Update README.md by @chloedia in https://github.com/QuivrHQ/MegaParse/pull/47
+
+
+**Full Changelog**: https://github.com/QuivrHQ/MegaParse/compare/v0.0.15...v0.0.16
+
+## 0.0.15 (2024-06-26)
+
+## What's Changed
+* add: llm megaparser by @chloedia in https://github.com/QuivrHQ/MegaParse/pull/42
+
+
+**Full Changelog**: https://github.com/QuivrHQ/MegaParse/compare/v0.0.14...v0.0.15
+
 ## 0.0.14 (2024-06-24)
 
 ## What's Changed

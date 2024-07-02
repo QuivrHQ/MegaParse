@@ -2,7 +2,7 @@ from setuptools import setup, find_packages
 
 setup(
     name="megaparse",
-    version="0.0.14",
+    version="0.0.19",
     description="Parse complex files (PDF,Docx,PPTX) for LLM consumption",
     long_description=open("README.md").read(),
     long_description_content_type="text/markdown",
@@ -12,10 +12,8 @@ setup(
         "python-docx",
         "mammoth",
         "python-pptx",
-        "nest-asyncio",
         "llama-parse",
         "pdf2docx",
         "unstructured",
-        "markdownify"
     ],
 )
