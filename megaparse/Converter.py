@@ -273,7 +273,10 @@ class PDFConverter:
             parsing_instruction=parsing_instructions,  # Optionally you can define a parsing instruction
         )
         documents: List[LlamaDocument] = await self.parser.aload_data(str(file_path))
-        parsed_md = documents[0].get_content()
+        parsed_md = ""
+        for document in documents:
+            text_content = document.text
+            parsed_md = parsed_md + text_content
         return parsed_md
 
     def _unstructured_parse(self, file_path: str | Path, model: ModelEnum = ModelEnum.NONE):
