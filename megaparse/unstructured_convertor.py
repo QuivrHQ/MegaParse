@@ -7,7 +7,6 @@ import os
 from langchain_core.prompts import ChatPromptTemplate
 from langchain_community.chat_models import ChatOllama
 from langchain_core.output_parsers import StrOutputParser
-
 class ModelEnum(str, Enum):
     """Model to use for the conversion"""
     LOCAL = "llama3"
@@ -16,6 +15,7 @@ class ModelEnum(str, Enum):
 
 class UnstructuredParser:
     load_dotenv()
+
 
     # Function to convert element category to markdown format
     def convert_to_markdown(self, elements):
@@ -80,7 +80,7 @@ class UnstructuredParser:
 
     def partition_pdf_file(self, path, strategy="fast"):
         return partition_pdf(
-            filename=path, infer_table_structure=True, strategy=strategy
+            filename=path, infer_table_structure=False, strategy=strategy
         )
 
     def improve_layout(self, elements, remove_repeated_headers=True, model: ModelEnum = ModelEnum.GPT4O):
@@ -145,12 +145,12 @@ class UnstructuredParser:
 
         return improved_elements
 
-    def convert(self, path, model: ModelEnum = ModelEnum.GPT4O, strategy="fast"):
+    def convert(self, path, model: ModelEnum = ModelEnum.GPT4O, strategy="fast", remove_headers=True):
         # Partition the PDF
         elements = self.partition_pdf_file(path, strategy=strategy)
 
         # Improve table elements
-        improved_elements = self.improve_layout(elements, model=model)
+        improved_elements = self.improve_layout(elements, model=model, remove_repeated_headers=remove_headers)
 
         elements_dict = [el.to_dict() for el in improved_elements]
         markdown_content = self.convert_to_markdown(elements_dict)
