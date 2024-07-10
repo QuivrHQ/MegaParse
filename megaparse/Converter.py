@@ -26,6 +26,7 @@ from unstructured.partition.auto import partition
 import pandas as pd
 from megaparse.multimodal_convertor.megaparse_vision import MegaParseVision
 from langchain_core.documents import Document as LangChainDocument
+from unstructured_inference.models.tables import load_agent, tables_agent
 
 
 class Converter:
@@ -273,18 +274,19 @@ class PDFConverter:
             parsing_instruction=parsing_instructions,  # Optionally you can define a parsing instruction
         )
         documents: List[LlamaDocument] = await self.parser.aload_data(str(file_path))
+        
         parsed_md = documents[0].get_content()
         return parsed_md
 
-    def _unstructured_parse(self, file_path: str | Path, model: ModelEnum = ModelEnum.NONE):
+    def _unstructured_parse(self, file_path: str | Path, model: ModelEnum = ModelEnum.NONE, remove_headers = False):
         unstructured_parser = UnstructuredParser()
-        return unstructured_parser.convert(file_path, model= model, strategy=self.strategy)
+        return unstructured_parser.convert(file_path, model= model, strategy=self.strategy, remove_headers = False)
     
     async def _lmm_parse(self, file_path: str | Path):
         lmm_parser = MegaParseVision()
         return await lmm_parser.parse(file_path)
 
-    async def convert(self, file_path: str | Path, model: ModelEnum = ModelEnum.NONE, gpt4o_cleaner=False) -> LangChainDocument:
+    async def convert(self, file_path: str | Path, model: ModelEnum = ModelEnum.NONE, gpt4o_cleaner=False, remove_headers = False) -> LangChainDocument:
         if isinstance(file_path, str):
             file_path = Path(file_path)
 
@@ -295,7 +297,7 @@ class PDFConverter:
         elif self.method == MethodEnum.MEGAPARSE_VISION:
             parsed_md = await self._lmm_parse(file_path)
         elif self.method == MethodEnum.UNSTRUCTURED:
-            parsed_md = self._unstructured_parse(file_path, model)
+            parsed_md = self._unstructured_parse(file_path, model, remove_headers= remove_headers)
         else:
             raise ValueError(f"Method {self.method} not supported")
 
@@ -316,15 +318,16 @@ class PDFConverter:
 
 
 class MegaParse:
-    def __init__(self, file_path: str| Path, llama_parse_api_key: str | None = None, strategy = "fast") -> None:
-        if isinstance(file_path, str):
-            file_path = Path(file_path)
-        self.file_path = file_path
+    def __init__(self, llama_parse_api_key: str | None = None, strategy = "fast") -> None:
         self.llama_parse_api_key = llama_parse_api_key
         self.strategy = strategy
+        if strategy == "hi_res":
+            load_agent()
 
-    def load(self, **kwargs) -> LangChainDocument:
-        file_extension: str = os.path.splitext(self.file_path)[1]
+    def load(self, file_path: Path | str, **kwargs) -> LangChainDocument:
+        if isinstance(file_path, str):
+            file_path = Path(file_path)
+        file_extension: str = os.path.splitext(file_path)[1]
         if file_extension == ".docx":
             converter = DOCXConverter()
         elif file_extension == ".pptx":
@@ -334,22 +337,24 @@ class MegaParse:
         elif file_extension == ".xlsx":
             converter = XLSXConverter()
         else:
-            print(self.file_path, file_extension)
+            print(file_path, file_extension)
             raise ValueError(f"Unsupported file extension: {file_extension}")
         
         loop = asyncio.get_event_loop()
-        return loop.run_until_complete(converter.convert(self.file_path, **kwargs))
+        return loop.run_until_complete(converter.convert(file_path, **kwargs))
     
-    def load_tab(self, tab_name: str, **kwargs) -> LangChainDocument:
-        file_extension: str = os.path.splitext(self.file_path)[1]
+    def load_tab(self, file_path: Path | str, tab_name: str, **kwargs) -> LangChainDocument:
+        if isinstance(file_path, str):
+            file_path = Path(file_path)
+        file_extension: str = os.path.splitext(file_path)[1]
         if file_extension == ".xlsx":
             converter = XLSXConverter()
         else:
-            print(self.file_path, file_extension)
+            print(file_path, file_extension)
             raise ValueError(f"Unsupported file extension for tabs: {file_extension}")
         
-        result = converter.convert_tab(self.file_path, tab_name= tab_name)
-        return LangChainDocument(page_content=result, metadata={"filename": self.file_path.name, "type": "xlsx"})
+        result = converter.convert_tab(file_path, tab_name= tab_name)
+        return LangChainDocument(page_content=result, metadata={"filename": file_path.name, "type": "xlsx"})
 
 
     def save_md(self, md_content: str, file_path: Path | str) -> None:
