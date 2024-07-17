@@ -1,5 +1,13 @@
 # Changelog
 
+## 0.0.20 (2024-07-10)
+
+## What's Changed
+* add: resolve multiple page problem on llama parse by @chloedia in https://github.com/QuivrHQ/MegaParse/pull/61
+
+
+**Full Changelog**: https://github.com/QuivrHQ/MegaParse/compare/v0.0.19...v0.0.20
+
 ## 0.0.19 (2024-06-28)
 
 ## What's Changed
