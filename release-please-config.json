@@ -1,0 +1,10 @@
+{
+    "packages": {
+        "megaparse": {
+            "release-type": "python",
+            "bump-patch-for-minor-pre-major": true,
+            "changelog-notes-type": "github",
+            "include-v-in-tag": true
+        }
+    }
+}
