@@ -26,7 +26,7 @@ from unstructured.partition.auto import partition
 import pandas as pd
 from megaparse.multimodal_convertor.megaparse_vision import MegaParseVision
 from langchain_core.documents import Document as LangChainDocument
-
+from langchain_community.document_loaders.base import BaseLoader
 
 class Converter:
     def __init__(self) -> None:
@@ -318,7 +318,7 @@ class PDFConverter:
             f.write(md_content)
 
 
-class MegaParse:
+class MegaParse(BaseLoader):
     def __init__(self, file_path: str| Path, llama_parse_api_key: str | None = None, strategy = "fast") -> None:
         if isinstance(file_path, str):
             file_path = Path(file_path)

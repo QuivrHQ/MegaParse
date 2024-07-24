@@ -2,22 +2,58 @@ on:
   push:
     branches:
       - main
-  
+
 permissions:
   contents: write
   pull-requests: write
-  
+
 name: release-please
-  
+
 jobs:
   release-please:
     runs-on: ubuntu-latest
+    outputs:
+      release_created: ${{ steps.release.outputs.release_created }}
     steps:
-      - uses: google-github-actions/release-please-action@db8f2c60ee802b3748b512940dde88eabd7b7e01 # v3
+      - name: Checkout repository
+        uses: actions/checkout@v3
         with:
-          release-type: python
-          changelog-notes-type: github
-          package-name: megaparse
-          bump-patch-for-minor-pre-major: true
-          extra-files: "setup.py"
+          fetch-depth: 0 # Fetch all history for tags and releases
+
+      - name: Setup Python
+        uses: actions/setup-python@v4
+        with:
+          python-version: '3.11'
+
+      - name: Run release-please
+        id: release
+        uses: google-github-actions/release-please-action@v4
+        with:
           token: ${{ secrets.RELEASE_PLEASE_TOKEN }}
+
+
+  deploy:
+    if: needs.release-please.outputs.release_created == 'true'
+    needs: release-please
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Set up Python
+        uses: actions/setup-python@v3
+        with:
+          python-version: '3.11'
+      - name: Check working directory
+        run: pwd
+      - name: Install dependencies
+        run: |
+          python -m pip install --upgrade pip
+          pip install poetry
+      - name: Install project dependencies
+        run: poetry install
+      - name: Build package
+        run: poetry build
+      - name: Publish package
+        uses: pypa/gh-action-pypi-publish@27b31702a0e7fc50959f5ad993c78deac1bdfc29
+        with:
+          user: __token__
+          password: ${{ secrets.PYPI_API_TOKEN }}
