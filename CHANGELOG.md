@@ -1,5 +1,12 @@
 # Changelog
 
+## [0.0.24](https://github.com/QuivrHQ/MegaParse/compare/megaparse-v0.0.23...megaparse-v0.0.24) (2024-07-30)
+
+
+### Features
+
+* async load   ([#71](https://github.com/QuivrHQ/MegaParse/issues/71)) ([fbc3e1b](https://github.com/QuivrHQ/MegaParse/commit/fbc3e1b5f504eee9757e15592169ddad9b069f03))
+
 ## [0.0.23](https://github.com/QuivrHQ/MegaParse/compare/megaparse-v0.0.22...megaparse-v0.0.23) (2024-07-30)
 
 
