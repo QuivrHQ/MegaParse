@@ -1,6 +1,6 @@
 [tool.poetry]
 name = "megaparse"
-version = "0.0.20"
+version = "0.1.0"
 description = "Parse complex files (PDF,Docx,PPTX) for LLM consumption"
 authors = ["Quivr"]
 license = "Apache 2.0"
