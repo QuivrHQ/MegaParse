@@ -356,7 +356,7 @@ class MegaParse(BaseLoader):
         self.llama_parse_api_key = llama_parse_api_key
         self.strategy = strategy
 
-    async def aload(self, **kwargs) -> LangChainDocument:
+    async def aload(self, **convert_kwargs) -> LangChainDocument:
         file_extension: str = os.path.splitext(self.file_path)[1]
         if file_extension == ".docx":
             converter = DOCXConverter()
@@ -372,7 +372,7 @@ class MegaParse(BaseLoader):
         else:
             raise ValueError(f"Unsupported file extension: {file_extension}")
 
-        return await converter.convert(self.file_path, **kwargs)
+        return await converter.convert(self.file_path, **convert_kwargs)
 
     def load(self, **kwargs) -> LangChainDocument:
         file_extension: str = os.path.splitext(self.file_path)[1]
