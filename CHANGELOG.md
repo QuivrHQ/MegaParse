@@ -1,5 +1,12 @@
 # Changelog
 
+## [0.0.23](https://github.com/QuivrHQ/MegaParse/compare/megaparse-v0.0.22...megaparse-v0.0.23) (2024-07-30)
+
+
+### Features
+
+* megaparse 0.0.22 ([071fd4d](https://github.com/QuivrHQ/MegaParse/commit/071fd4da2e8f0abb58fc66c3cdd87c4ee5cda4d6))
+
 ## 0.0.20 (2024-07-10)
 
 ## What's Changed
