@@ -1,6 +1,6 @@
 {
     "packages": {
-        "megaparse": {
+        ".": {
             "release-type": "python",
             "package-name": "megaparse",
             "bump-patch-for-minor-pre-major": true,
