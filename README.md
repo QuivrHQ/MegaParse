@@ -42,8 +42,8 @@ from megaparse import MegaParse
 
 megaparse = MegaParse(file_path="./test.pdf")
 document = megaparse.load()
-print(document.content)
-megaparse.save_md(content, "./test.md")
+print(document.page_content)
+megaparse.save_md(document.page_content, "./test.md")
 ```
 
 ### (Optional) Use LlamaParse for Improved Results
@@ -57,7 +57,7 @@ from megaparse import MegaParse
 
 megaparse = MegaParse(file_path="./test.pdf", llama_parse_api_key="llx-your_api_key")
 document = megaparse.load()
-print(document.content)
+print(document.page_content)
 ```
 
 ## BenchMark
