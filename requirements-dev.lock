@@ -403,7 +403,6 @@ packaging==24.1 ; (python_full_version < '3.12.4' and python_version < '3.12') o
     # via matplotlib
     # via onnxruntime
     # via pikepdf
-    # via pytesseract
     # via pytest
     # via transformers
     # via unstructured-client
@@ -439,7 +438,6 @@ pillow==10.4.0 ; (python_full_version < '3.12.4' and python_version < '3.12') or
     # via pdfplumber
     # via pikepdf
     # via pillow-heif
-    # via pytesseract
     # via python-pptx
     # via torchvision
     # via unstructured-pytesseract
@@ -513,8 +511,6 @@ pypdfium2==4.30.0 ; (python_full_version < '3.12.4' and python_version < '3.12')
     # via pdfplumber
 pyreadline3==3.4.1 ; sys_platform == 'win32' and ((python_full_version < '3.12.4' and python_version < '3.12') or (python_full_version < '3.12.4' and python_version < '3.13' and python_version >= '3.12') or (python_full_version < '3.12.4' and python_version >= '3.13') or (python_full_version >= '3.12.4' and python_version < '3.12') or (python_full_version >= '3.12.4' and python_version < '3.13' and python_version >= '3.12') or (python_full_version >= '3.12.4' and python_version >= '3.13'))
     # via humanfriendly
-pytesseract==0.3.13 ; (python_full_version < '3.12.4' and python_version < '3.12') or (python_full_version < '3.12.4' and python_version < '3.13' and python_version >= '3.12') or (python_full_version < '3.12.4' and python_version >= '3.13') or (python_full_version >= '3.12.4' and python_version < '3.12') or (python_full_version >= '3.12.4' and python_version < '3.13' and python_version >= '3.12') or (python_full_version >= '3.12.4' and python_version >= '3.13')
-    # via unstructured
 pytest==8.3.2 ; (python_full_version < '3.12.4' and python_version < '3.12') or (python_full_version < '3.12.4' and python_version < '3.13' and python_version >= '3.12') or (python_full_version < '3.12.4' and python_version >= '3.13') or (python_full_version >= '3.12.4' and python_version < '3.12') or (python_full_version >= '3.12.4' and python_version < '3.13' and python_version >= '3.12') or (python_full_version >= '3.12.4' and python_version >= '3.13')
     # via pytest-asyncio
     # via pytest-cov
@@ -690,7 +686,7 @@ typing-inspect==0.9.0 ; (python_full_version < '3.12.4' and python_version < '3.
     # via unstructured-client
 tzdata==2024.1 ; (python_full_version < '3.12.4' and python_version < '3.12') or (python_full_version < '3.12.4' and python_version < '3.13' and python_version >= '3.12') or (python_full_version < '3.12.4' and python_version >= '3.13') or (python_full_version >= '3.12.4' and python_version < '3.12') or (python_full_version >= '3.12.4' and python_version < '3.13' and python_version >= '3.12') or (python_full_version >= '3.12.4' and python_version >= '3.13')
     # via pandas
-unstructured==0.15.0 ; (python_full_version < '3.12.4' and python_version < '3.12') or (python_full_version < '3.12.4' and python_version < '3.13' and python_version >= '3.12') or (python_full_version < '3.12.4' and python_version >= '3.13') or (python_full_version >= '3.12.4' and python_version < '3.12') or (python_full_version >= '3.12.4' and python_version < '3.13' and python_version >= '3.12') or (python_full_version >= '3.12.4' and python_version >= '3.13')
+unstructured==0.15.5 ; (python_full_version < '3.12.4' and python_version < '3.12') or (python_full_version < '3.12.4' and python_version < '3.13' and python_version >= '3.12') or (python_full_version < '3.12.4' and python_version >= '3.13') or (python_full_version >= '3.12.4' and python_version < '3.12') or (python_full_version >= '3.12.4' and python_version < '3.13' and python_version >= '3.12') or (python_full_version >= '3.12.4' and python_version >= '3.13')
     # via megaparse
 unstructured-client==0.25.5 ; (python_full_version < '3.12.4' and python_version < '3.12') or (python_full_version < '3.12.4' and python_version < '3.13' and python_version >= '3.12') or (python_full_version < '3.12.4' and python_version >= '3.13') or (python_full_version >= '3.12.4' and python_version < '3.12') or (python_full_version >= '3.12.4' and python_version < '3.13' and python_version >= '3.12') or (python_full_version >= '3.12.4' and python_version >= '3.13')
     # via unstructured
