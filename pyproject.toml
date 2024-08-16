@@ -8,22 +8,22 @@ authors = [
 ]
 readme = "README.md"
 dependencies = [
-    "python-docx>=1.1.2",
+    "python-docx>=1.1.0",
     "mammoth>=1.8.0",
     "python-pptx>=1.0.2",
-    "llama-parse>=0.4.9",
-    "pdf2docx>=0.5.8",
+    "llama-parse>=0.4.0",
+    "pdf2docx>=0.5.0",
     "unstructured[pdf]>=0.15.0",
-    "langchain>=0.2.14",
-    "langchain-community>=0.2.12",
-    "langchain-openai>=0.1.21",
-    "langchain-core>=0.2.32",
-    "python-dotenv>=1.0.1",
-    "torch>=2.4.0",
-    "torchvision>=0.19.0",
+    "langchain>=0.2.0",
+    "langchain-community>=0.2.0",
+    "langchain-openai>=0.1.0",
+    "langchain-core>=0.2.0",
+    "python-dotenv>=1.0.0",
+    "torch>=2.0.0",
+    "torchvision>=0.18.0",
     "pycryptodome>=3.20.0",
-    "llama-index>=0.10.65",
-    "pdfplumber>=0.11.3",
+    "llama-index>=0.10.0",
+    "pdfplumber>=0.11.0",
 ]
 python = "^3.11"
 
