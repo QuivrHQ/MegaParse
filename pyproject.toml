@@ -21,10 +21,9 @@ dependencies = [
     "python-dotenv>=1.0.1",
     "torch>=2.4.0",
     "torchvision>=0.19.0",
-    "setuptools>=72.2.0",
-    "wheel>=0.44.0",
     "pycryptodome>=3.20.0",
     "llama-index>=0.10.65",
+    "pdfplumber>=0.11.3",
 ]
 python = "^3.11"
 
