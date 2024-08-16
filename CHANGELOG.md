@@ -1,5 +1,12 @@
 # Changelog
 
+## [0.0.25](https://github.com/QuivrHQ/MegaParse/compare/megaparse-v0.0.24...megaparse-v0.0.25) (2024-08-16)
+
+
+### Features
+
+* **rye:** implemented ([#74](https://github.com/QuivrHQ/MegaParse/issues/74)) ([1e9ad8e](https://github.com/QuivrHQ/MegaParse/commit/1e9ad8e0000f28c709d915219fe62c0dbe7fa812))
+
 ## [0.0.24](https://github.com/QuivrHQ/MegaParse/compare/megaparse-v0.0.23...megaparse-v0.0.24) (2024-07-30)
 
 
