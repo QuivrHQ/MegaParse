@@ -3,16 +3,17 @@ import re
 from langchain_openai import ChatOpenAI
 from unstructured.partition.pdf import partition_pdf
 from dotenv import load_dotenv
-import os
 from langchain_core.prompts import ChatPromptTemplate
 from langchain_community.chat_models import ChatOllama
-from langchain_core.output_parsers import StrOutputParser
+
 
 class ModelEnum(str, Enum):
     """Model to use for the conversion"""
+
     LOCAL = "llama3"
     GPT4O = "gpt-4o"
     NONE = None
+
 
 class UnstructuredParser:
     load_dotenv()
@@ -58,7 +59,7 @@ class UnstructuredParser:
         elif element_type == "Table":
             markdown_line = el["metadata"]["text_as_html"]
         elif element_type == "PageBreak":
-            markdown_line = f"---\n\n"
+            markdown_line = "---\n\n"
         elif element_type == "Image":
             markdown_line = f"![Image]({el['metadata'].get('image_path', '')})\n\n"
         elif element_type == "Formula":
@@ -83,17 +84,24 @@ class UnstructuredParser:
             filename=path, infer_table_structure=True, strategy=strategy
         )
 
-    def improve_layout(self, elements, remove_repeated_headers=True, model: ModelEnum = ModelEnum.GPT4O):
+    def improve_layout(
+        self, elements, remove_repeated_headers=True, model: ModelEnum = ModelEnum.GPT4O
+    ):
         llm = None
         chain = None
         if model != ModelEnum.NONE:
-            llm = ChatOpenAI(model="gpt-4o", temperature=0.1) if model == ModelEnum.GPT4O else ChatOllama(model=model.value,  temperature=0.1)
+            llm = (
+                ChatOpenAI(model="gpt-4o", temperature=0.1)
+                if model == ModelEnum.GPT4O
+                else ChatOllama(model=model.value, temperature=0.1)
+            )
 
             # Define the prompt
-            prompt = ChatPromptTemplate.from_messages([
-                (
-                    "human",
-                    """You are an expert in markdown tables, match this text and this html table to fill a md table. You answer with just the table in pure markdown, nothing else.
+            prompt = ChatPromptTemplate.from_messages(
+                [
+                    (
+                        "human",
+                        """You are an expert in markdown tables, match this text and this html table to fill a md table. You answer with just the table in pure markdown, nothing else.
                     <TEXT> 
                     {text} 
                     </TEXT>
@@ -104,11 +112,12 @@ class UnstructuredParser:
                     Note, the previous table (that might be related since appearing just before):
                     <PREVIOUS_TABLE>
                     {previous_table}
-                    </PREVIOUS_TABLE>"""
-                ),
-            ])
+                    </PREVIOUS_TABLE>""",
+                    ),
+                ]
+            )
             chain = prompt | llm
-        
+
         table_stack = []
 
         improved_elements = []
@@ -116,32 +125,38 @@ class UnstructuredParser:
             if el.category == "Table":
                 if el.text not in set(table_stack):
                     if chain:
-                        result = chain.invoke({
-                            "text": el.text,
-                            "html": el.metadata.text_as_html,
-                            "previous_table": table_stack[-1] if table_stack else ""
-
-                        })
+                        result = chain.invoke(
+                            {
+                                "text": el.text,
+                                "html": el.metadata.text_as_html,
+                                "previous_table": table_stack[-1]
+                                if table_stack
+                                else "",
+                            }
+                        )
                         cleaned_result = result.content
-                        cleaned_content = re.sub(r'^```.*$\n?', '', str(cleaned_result), flags=re.MULTILINE)
-                    else: 
+                        cleaned_content = re.sub(
+                            r"^```.*$\n?", "", str(cleaned_result), flags=re.MULTILINE
+                        )
+                    else:
                         cleaned_content = el.text
-                        
+
                     el.metadata.text_as_html = f"[TABLE]\n{cleaned_content}\n[/TABLE]"
                     # add line break to separate tables
-                    el.metadata.text_as_html = el.metadata.text_as_html + "\n\n" #type: ignore
+                    el.metadata.text_as_html = el.metadata.text_as_html + "\n\n"  # type: ignore
                     table_stack.append(el.text)
                     improved_elements.append(el)
 
             elif el.category not in ["Header", "Footer"]:
                 if "page" not in el.text.lower():
-                    if (el.text not in set(table_stack) and "page" not in el.text.lower()) or remove_repeated_headers == False:
+                    if (
+                        el.text not in set(table_stack)
+                        and "page" not in el.text.lower()
+                    ) or remove_repeated_headers == False:
                         improved_elements.append(el)
 
                     table_stack.append(el.text.strip())
                     table_stack.append("")
-
-                
 
         return improved_elements
 
