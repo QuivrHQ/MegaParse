@@ -84,6 +84,7 @@ _Lower is better_
 - [ ] Add TOC for Docx
 - [ ] Add Hyperlinks for Docx
 - [ ] Order Headers for Docx to Markdown
+- [X] Add Rye package manager 
 
 
 
