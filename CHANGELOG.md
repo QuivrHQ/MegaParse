@@ -1,5 +1,12 @@
 # Changelog
 
+## [0.0.28](https://github.com/QuivrHQ/MegaParse/compare/megaparse-v0.0.27...megaparse-v0.0.28) (2024-08-16)
+
+
+### Features
+
+* **rye:** added package manager ([#81](https://github.com/QuivrHQ/MegaParse/issues/81)) ([a3a50a3](https://github.com/QuivrHQ/MegaParse/commit/a3a50a3f27d3d9b4d6de4f3415472f8e52710656))
+
 ## [0.0.27](https://github.com/QuivrHQ/MegaParse/compare/megaparse-v0.0.26...megaparse-v0.0.27) (2024-08-16)
 
 
