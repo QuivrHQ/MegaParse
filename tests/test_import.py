@@ -8,4 +8,3 @@ def test_load():
     megaparse = MegaParse(file_path="./tests/data/dummy.pdf")
     element = megaparse.load()
     assert element.page_content.strip("\n") == "# Dummy PDF download"
-
