@@ -1,5 +1,12 @@
 # Changelog
 
+## [0.0.26](https://github.com/QuivrHQ/MegaParse/compare/megaparse-v0.0.25...megaparse-v0.0.26) (2024-08-16)
+
+
+### Bug Fixes
+
+* **pycrypto:** being used by an old version of pdfplumber ([#76](https://github.com/QuivrHQ/MegaParse/issues/76)) ([d28f88c](https://github.com/QuivrHQ/MegaParse/commit/d28f88ceb2a722b15c84738f395b3ff4c818a365))
+
 ## [0.0.25](https://github.com/QuivrHQ/MegaParse/compare/megaparse-v0.0.24...megaparse-v0.0.25) (2024-08-16)
 
 
