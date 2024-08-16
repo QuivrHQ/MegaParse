@@ -1,5 +1,12 @@
 # Changelog
 
+## [0.0.27](https://github.com/QuivrHQ/MegaParse/compare/megaparse-v0.0.26...megaparse-v0.0.27) (2024-08-16)
+
+
+### Features
+
+* **unstructured:** increased version ([#78](https://github.com/QuivrHQ/MegaParse/issues/78)) ([eb49cf5](https://github.com/QuivrHQ/MegaParse/commit/eb49cf5e79cd7a38c8212b315a4b64860c35a7b7))
+
 ## [0.0.26](https://github.com/QuivrHQ/MegaParse/compare/megaparse-v0.0.25...megaparse-v0.0.26) (2024-08-16)
 
 
