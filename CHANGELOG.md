@@ -1,5 +1,12 @@
 # Changelog
 
+## [0.0.29](https://github.com/QuivrHQ/MegaParse/compare/megaparse-v0.0.28...megaparse-v0.0.29) (2024-08-18)
+
+
+### Bug Fixes
+
+* **building:** version not working ([#83](https://github.com/QuivrHQ/MegaParse/issues/83)) ([c5e73f6](https://github.com/QuivrHQ/MegaParse/commit/c5e73f6c821424ef277ddd15ddb5b2df48ff7ab2))
+
 ## [0.0.28](https://github.com/QuivrHQ/MegaParse/compare/megaparse-v0.0.27...megaparse-v0.0.28) (2024-08-16)
 
 
