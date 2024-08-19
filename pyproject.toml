@@ -19,8 +19,10 @@ dependencies = [
     "langchain-openai>=0.1.0",
     "langchain-core>=0.2.0",
     "python-dotenv>=1.0.0",
-    "torch>=2.0.0",
-    "torchvision>=0.18.0",
+    "torch==2.4.0+cpu; sys_platform != 'darwin'",  # For Linux
+    "torch==2.4.0; sys_platform == 'darwin'",  # For macOS
+    "torchvision==0.19.0+cpu; sys_platform != 'darwin'",  # For Linux
+    "torchvision==0.19.0; sys_platform == 'darwin'",  # For macOS
     "pycryptodome>=3.20.0",
     "llama-index>=0.10.0",
     "pdfplumber>=0.11.0",
@@ -54,3 +56,6 @@ allow-direct-references = true
 [tool.hatch.build.targets.wheel]
 packages = ["megaparse"]
 
+[[tool.rye.sources]]
+name = "pytorch"
+url = "https://download.pytorch.org/whl/cpu"
