@@ -26,7 +26,13 @@ https://github.com/QuivrHQ/MegaParse/assets/19614572/1b4cdb73-8dc2-44ef-b8b4-a75
 ## Installation
 
 ```bash
-pip install megaparse
+pip install megaparse 
+```
+
+## OR Install with Pytorch cpu only
+
+```bash
+pip install megaparse[cpu]
 ```
 
 ## Usage
