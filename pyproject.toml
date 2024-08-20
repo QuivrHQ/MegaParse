@@ -25,14 +25,6 @@ dependencies = [
 ]
 python = "^3.11"
 
-[project.optional-dependencies]
-cpu = [
-    "torch==2.4.0+cpu; sys_platform != 'darwin'",  # For Linux
-    "torch==2.4.0; sys_platform == 'darwin'",  # For macOS
-    "torchvision==0.19.0+cpu; sys_platform != 'darwin'",  # For Linux
-    "torchvision==0.19.0; sys_platform == 'darwin'",  # For macOS
-]
-
 
 [build-system]
 requires = ["hatchling"]
@@ -59,7 +51,3 @@ allow-direct-references = true
 
 [tool.hatch.build.targets.wheel]
 packages = ["megaparse"]
-
-[[tool.rye.sources]]
-name = "pytorch"
-url = "https://download.pytorch.org/whl/cpu"
