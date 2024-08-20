@@ -1,5 +1,12 @@
 # Changelog
 
+## [0.0.31](https://github.com/QuivrHQ/MegaParse/compare/megaparse-v0.0.30...megaparse-v0.0.31) (2024-08-20)
+
+
+### Features
+
+* **pytorch:** cpu only removed ([#88](https://github.com/QuivrHQ/MegaParse/issues/88)) ([6b2fcfa](https://github.com/QuivrHQ/MegaParse/commit/6b2fcfa4413b8a72d398aab57f277dd28ab69c2f))
+
 ## [0.0.30](https://github.com/QuivrHQ/MegaParse/compare/megaparse-v0.0.29...megaparse-v0.0.30) (2024-08-20)
 
 
