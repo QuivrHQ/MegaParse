@@ -157,11 +157,11 @@ class MarkdownProcessor:
             ),
         ]
 
-        prompt = f"""You are a document cleaner and you are used to remove repetitive headers / footer from parsed files in markdown.
-        Here is a md file : "{self.md_result}"
-        I want you to identify repetitive texts that could be associate to a document header and footer. Please identify the headers, the footer and remove them from the document.
-        Answer with only the cleaned document in markdown format. 
-        Result : """
+        # prompt = f"""You are a document cleaner and you are used to remove repetitive headers / footer from parsed files in markdown.
+        # Here is a md file : "{self.md_result}"
+        # I want you to identify repetitive texts that could be associate to a document header and footer. Please identify the headers, the footer and remove them from the document.
+        # Answer with only the cleaned document in markdown format.
+        # Result : """
 
         messages.append(("human", self.md_result))  # type: ignore
 
