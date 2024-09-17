@@ -4,7 +4,6 @@ from collections import Counter
 from enum import Enum
 from pathlib import Path
 from typing import List, Set
-
 import pandas as pd
 from docx import Document
 from docx.oxml.table import CT_Tbl
@@ -19,7 +18,6 @@ from llama_parse import LlamaParse
 from llama_parse.utils import Language, ResultType
 from pptx import Presentation
 from pptx.enum.shapes import MSO_SHAPE_TYPE
-
 from megaparse.markdown_processor import MarkdownProcessor
 from megaparse.multimodal_convertor.megaparse_vision import MegaParseVision
 from megaparse.unstructured_convertor import ModelEnum, UnstructuredParser

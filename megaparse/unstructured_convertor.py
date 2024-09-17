@@ -21,7 +21,6 @@ class UnstructuredParser:
     # Function to convert element category to markdown format
     def convert_to_markdown(self, elements):
         markdown_content = ""
-        element_hierarchy = {}
 
         for el in elements:
             markdown_content += self.get_markdown_line(el)
@@ -129,9 +128,9 @@ class UnstructuredParser:
                             {
                                 "text": el.text,
                                 "html": el.metadata.text_as_html,
-                                "previous_table": table_stack[-1]
-                                if table_stack
-                                else "",
+                                "previous_table": (
+                                    table_stack[-1] if table_stack else ""
+                                ),
                             }
                         )
                         cleaned_result = result.content
@@ -152,7 +151,7 @@ class UnstructuredParser:
                     if (
                         el.text not in set(table_stack)
                         and "page" not in el.text.lower()
-                    ) or remove_repeated_headers == False:
+                    ) or remove_repeated_headers is False:
                         improved_elements.append(el)
 
                     table_stack.append(el.text.strip())
