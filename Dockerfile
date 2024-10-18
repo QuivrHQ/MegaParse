@@ -19,7 +19,6 @@ RUN apt-get clean && apt-get update && apt-get install -y \
     python-dev \
     build-essential \
     wget \
-    gcc \
     # Additional dependencies for document handling
     libmagic-dev \
     poppler-utils \
