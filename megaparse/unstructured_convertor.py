@@ -129,9 +129,9 @@ class UnstructuredParser:
                             {
                                 "text": el.text,
                                 "html": el.metadata.text_as_html,
-                                "previous_table": table_stack[-1]
-                                if table_stack
-                                else "",
+                                "previous_table": (
+                                    table_stack[-1] if table_stack else ""
+                                ),
                             }
                         )
                         cleaned_result = result.content
@@ -165,17 +165,17 @@ class UnstructuredParser:
         elements = self.partition_pdf_file(path, strategy=strategy)
 
         # Improve table elements
-        improved_elements = self.improve_layout(elements, model=model)
 
-        elements_dict = [el.to_dict() for el in improved_elements]
+        elements_dict = [el.to_dict() for el in elements]
         markdown_content = self.convert_to_markdown(elements_dict)
         return markdown_content
 
 
-# if __name__ == "__main__":
-#     parser = UnstructuredParser()
-#     response = parser.convert("megaparse/tests/input_tests/MegaFake_report.pdf", model=ModelEnum.NONE)
-#     print(response)
-#     with open("megaparse/tests/output_tests/cdp.md", "w") as f:
-#         f.write(response)
-#     print("ok")
+if __name__ == "__main__":
+    parser = UnstructuredParser()
+    response = parser.convert("megaparse/tests/input_tests/MegaFake_report.pdf")
+    document = megaparse.load()
+    print(document.page_content)
+    # with open("megaparse/tests/output_tests/cdp.md", "w") as f:
+    #     f.write(response)
+    # print("ok")
