@@ -31,9 +31,6 @@ dependencies = [
     "pypdf>=5.0.1",
     "psutil>=6.1.0",
     "numpy<=2.0.0",
-    "playwright>=1.47.0",
-    "langchain-anthropic>=0.2.3",
-    "python-magic>=0.4.27",
 ]
 requires-python = ">= 3.11"
 

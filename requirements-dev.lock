@@ -177,8 +177,6 @@ h11==0.14.0
 httpcore==1.0.5
     # via httpx
 httpx==0.27.0
-    # via anthropic
-    # via langsmith
     # via llama-index-core
     # via llama-index-legacy
     # via llamaindex-py-client
@@ -517,7 +515,6 @@ pycparser==2.22 ; platform_python_implementation != 'PyPy' or implementation_nam
 pycryptodome==3.21.0
     # via megaparse
 pydantic==2.8.2
-    # via anthropic
     # via fastapi
     # via langchain
     # via langchain-anthropic
