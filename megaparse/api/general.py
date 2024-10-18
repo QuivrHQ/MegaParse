@@ -5,6 +5,8 @@ from megaparse.unstructured_convertor import UnstructuredParser
 import psutil
 import os
 from fastapi import FastAPI, UploadFile, File, HTTPException
+from langchain_community.document_loaders import PlaywrightURLLoader
+
 
 app = FastAPI()
 
@@ -26,7 +28,7 @@ def _check_free_memory():
         )
 
 
-@app.post("/upload")
+@app.post("/file")
 def upload_file(file: UploadFile = File(...)):
     parser = UnstructuredParser()
     _check_free_memory()
@@ -34,4 +36,17 @@ def upload_file(file: UploadFile = File(...)):
     with open(file.filename, "wb") as f:  # type: ignore
         f.write(file.file.read())
         result = parser.convert(file.filename, strategy="auto")
+        os.remove(file.filename)  # type: ignore
         return {"message": "File uploaded successfully", "result": result}
+
+
+@app.post("/url")
+async def upload_url(url: str):
+    loader = PlaywrightURLLoader(urls=[url], remove_selectors=["header", "footer"])
+
+    data = await loader.aload()
+    # Now turn the data into a string
+    extracted_content = ""
+    for page in data:
+        extracted_content += page.page_content
+    return extracted_content

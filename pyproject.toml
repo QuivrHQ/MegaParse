@@ -30,6 +30,7 @@ dependencies = [
     "pypdf>=5.0.1",
     "psutil>=6.1.0",
     "numpy<=2.0.0",
+    "playwright>=1.47.0",
 ]
 python = "^3.11"
 

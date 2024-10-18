@@ -128,6 +128,7 @@ googleapis-common-protos==1.63.2
     # via google-api-core
     # via grpcio-status
 greenlet==3.0.3
+    # via playwright
     # via sqlalchemy
 grpcio==1.65.5
     # via google-api-core
@@ -394,6 +395,8 @@ pillow==10.4.0
     # via unstructured-pytesseract
 pillow-heif==0.18.0
     # via unstructured
+playwright==1.47.0
+    # via megaparse
 portalocker==2.10.1
     # via iopath
 proto-plus==1.24.0
@@ -430,6 +433,8 @@ pydantic==2.8.2
     # via openai
 pydantic-core==2.20.1
     # via pydantic
+pyee==12.0.0
+    # via playwright
 pymupdf==1.24.9
     # via llama-index-readers-file
     # via pdf2docx
@@ -585,6 +590,7 @@ typing-extensions==4.12.2
     # via openai
     # via pydantic
     # via pydantic-core
+    # via pyee
     # via python-docx
     # via python-oxmsg
     # via python-pptx
