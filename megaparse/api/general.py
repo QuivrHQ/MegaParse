@@ -44,9 +44,24 @@ def upload_file(file: UploadFile = File(...)):
 async def upload_url(url: str):
     loader = PlaywrightURLLoader(urls=[url], remove_selectors=["header", "footer"])
 
-    data = await loader.aload()
-    # Now turn the data into a string
-    extracted_content = ""
-    for page in data:
-        extracted_content += page.page_content
-    return extracted_content
+    if url.endswith(".pdf"):
+        ## Download the file
+        import requests
+        import tempfile
+
+        response = requests.get(url)
+        if response.status_code != 200:
+            raise HTTPException(status_code=400, detail="Failed to download the file")
+
+        with tempfile.NamedTemporaryFile(delete=False, suffix=".pdf") as temp_file:
+            temp_file.write(response.content)
+            parser = UnstructuredParser()
+            result = parser.convert(temp_file.name, strategy="auto")
+            return result
+    else:
+        data = await loader.aload()
+        # Now turn the data into a string
+        extracted_content = ""
+        for page in data:
+            extracted_content += page.page_content
+        return extracted_content
