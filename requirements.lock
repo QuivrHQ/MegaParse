@@ -26,13 +26,18 @@ antlr4-python3-runtime==4.9.3
 anyio==4.4.0
     # via httpx
     # via openai
+    # via starlette
 attrs==24.2.0
     # via aiohttp
 backoff==2.2.1
+    # via megaparse
     # via unstructured
 beautifulsoup4==4.12.3
+    # via bs4
     # via llama-index-readers-file
     # via unstructured
+bs4==0.0.2
+    # via llama-index-readers-file
 cachetools==5.5.0
     # via google-auth
 certifi==2024.7.4
@@ -50,6 +55,8 @@ charset-normalizer==3.3.2
     # via unstructured-client
 click==8.1.7
     # via nltk
+    # via python-oxmsg
+    # via uvicorn
 cobble==0.1.4
     # via mammoth
 colorama==0.4.6 ; platform_system == 'Windows'
@@ -84,6 +91,10 @@ effdet==0.4.1
     # via unstructured
 emoji==2.12.1
     # via unstructured
+et-xmlfile==1.1.0
+    # via openpyxl
+fastapi==0.115.2
+    # via megaparse
 filelock==3.15.4
     # via huggingface-hub
     # via torch
@@ -125,12 +136,13 @@ grpcio-status==1.65.5
     # via google-api-core
 h11==0.14.0
     # via httpcore
+    # via uvicorn
 httpcore==1.0.5
     # via httpx
 httpx==0.27.0
-    # via llama-cloud
     # via llama-index-core
     # via llama-index-legacy
+    # via llamaindex-py-client
     # via openai
     # via unstructured-client
 huggingface-hub==0.24.6
@@ -185,19 +197,14 @@ langsmith==0.1.99
     # via langchain-core
 layoutparser==0.3.4
     # via unstructured-inference
-llama-cloud==0.0.13
-    # via llama-index-indices-managed-llama-cloud
-llama-index==0.10.67.post1
+llama-index==0.10.9
     # via megaparse
-llama-index-agent-openai==0.2.9
+llama-index-agent-openai==0.1.7
     # via llama-index
     # via llama-index-program-openai
-llama-index-cli==0.1.13
-    # via llama-index
 llama-index-core==0.10.67
     # via llama-index
     # via llama-index-agent-openai
-    # via llama-index-cli
     # via llama-index-embeddings-openai
     # via llama-index-indices-managed-llama-cloud
     # via llama-index-llms-openai
@@ -209,15 +216,13 @@ llama-index-core==0.10.67
     # via llama-parse
 llama-index-embeddings-openai==0.1.11
     # via llama-index
-    # via llama-index-cli
-llama-index-indices-managed-llama-cloud==0.2.7
+llama-index-indices-managed-llama-cloud==0.1.6
     # via llama-index
 llama-index-legacy==0.9.48.post3
     # via llama-index
 llama-index-llms-openai==0.1.29
     # via llama-index
     # via llama-index-agent-openai
-    # via llama-index-cli
     # via llama-index-multi-modal-llms-openai
     # via llama-index-program-openai
     # via llama-index-question-gen-openai
@@ -228,13 +233,15 @@ llama-index-program-openai==0.1.7
     # via llama-index-question-gen-openai
 llama-index-question-gen-openai==0.1.3
     # via llama-index
-llama-index-readers-file==0.1.33
+llama-index-readers-file==0.1.1
     # via llama-index
 llama-index-readers-llama-parse==0.1.6
     # via llama-index
 llama-parse==0.4.9
     # via llama-index-readers-llama-parse
     # via megaparse
+llamaindex-py-client==0.1.19
+    # via llama-index-indices-managed-llama-cloud
 lxml==5.3.0
     # via pikepdf
     # via python-docx
@@ -242,6 +249,8 @@ lxml==5.3.0
     # via unstructured
 mammoth==1.8.0
     # via megaparse
+markdown==3.7
+    # via unstructured
 markupsafe==2.1.5
     # via jinja2
 marshmallow==3.21.3
@@ -266,6 +275,7 @@ networkx==3.3
     # via llama-index-core
     # via llama-index-legacy
     # via torch
+    # via unstructured
 nltk==3.9.1
     # via llama-index-core
     # via llama-index-legacy
@@ -278,6 +288,7 @@ numpy==1.26.4
     # via llama-index-core
     # via llama-index-legacy
     # via matplotlib
+    # via megaparse
     # via onnx
     # via onnxruntime
     # via opencv-python
@@ -317,6 +328,8 @@ nvidia-nvjitlink-cu12==12.6.20 ; platform_machine == 'x86_64' and platform_syste
     # via nvidia-cusparse-cu12
 nvidia-nvtx-cu12==12.1.105 ; platform_machine == 'x86_64' and platform_system == 'Linux'
     # via torch
+olefile==0.47
+    # via python-oxmsg
 omegaconf==2.3.0
     # via effdet
 onnx==1.16.2
@@ -326,7 +339,6 @@ onnxruntime==1.19.0
     # via unstructured-inference
 openai==1.41.1
     # via langchain-openai
-    # via llama-index-agent-openai
     # via llama-index-core
     # via llama-index-legacy
     # via llama-index-llms-openai
@@ -335,6 +347,8 @@ opencv-python==4.10.0.84
     # via unstructured-inference
 opencv-python-headless==4.10.0.84
     # via pdf2docx
+openpyxl==3.1.5
+    # via unstructured
 ordered-set==4.1.0
     # via deepdiff
 orjson==3.10.7
@@ -353,6 +367,7 @@ pandas==2.2.2
     # via layoutparser
     # via llama-index-core
     # via llama-index-legacy
+    # via unstructured
 pdf2docx==0.5.8
     # via megaparse
 pdf2image==1.17.0
@@ -392,7 +407,8 @@ protobuf==5.27.3
     # via onnx
     # via onnxruntime
     # via proto-plus
-psutil==6.0.0
+psutil==6.1.0
+    # via megaparse
     # via unstructured
 pyasn1==0.6.0
     # via pyasn1-modules
@@ -403,24 +419,28 @@ pycocotools==2.0.8
     # via effdet
 pycparser==2.22 ; platform_python_implementation != 'PyPy'
     # via cffi
-pycryptodome==3.20.0
+pycryptodome==3.21.0
     # via megaparse
 pydantic==2.8.2
+    # via fastapi
     # via langchain
     # via langchain-core
     # via langsmith
-    # via llama-cloud
+    # via llamaindex-py-client
     # via openai
 pydantic-core==2.20.1
     # via pydantic
 pymupdf==1.24.9
+    # via llama-index-readers-file
     # via pdf2docx
 pymupdfb==1.24.9
     # via pymupdf
+pypandoc==1.14
+    # via unstructured
 pyparsing==3.1.2
     # via matplotlib
-pypdf==4.3.1
-    # via llama-index-readers-file
+pypdf==5.0.1
+    # via megaparse
     # via unstructured
     # via unstructured-client
 pypdfium2==4.30.0
@@ -434,6 +454,7 @@ python-dateutil==2.9.0.post0
 python-docx==1.1.2
     # via megaparse
     # via pdf2docx
+    # via unstructured
 python-dotenv==1.0.1
     # via megaparse
 python-iso639==2024.4.27
@@ -442,8 +463,11 @@ python-magic==0.4.27
     # via unstructured
 python-multipart==0.0.9
     # via unstructured-inference
+python-oxmsg==0.0.1
+    # via unstructured
 python-pptx==1.0.2
     # via megaparse
+    # via unstructured
 pytz==2024.1
     # via pandas
 pywin32==306 ; platform_system == 'Windows'
@@ -461,6 +485,8 @@ pyyaml==6.0.2
 rapidfuzz==3.9.6
     # via unstructured
     # via unstructured-inference
+ratelimit==2.2.1
+    # via megaparse
 regex==2024.7.24
     # via nltk
     # via tiktoken
@@ -473,6 +499,7 @@ requests==2.32.3
     # via langsmith
     # via llama-index-core
     # via llama-index-legacy
+    # via megaparse
     # via requests-toolbelt
     # via tiktoken
     # via transformers
@@ -487,8 +514,6 @@ safetensors==0.4.4
     # via transformers
 scipy==1.14.0
     # via layoutparser
-setuptools==73.0.0
-    # via torch
 six==1.16.0
     # via fire
     # via langdetect
@@ -505,8 +530,8 @@ sqlalchemy==2.0.32
     # via langchain-community
     # via llama-index-core
     # via llama-index-legacy
-striprtf==0.0.26
-    # via llama-index-readers-file
+starlette==0.40.0
+    # via fastapi
 sympy==1.13.2
     # via onnxruntime
     # via torch
@@ -547,10 +572,11 @@ tqdm==4.66.5
     # via unstructured
 transformers==4.44.0
     # via unstructured-inference
-triton==3.0.0 ; python_version < '3.13' and platform_machine == 'x86_64' and platform_system == 'Linux'
+triton==3.0.0 ; python_full_version < '3.13' and platform_machine == 'x86_64' and platform_system == 'Linux'
     # via torch
 typing-extensions==4.12.2
     # via emoji
+    # via fastapi
     # via huggingface-hub
     # via iopath
     # via langchain-core
@@ -560,6 +586,7 @@ typing-extensions==4.12.2
     # via pydantic
     # via pydantic-core
     # via python-docx
+    # via python-oxmsg
     # via python-pptx
     # via sqlalchemy
     # via torch
@@ -584,9 +611,13 @@ unstructured-pytesseract==0.3.13
 urllib3==2.2.2
     # via requests
     # via unstructured-client
+uvicorn==0.32.0
+    # via megaparse
 wrapt==1.16.0
     # via deprecated
     # via llama-index-core
+    # via unstructured
+xlrd==2.0.1
     # via unstructured
 xlsxwriter==3.2.0
     # via python-pptx
