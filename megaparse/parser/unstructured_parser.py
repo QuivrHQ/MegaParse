@@ -1,23 +1,22 @@
 import asyncio
-from enum import Enum
 from unstructured.partition.auto import partition
 from dotenv import load_dotenv
 from megaparse.parser import MegaParser
+from langchain_core.language_models.chat_models import BaseChatModel
+from langchain_core.prompts import ChatPromptTemplate
+import re
+from langchain_openai import ChatOpenAI
+import os
 
-
-class StrategyEnum(str, Enum):
-    """Method to use for the conversion"""
-
-    FAST = "fast"
-    AUTO = "auto"
-    HI_RES = "hi_res"
+from megaparse.parser.type import StrategyEnum
 
 
 class UnstructuredParser(MegaParser):
     load_dotenv()
 
-    def __init__(self, strategy=StrategyEnum.AUTO):
+    def __init__(self, strategy=StrategyEnum.AUTO, model: BaseChatModel | None = None):
         self.strategy = strategy
+        self.model = model
 
     # Function to convert element category to markdown format
     def convert_to_markdown(self, elements):
@@ -28,61 +27,84 @@ class UnstructuredParser(MegaParser):
 
         return markdown_content
 
-    def get_markdown_line(self, el):
+    def get_markdown_line(self, el: dict):
         element_type = el["type"]
         text = el["text"]
         metadata = el["metadata"]
         parent_id = metadata.get("parent_id", None)
         category_depth = metadata.get("category_depth", 0)
+        table_stack = []
+
         if "emphasized_text_contents" in metadata:
             print(metadata["emphasized_text_contents"])
 
+        # Markdown line defaults to empty
         markdown_line = ""
 
-        if element_type == "Title":
-            if parent_id:
-                markdown_line = (
-                    f"## {text}\n\n"  # Adjusted to add sub headers if parent_id exists
-                )
-            else:
-                markdown_line = f"# {text}\n\n"
-        elif element_type == "Subtitle":
-            markdown_line = f"## {text}\n\n"
-        elif element_type == "Header":
-            markdown_line = f"{'#' * (category_depth + 1)} {text}\n\n"
-        elif element_type == "Footer":
-            markdown_line = f"#### {text}\n\n"
-        elif element_type == "NarrativeText":
-            markdown_line = f"{text}\n\n"
-        elif element_type == "ListItem":
-            markdown_line = f"- {text}\n"
-        elif element_type == "Table":
-            markdown_line = el["metadata"]["text_as_html"]
-        elif element_type == "PageBreak":
-            markdown_line = "---\n\n"
-        elif element_type == "Image":
-            markdown_line = f"![Image]({el['metadata'].get('image_path', '')})\n\n"
-        elif element_type == "Formula":
-            markdown_line = f"$$ {text} $$\n\n"
-        elif element_type == "FigureCaption":
-            markdown_line = f"**Figure:** {text}\n\n"
-        elif element_type == "Address":
-            markdown_line = f"**Address:** {text}\n\n"
-        elif element_type == "EmailAddress":
-            markdown_line = f"**Email:** {text}\n\n"
-        elif element_type == "CodeSnippet":
-            markdown_line = f"```{el['metadata'].get('language', '')}\n{text}\n```\n\n"
-        elif element_type == "PageNumber":
-            markdown_line = f"**Page {text}**\n\n"
-        else:
-            markdown_line = f"{text}\n\n"
+        # Element type-specific markdown content
+        markdown_types = {
+            "Title": f"## {text}\n\n" if parent_id else f"# {text}\n\n",
+            "Subtitle": f"## {text}\n\n",
+            "Header": f"{'#' * (category_depth + 1)} {text}\n\n",
+            "Footer": f"#### {text}\n\n",
+            "NarrativeText": f"{text}\n\n",
+            "ListItem": f"- {text}\n",
+            "Table": f"{text}\n\n",
+            "PageBreak": "---\n\n",
+            "Image": f"![Image]({el['metadata'].get('image_path', '')})\n\n",
+            "Formula": f"$$ {text} $$\n\n",
+            "FigureCaption": f"**Figure:** {text}\n\n",
+            "Address": f"**Address:** {text}\n\n",
+            "EmailAddress": f"**Email:** {text}\n\n",
+            "CodeSnippet": f"```{el['metadata'].get('language', '')}\n{text}\n```\n\n",
+            "PageNumber": "",  # Page number is not included in markdown
+        }
+
+        markdown_line = markdown_types.get(element_type, f"{text}\n\n")
+
+        if element_type == "Table" and self.model:
+            # FIXME: @Chloé - Add a modular table enhancement here - LVM
+            prompt = ChatPromptTemplate.from_messages(
+                [
+                    (
+                        "human",
+                        """You are an expert in markdown tables, match this text and this html table to fill a md table. You answer with just the table in pure markdown, nothing else.
+                        <TEXT> 
+                        {text} 
+                        </TEXT>
+                        <HTML>
+                        {html}
+                        </HTML>
+                        <PREVIOUS_TABLE>
+                        {previous_table}
+                        </PREVIOUS_TABLE>""",
+                    ),
+                ]
+            )
+            chain = prompt | self.model
+            result = chain.invoke(
+                {
+                    "text": el["text"],
+                    "html": metadata["text_as_html"],
+                    "previous_table": table_stack[-1] if table_stack else "",
+                }
+            )
+            content_str = (
+                str(result.content)
+                if not isinstance(result.content, str)
+                else result.content
+            )
+            cleaned_content = re.sub(r"^```.*$\n?", "", content_str, flags=re.MULTILINE)
+            markdown_line = f"[TABLE]\n{cleaned_content}\n[/TABLE]\n\n"
 
         return markdown_line
 
     async def convert(self, file_path, **kwargs) -> str:
         # Partition the PDF
         elements = partition(
-            filename=str(file_path), infer_table_structure=True, strategy=self.strategy
+            filename=str(file_path),
+            strategy=self.strategy,
+            skip_infer_table_types=[],
         )
         elements_dict = [el.to_dict() for el in elements]
         markdown_content = self.convert_to_markdown(elements_dict)
@@ -90,7 +112,8 @@ class UnstructuredParser(MegaParser):
 
 
 if __name__ == "__main__":
-    parser = UnstructuredParser()
+    model = ChatOpenAI(model="gpt-4o", api_key=os.getenv("OPENAI_API_KEY"))  # type: ignore
+    parser = UnstructuredParser(strategy=StrategyEnum.AUTO, model=model)
     response = asyncio.run(
         parser.convert(
             "/Users/chloed./Documents/quivr/MegaParse/tests/data/input_tests/MegaFake_report.pdf"
@@ -99,4 +122,4 @@ if __name__ == "__main__":
     print(response)
     # with open("megaparse/tests/output_tests/cdp.md", "w") as f:
     #     f.write(response)
-    # print("ok")
+    # print("ok"
