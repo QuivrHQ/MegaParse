@@ -6,6 +6,7 @@ authors = [
     { name = "Stan Girard", email = "stan@quivr.app" },
     { name = "Chloé Daems", email = "chloe@quivr.app" }
 ]
+
 readme = "README.md"
 dependencies = [
     "python-docx>=1.1.0",
@@ -31,8 +32,10 @@ dependencies = [
     "psutil>=6.1.0",
     "numpy<=2.0.0",
     "playwright>=1.47.0",
+    "langchain-anthropic>=0.2.3",
+    "python-magic>=0.4.27",
 ]
-python = "^3.11"
+requires-python = ">= 3.11"
 
 
 [build-system]
@@ -40,6 +43,7 @@ requires = ["hatchling"]
 build-backend = "hatchling.build"
 
 [tool.rye]
+python = "3.11.9"
 managed = true
 universal = true
 dev-dependencies = [

@@ -1,11 +1,16 @@
-from typing import IO
-from fastapi import FastAPI, UploadFile, File
-from megaparse import MegaParse
-from megaparse.unstructured_convertor import UnstructuredParser
+from fastapi import FastAPI, UploadFile, File, HTTPException
+from megaparse.main import MegaParse
+from megaparse.parser.type import ParserType
+from megaparse.parser.unstructured_parser import StrategyEnum, UnstructuredParser
+from megaparse.parser.llama import LlamaParser
+from megaparse.parser.megaparse_vision import MegaParseVision
 import psutil
 import os
-from fastapi import FastAPI, UploadFile, File, HTTPException
 from langchain_community.document_loaders import PlaywrightURLLoader
+
+from langchain_openai import ChatOpenAI
+from langchain_anthropic import ChatAnthropic
+from llama_parse.utils import Language
 
 
 app = FastAPI()
@@ -29,13 +34,47 @@ def _check_free_memory():
 
 
 @app.post("/file")
-def upload_file(file: UploadFile = File(...)):
-    parser = UnstructuredParser()
+async def upload_file(
+    file: UploadFile = File(...),
+    method: ParserType = ParserType.UNSTRUCTURED,
+    strategy: StrategyEnum = StrategyEnum.AUTO,
+    check_table=False,
+    language: Language = Language.ENGLISH,
+    parsing_instruction: str | None = None,
+    model_name: str = "gpt-4o",
+):
     _check_free_memory()
+    if "gpt" in model_name:
+        model = ChatOpenAI(model=model_name, api_key=os.getenv("OPENAI_API_KEY"))  # type: ignore
+    elif "claude" in model_name:
+        model = ChatAnthropic(
+            model_name=model_name,
+            api_key=os.getenv("ANTHROPIC_API_KEY"),  # type: ignore
+            timeout=60,
+            stop=None,
+        )
+
+    else:
+        raise HTTPException(
+            status_code=400, detail="Model not supported for MegaParse Vision"
+        )
+
+    parser_dict = {
+        "unstructured": UnstructuredParser(
+            strategy=strategy, model=model if check_table else None
+        ),
+        "llama_parser": LlamaParser(
+            api_key=str(os.getenv("LLAMA_CLOUD_API_KEY")),
+            language=language,  # type: ignore
+            parsing_instruction=parsing_instruction,
+        ),
+        "megaparse_vision": MegaParseVision(model=model),
+    }
 
     with open(file.filename, "wb") as f:  # type: ignore
         f.write(file.file.read())
-        result = parser.convert(file.filename, strategy="auto")
+        megaparse = MegaParse(parser=parser_dict[method])
+        result = await megaparse.aload(file_path=str(file.filename))
         os.remove(file.filename)  # type: ignore
         return {"message": "File uploaded successfully", "result": result}
 
