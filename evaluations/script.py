@@ -21,8 +21,8 @@ if __name__ == "__main__":
         "megaparse_vision": MegaParseVision(model=model),
     }
 
-    base_pdf_path = "tests/data/input_tests/MegaFake_report.pdf"
-    base_md_path = "tests/data/output_tests/MegaFake_report.md"
+    base_pdf_path = "tests/data/MegaFake_report.pdf"
+    base_md_path = "tests/data/grt_example/MegaFake_report.md"
     with open(base_md_path, "r", encoding="utf-8") as f:
         base_md = f.read()
 
