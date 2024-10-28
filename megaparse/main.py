@@ -231,7 +231,9 @@ from megaparse.checker.format_checker import FormatChecker
 
 class MegaParse:
     def __init__(
-        self, parser: MegaParser, format_checker: FormatChecker | None = None
+        self,
+        parser: MegaParser = UnstructuredParser(),
+        format_checker: FormatChecker | None = None,
     ) -> None:
         self.parser = parser
         self.format_checker = format_checker
