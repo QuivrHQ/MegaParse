@@ -92,14 +92,12 @@ megaparse.save("./test.md") #saves the last processed doc in md format
 
 _Higher the better_
 
-## Next Steps
+Note: Want to evaluate and compare your Megaparse module with ours ? Please add your config in ```evaluations/script.py``` and then run ```python evaluations/script.py```. If it is better, do a PR, I mean, let's go higher together 🚀.
 
-- [ ] Improve Table Parsing
-- [ ] Improve Image Parsing and description
-- [ ] Add TOC for Docx
-- [ ] Add Hyperlinks for Docx
-- [ ] Order Headers for Docx to Markdown
-- [X] Add Rye package manager 
+## In Construction 🚧
+- Improve table checker
+- Create Checkers to add **modular postprocessing** ⚙️
+- Add Structured output, **let's get computer talking** 🤖
 
 
 
