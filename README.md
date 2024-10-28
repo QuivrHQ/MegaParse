@@ -31,51 +31,66 @@ pip install megaparse
 
 ## Usage
 
-1. Add your OpenAI API key to the .env file
+1. Add your OpenAI or Anthropic API key to the .env file
 
 2. Install poppler on your computer (images and PDFs)
 
 3. Install tesseract on your computer (images and PDFs)
 
-```python
-from megaparse import MegaParse
+4. If you have a mac, you also need to install libmagic ```brew install libmagic```
 
-megaparse = MegaParse(file_path="./test.pdf")
-document = megaparse.load()
-print(document.page_content)
-megaparse.save_md(document.page_content, "./test.md")
+```python
+model = ChatOpenAI(model="gpt-4o", api_key=os.getenv("OPENAI_API_KEY"))  # or any langchain compatible Chat Models
+parser = UnstructuredParser(model=model)
+megaparse = MegaParse(parser)
+response = megaparse.load("./test.pdf")
+print(response)
+megaparse.save("./test.md") #saves the last processed doc in md format
 ```
+
+### Use MegaParse Vision
+
+* Change the parser to MegaParseVision
+
+```python
+
+model = ChatOpenAI(model="gpt-4o", api_key=os.getenv("OPENAI_API_KEY"))  # type: ignore
+parser = MegaParseVision(model=model)
+megaparse = MegaParse(parser)
+response = megaparse.load("./test.pdf")
+print(response)
+megaparse.save("./test.md")
+
+```
+**Note**: The model supported by MegaParse Vision are the multimodal ones such as claude 3.5, claude 4, gpt-4o and gpt-4.
 
 ### (Optional) Use LlamaParse for Improved Results
 
 1. Create an account on [Llama Cloud](https://cloud.llamaindex.ai/) and get your API key.
 
-2. Call Megaparse with the `llama_parse_api_key` parameter
+2. Change the parser to LlamaParser
 
 ```python
-from megaparse import MegaParse
-
-megaparse = MegaParse(file_path="./test.pdf", llama_parse_api_key="llx-your_api_key")
-document = megaparse.load()
-print(document.page_content)
+from parser.llama import LlamaParser
+parser = LlamaParser(api_key = os.getenv("LLAMA_CLOUD_API_KEY"))
+megaparse = MegaParse(parser)
+response = megaparse.load("./test.pdf")
+print(response)
+megaparse.save("./test.md") #saves the last processed doc in md format
 ```
 
 ## BenchMark
 
 <!---BENCHMARK-->
-
-| Parser                                   | Diff |
-| ---------------------------------------- | ---- |
-| LMM megaparse                            | 36   |
-| Megaparse with LLamaParse and GPTCleaner | 74   |
-| Megaparse with LLamaParse                | 97   |
-| Unstructured Augmented Parse             | 99   |
-| LLama Parse                              | 102  |
-| **Megaparse**                            | 105  |
-
+| Parser | similarity_ratio |
+|---|---|
+| megaparse_vision | 0.87 |
+| unstructured_with_check_table | 0.77 |
+| unstructured | 0.59 |
+| llama_parser | 0.33 |
 <!---END_BENCHMARK-->
 
-_Lower is better_
+_Higher the better_
 
 ## Next Steps
 

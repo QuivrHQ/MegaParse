@@ -22,7 +22,7 @@ class LlamaParser(MegaParser):
         if parsing_instruction:
             self.parsing_instruction = parsing_instruction
         else:
-            self.parsing_instructions = """Do not take into account the page breaks (no --- between pages), 
+            self.parsing_instruction = """Do not take into account the page breaks (no --- between pages), 
             do not repeat the header and the footer so the tables are merged if needed. Keep the same format for similar tables."""
 
     async def convert(self, file_path: str | Path, **kwargs) -> str:
