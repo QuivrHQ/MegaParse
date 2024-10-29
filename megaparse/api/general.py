@@ -1,9 +1,9 @@
 from fastapi import FastAPI, UploadFile, File, HTTPException
-from megaparse.main import MegaParse
-from megaparse.parser.type import ParserType
-from megaparse.parser.unstructured_parser import StrategyEnum, UnstructuredParser
-from megaparse.parser.llama import LlamaParser
-from megaparse.parser.megaparse_vision import MegaParseVision
+from megaparse.core.main import MegaParse
+from megaparse.core.parser.type import ParserType
+from megaparse.core.parser.unstructured_parser import StrategyEnum, UnstructuredParser
+from megaparse.core.parser.llama import LlamaParser
+from megaparse.core.parser.megaparse_vision import MegaParseVision
 import psutil
 import os
 from langchain_community.document_loaders import PlaywrightURLLoader
