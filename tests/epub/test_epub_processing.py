@@ -3,10 +3,10 @@ from uuid import uuid4
 
 import pytest
 
-from langchain_openai import ChatOpenAI
 from megaparse.parser.llama import LlamaParser
 from megaparse.parser.megaparse_vision import MegaParseVision
 from megaparse.main import MegaParse
+from langchain_core.language_models import FakeListChatModel
 
 
 @pytest.mark.asyncio
@@ -25,7 +25,7 @@ async def test_megaparse_epub_processor_fail():
     with pytest.raises(ValueError):
         await processor.aload(file_path=p)
 
-    parser = MegaParseVision(model=ChatOpenAI(model="gpt-4o", api_key=str(uuid4())))  # type: ignore
+    parser = MegaParseVision(model=FakeListChatModel(responses=["good"]))  # type: ignore
     processor = MegaParse(parser=parser)
     with pytest.raises(ValueError):
         await processor.aload(file_path=p)

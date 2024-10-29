@@ -22,4 +22,4 @@ class FormatChecker:
         self.model = model
 
     def check(self, elements: List[Element]):
-        return "ok"
+        raise NotImplementedError("Method not implemented yet")
