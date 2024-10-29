@@ -9,6 +9,8 @@ from megaparse.core.megaparse import MegaParse
 
 from langchain_core.language_models import FakeListChatModel
 
+from langchain_core.language_models import FakeListChatModel
+
 
 @pytest.mark.asyncio
 async def test_megaparse_xls_processor():

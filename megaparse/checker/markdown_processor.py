@@ -1,4 +1,4 @@
-# Dead Code - Not used in the project anymore
+# Code to clean markdown files - not used but to be refactored
 # import os
 # from collections import Counter
 # from typing import List, Tuple, Dict
