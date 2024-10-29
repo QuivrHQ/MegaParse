@@ -41,23 +41,26 @@ async def upload_file(
     check_table=False,
     language: Language = Language.ENGLISH,
     parsing_instruction: str | None = None,
-    model_name: str = "gpt-4o",
+    model_name: str | None = None,
 ):
     _check_free_memory()
-    if "gpt" in model_name:
-        model = ChatOpenAI(model=model_name, api_key=os.getenv("OPENAI_API_KEY"))  # type: ignore
-    elif "claude" in model_name:
-        model = ChatAnthropic(
-            model_name=model_name,
-            api_key=os.getenv("ANTHROPIC_API_KEY"),  # type: ignore
-            timeout=60,
-            stop=None,
-        )
 
-    else:
-        raise HTTPException(
-            status_code=400, detail="Model not supported for MegaParse Vision"
-        )
+    model = None
+    if model_name:
+        if "gpt" in model_name:
+            model = ChatOpenAI(model=model_name, api_key=os.getenv("OPENAI_API_KEY"))  # type: ignore
+        elif "claude" in model_name:
+            model = ChatAnthropic(
+                model_name=model_name,
+                api_key=os.getenv("ANTHROPIC_API_KEY"),  # type: ignore
+                timeout=60,
+                stop=None,
+            )
+
+        else:
+            raise HTTPException(
+                status_code=400, detail="Model not supported for MegaParse Vision"
+            )
 
     parser_dict = {
         "unstructured": UnstructuredParser(
