@@ -1,22 +1,25 @@
-from sdk import MegaParseSDK
+from megaparse.sdk import MegaParseSDK
+import asyncio
 
-if __name__ == "__main__":
+
+async def main():
     api_key = "your_api_key_here"  # Replace with actual API key
     megaparse = MegaParseSDK(api_key)
 
+    # # Upload a URL
+    # url_response = megaparse.url.upload("https://www.quivr.com")
+    # print(url_response)
+
     # Upload a file
-    response = megaparse.file.upload(
-        file_path="sample.pdf",
-        method="unstructured",
+    response = await megaparse.file.upload(
+        file_path="megaparse/sdk/pdf/MegaFake_report.pdf",
+        method="unstructured",  # type: ignore  # unstructured, llama_parser, megaparse_vision
         strategy="auto",
-        language="english",
-        model_name="gpt-4o",
     )
+
     print(response)
+    await megaparse.close()
 
-    # Upload a URL
-    url_response = megaparse.url.upload("https://example.com")
-    print(url_response)
 
-    # Close the client session when done
-    megaparse.close()
+if __name__ == "__main__":
+    asyncio.run(main())
