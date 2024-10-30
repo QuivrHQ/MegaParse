@@ -3,10 +3,10 @@ import os
 from pathlib import Path
 from langchain_openai import ChatOpenAI
 
-from megaparse.parser.unstructured_parser import UnstructuredParser
+from megaparse.core.parser.unstructured_parser import UnstructuredParser
 
-from megaparse.parser import MegaParser
-from megaparse.checker.format_checker import FormatChecker
+from megaparse.core.parser import MegaParser
+from megaparse.core.checker.format_checker import FormatChecker
 
 
 class MegaParse:

@@ -75,7 +75,7 @@ async def upload_file(
         f.write(file.file.read())
         megaparse = MegaParse(parser=parser_dict[method])
         result = await megaparse.aload(file_path=str(file.filename))
-        os.remove(file.filename)  # type: ignore
+        # os.remove(file.filename)  # type: ignore
         return {"message": "File uploaded successfully", "result": result}
 
 
@@ -94,8 +94,8 @@ async def upload_url(url: str):
 
         with tempfile.NamedTemporaryFile(delete=False, suffix=".pdf") as temp_file:
             temp_file.write(response.content)
-            parser = UnstructuredParser()
-            result = parser.convert(temp_file.name, strategy="auto")
+            megaparse = MegaParse(parser=UnstructuredParser(strategy=StrategyEnum.AUTO))
+            result = await megaparse.aload(temp_file.name)
             return result
     else:
         data = await loader.aload()

@@ -1,20 +1,19 @@
 from typing import Optional
 from httpx import Response
-from .client import MegaParseClient
-from megaparse.parser.type import ParserType
+from megaparse.sdk.src.client import MegaParseClient
+from megaparse.core.parser.type import ParserType, StrategyEnum
 from llama_parse.utils import Language
-import asyncio
 
 
 class FileUpload:
     def __init__(self, client: MegaParseClient):
         self.client = client
 
-    async def aupload(
+    async def upload(
         self,
         file_path: str,
         method: ParserType = ParserType.UNSTRUCTURED,
-        strategy: str = "AUTO",
+        strategy: str = StrategyEnum.AUTO,
         check_table: bool = False,
         language: Language = Language.ENGLISH,
         parsing_instruction: Optional[str] = None,
@@ -31,26 +30,3 @@ class FileUpload:
                 "model_name": model_name,
             }
             return await self.client.request("POST", "/file", files=files, data=data)
-
-    def upload(
-        self,
-        file_path: str,
-        method: ParserType = ParserType.UNSTRUCTURED,
-        strategy: str = "AUTO",
-        check_table: bool = False,
-        language: Language = Language.ENGLISH,
-        parsing_instruction: Optional[str] = None,
-        model_name: str = "gpt-4o",
-    ) -> Response:
-        """Synchronous wrapper for file upload using asyncio.run."""
-        return asyncio.run(
-            self.aupload(
-                file_path,
-                method=method,
-                strategy=strategy,
-                check_table=check_table,
-                language=language,
-                parsing_instruction=parsing_instruction,
-                model_name=model_name,
-            )
-        )
