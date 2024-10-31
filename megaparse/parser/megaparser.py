@@ -1,7 +1,8 @@
+from abc import ABC
 from pathlib import Path
 
 
-class MegaParser:
+class MegaParser(ABC):
     """Mother Class for all the parsers [Unstructured, LlamaParse, MegaParseVision]"""
 
     async def convert(self, file_path: str | Path, **kwargs) -> str:

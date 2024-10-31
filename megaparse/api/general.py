@@ -1,4 +1,6 @@
+import tempfile
 from fastapi import FastAPI, UploadFile, File, HTTPException
+from megaparse.api.utils.type import HTTPModelNotSupported, parser_dict
 from megaparse.main import MegaParse
 from megaparse.parser.type import ParserType
 from megaparse.parser.unstructured_parser import StrategyEnum, UnstructuredParser
@@ -11,30 +13,28 @@ from langchain_community.document_loaders import PlaywrightURLLoader
 from langchain_openai import ChatOpenAI
 from langchain_anthropic import ChatAnthropic
 from llama_parse.utils import Language
-
+import httpx
 
 app = FastAPI()
 
 
-@app.get("/")
-def read_root():
+@app.get("/healthz")
+def healthz():
     return {"message": "Hello World"}
 
 
-def _check_free_memory():
+def _check_free_memory() -> bool:
     """Reject traffic when free memory is below minimum (default 2GB)."""
     mem = psutil.virtual_memory()
     memory_free_minimum = int(os.environ.get("MEMORY_FREE_MINIMUM_MB", 2048))
 
     if mem.available <= memory_free_minimum * 1024 * 1024:
-        raise HTTPException(
-            status_code=503,
-            detail="Server is under heavy load. Please try again later.",
-        )
+        return False
+    return True
 
 
-@app.post("/file")
-async def upload_file(
+@app.post("v1/file")
+async def parse_file(
     file: UploadFile = File(...),
     method: ParserType = ParserType.UNSTRUCTURED,
     strategy: StrategyEnum = StrategyEnum.AUTO,
@@ -42,9 +42,11 @@ async def upload_file(
     language: Language = Language.ENGLISH,
     parsing_instruction: str | None = None,
     model_name: str | None = None,
-):
-    _check_free_memory()
-
+) -> dict[str, str]:
+    if not _check_free_memory():
+        raise HTTPException(
+            status_code=503, detail="Service unavailable due to low memory"
+        )
     model = None
     if model_name:
         if "gpt" in model_name:
@@ -58,52 +60,43 @@ async def upload_file(
             )
 
         else:
-            raise HTTPException(
-                status_code=400, detail="Model not supported for MegaParse Vision"
-            )
+            raise HTTPModelNotSupported()
 
-    parser_dict = {
-        "unstructured": UnstructuredParser(
-            strategy=strategy, model=model if check_table else None
-        ),
-        "llama_parser": LlamaParser(
-            api_key=str(os.getenv("LLAMA_CLOUD_API_KEY")),
-            language=language,  # type: ignore
-            parsing_instruction=parsing_instruction,
-        ),
-        "megaparse_vision": MegaParseVision(model=model),
-    }
+    parser = parser_dict[method](
+        strategy=strategy,
+        model=model if model and check_table else None,
+        language=language,
+        parsing_instruction=parsing_instruction,
+    )
 
-    with open(file.filename, "wb") as f:  # type: ignore
-        f.write(file.file.read())
-        megaparse = MegaParse(parser=parser_dict[method])
-        result = await megaparse.aload(file_path=str(file.filename))
-        os.remove(file.filename)  # type: ignore
+    with tempfile.NamedTemporaryFile(delete=False) as temp_file:
+        temp_file.write(file.file.read())
+        megaparse = MegaParse(parser=parser)
+        result = await megaparse.aload(file_path=temp_file.name)
         return {"message": "File uploaded successfully", "result": result}
 
 
 @app.post("/url")
-async def upload_url(url: str):
+async def upload_url(url: str) -> dict[str, str]:
     loader = PlaywrightURLLoader(urls=[url], remove_selectors=["header", "footer"])
 
     if url.endswith(".pdf"):
         ## Download the file
-        import requests
-        import tempfile
 
-        response = requests.get(url)
+        async with httpx.AsyncClient() as client:
+            response = await client.get(url)
         if response.status_code != 200:
             raise HTTPException(status_code=400, detail="Failed to download the file")
 
         with tempfile.NamedTemporaryFile(delete=False, suffix=".pdf") as temp_file:
             temp_file.write(response.content)
-            parser = UnstructuredParser()
-            result = parser.convert(temp_file.name, strategy="auto")
-            return result
+            megaparse = MegaParse(parser=UnstructuredParser(strategy=StrategyEnum.AUTO))
+            result = megaparse.load(temp_file.name)
+            return {"message": "File uploaded successfully", "result": result}
     else:
         data = await loader.aload()
         # Now turn the data into a string
         extracted_content = ""
         for page in data:
             extracted_content += page.page_content
-        return extracted_content
+        return {"message": "File uploaded successfully", "result": extracted_content}

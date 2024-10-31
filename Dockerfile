@@ -19,13 +19,13 @@ RUN apt-get clean && apt-get update && apt-get install -y \
     python-dev \
     build-essential \
     wget \
+    gcc \
     # Additional dependencies for document handling
     libmagic-dev \
     poppler-utils \
     tesseract-ocr \
     libreoffice \
     libpq-dev \
-    gcc \
     libhdf5-serial-dev \
     pandoc && \
     rm -rf /var/lib/apt/lists/* && apt-get clean
