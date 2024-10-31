@@ -3,6 +3,7 @@ import os
 from pathlib import Path
 from langchain_openai import ChatOpenAI
 
+from megaparse.api.utils.type import FileExtension
 from megaparse.parser.unstructured_parser import UnstructuredParser
 
 from megaparse.parser import MegaParser
@@ -23,6 +24,9 @@ class MegaParse:
         if isinstance(file_path, str):
             file_path = Path(file_path)
         file_extension: str = file_path.suffix
+        assert FileExtension(
+            file_extension
+        ), f"Unsupported file extension: {file_extension}"
 
         if file_extension != ".pdf":
             if self.format_checker:
@@ -31,7 +35,7 @@ class MegaParse:
                 )
             if not isinstance(self.parser, UnstructuredParser):
                 raise ValueError(
-                    f"Parser {self.parser}: Unsupported file extension: {file_extension}"
+                    f" Unsupported file extension : Parser {self.parser} do not support {file_extension}"
                 )
 
         try:

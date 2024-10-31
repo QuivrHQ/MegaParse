@@ -3,7 +3,6 @@ from fastapi import HTTPException, status
 
 from megaparse.parser.llama import LlamaParser
 from megaparse.parser.megaparse_vision import MegaParseVision
-from megaparse.parser.megaparser import MegaParser
 from megaparse.parser.unstructured_parser import UnstructuredParser
 
 
@@ -45,3 +44,24 @@ class MarkDownType(str, Enum):
     PAGE_NUMBER = "PageNumber"
     DEFAULT = "Default"
     UNDEFINED = "Undefined"
+
+
+class FileExtension(str, Enum):
+    """Supported file extension enumeration."""
+
+    PDF = ".pdf"
+    DOCX = ".docx"
+    DOC = ".doc"
+    TXT = ".txt"
+    OTF = ".odt"
+    EPUB = ".epub"
+    HTML = ".html"
+    XML = ".xml"
+    CSV = ".csv"
+    XLSX = ".xlsx"
+    XLS = ".xls"
+    PPTX = ".pptx"
+    PPT = ".ppt"
+    JSON = ".json"
+    MD = ".md"
+    MARKDOWN = ".markdown"
