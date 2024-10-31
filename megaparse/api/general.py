@@ -82,7 +82,7 @@ async def parse_file(
         return {"message": "File parsed successfully", "result": result}
 
 
-@app.post("/url")
+@app.post("v1/url")
 async def upload_url(
     url: str, playwright_loader=Depends(get_playwright_loader)
 ) -> dict[str, str]:
