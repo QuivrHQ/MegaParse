@@ -22,6 +22,8 @@ jobs:
     name: Deploy
     runs-on: ubuntu-latest
     environment: production
+    outputs:
+      imageoutput: ${{ steps.build-image.outputs.imageoutput }}
 
     steps:
     - name: Checkout
@@ -51,7 +53,7 @@ jobs:
         # be deployed to ECS.
         docker build -t $ECR_REGISTRY/$ECR_REPOSITORY:$IMAGE_TAG .
         docker push $ECR_REGISTRY/$ECR_REPOSITORY:$IMAGE_TAG
-        echo "image=$ECR_REGISTRY/$ECR_REPOSITORY:$IMAGE_TAG" >> $GITHUB_OUTPUT
+        echo "imageoutput=$ECR_REGISTRY/$ECR_REPOSITORY:$IMAGE_TAG" >> $GITHUB_OUTPUT
 
   deploy-ecs:
     name: Deploy ECS Task
@@ -74,7 +76,7 @@ jobs:
       with:
         task-definition: ${{ env.ECS_TASK_DEFINITION }}
         container-name: ${{ env.CONTAINER_NAME }}
-        image: ${{ needs.deploy.outputs['build-image'].image }}
+        image: ${{ needs.deploy.outputs['build-image'].imageoutput }}
 
     - name: Deploy Amazon ECS task definition
       uses: aws-actions/amazon-ecs-deploy-task-definition@v1
