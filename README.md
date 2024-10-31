@@ -39,6 +39,7 @@ pip install megaparse
 
 4. If you have a mac, you also need to install libmagic ```brew install libmagic```
 
+
 ```python
 model = ChatOpenAI(model="gpt-4o", api_key=os.getenv("OPENAI_API_KEY"))  # or any langchain compatible Chat Models
 parser = UnstructuredParser(model=model)
@@ -78,6 +79,13 @@ response = megaparse.load("./test.pdf")
 print(response)
 megaparse.save("./test.md") #saves the last processed doc in md format
 ```
+
+## Use as an API
+There is a MakeFile for you, simply use :
+```make dev```
+at the root of the project and you are good to go.
+
+See localhost:8000/docs for more info on the different endpoints !
 
 ## BenchMark
 
