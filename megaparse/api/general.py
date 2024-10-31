@@ -1,5 +1,5 @@
 import tempfile
-from fastapi import FastAPI, UploadFile, File, HTTPException
+from fastapi import Depends, FastAPI, UploadFile, File, HTTPException
 from megaparse.api.utils.type import HTTPModelNotSupported, parser_dict
 from megaparse.main import MegaParse
 from megaparse.parser.type import ParserType
@@ -88,7 +88,7 @@ async def upload_url(url: str) -> dict[str, str]:
         if response.status_code != 200:
             raise HTTPException(status_code=400, detail="Failed to download the file")
 
-        with tempfile.NamedTemporaryFile(delete=False, suffix=".pdf") as temp_file:
+        with tempfile.NamedTemporaryFile(delete=False, suffix=".html") as temp_file:
             temp_file.write(response.content)
             megaparse = MegaParse(parser=UnstructuredParser(strategy=StrategyEnum.AUTO))
             result = megaparse.load(temp_file.name)
