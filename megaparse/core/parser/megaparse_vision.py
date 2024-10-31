@@ -8,6 +8,10 @@ import base64
 from pdf2image import convert_from_path
 import asyncio
 import re
+from langchain_core.language_models.chat_models import BaseChatModel
+
+from megaparse.core.parser import MegaParser
+import os
 
 # BASE_OCR_PROMPT = """
 # Transcribe the content of this file into markdown. Be mindful of the formatting.
@@ -48,13 +52,6 @@ Follow these instructions to complete the task:
 """
 
 
-class ModelEnum(str, Enum):
-    """Model to use for the conversion"""
-
-    CLAUDE = "claude-3.5"
-    GPT4O = "gpt-4o"
-
-
 class TagEnum(str, Enum):
     """Possible tags for the elements in the file"""
 
@@ -64,14 +61,22 @@ class TagEnum(str, Enum):
     IMAGE = "IMAGE"
 
 
-class MegaParseVision:
-    def __init__(self, model: ModelEnum = ModelEnum.GPT4O):
-        if model == ModelEnum.GPT4O:
-            self.model = ChatOpenAI(model="gpt-4o")
-        elif model == ModelEnum.CLAUDE:
-            raise NotImplementedError("Claude support not yet implemented")
-        else:
-            raise ValueError(f"Model {model} not supported")
+class MegaParseVision(MegaParser):
+    def __init__(self, model: BaseChatModel):
+        if hasattr(model, "model_name"):
+            assert (
+                model.model_name  # type: ignore
+                in [
+                    "gpt-4o",
+                    "gpt-4o-turbo",
+                    "claude-3-5-sonnet-20241022",
+                    "claude-3-5-sonnet-latest",
+                    "claude-3-opus-20240229",
+                    "claude-3-opus-latest",
+                ]
+            ), "Invald model name, MegaParse vision only supports model that have vision capabilities such as gpt-4, gpt-4o and claude-3.5"
+
+        self.model = model
 
         self.parsed_chunks: list[str] | None = None
 
@@ -126,7 +131,9 @@ class MegaParseVision:
         response = await self.model.ainvoke([message])
         return str(response.content)
 
-    async def parse(self, file_path: str | Path, batch_size: int = 3) -> str:
+    async def convert(
+        self, file_path: str | Path, batch_size: int = 3, **kwargs
+    ) -> str:
         """
         Parse a PDF file and process its content using the language model.
 
@@ -183,12 +190,3 @@ class MegaParseVision:
         cleaned_content = cleaned_content.strip()
 
         return cleaned_content
-
-
-if __name__ == "__main__":
-    parser = MegaParseVision()
-    responses = asyncio.run(
-        parser.parse("megaparse/tests/input_tests/MegaFake_report.pdf")
-    )
-    print(responses)
-    print("Done!")

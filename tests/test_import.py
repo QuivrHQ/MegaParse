@@ -1,10 +1,13 @@
 import pytest
 
-from megaparse.Converter import MegaParse
+from megaparse.core.megaparse import MegaParse
+from megaparse.core.parser.unstructured_parser import UnstructuredParser
 
 
 @pytest.mark.skip("slow test")
 def test_load():
-    megaparse = MegaParse(file_path="./tests/data/dummy.pdf")
-    element = megaparse.load()
-    assert element.page_content.strip("\n") == "# Dummy PDF download"
+    parser = UnstructuredParser(model=None)
+    megaparse = MegaParse(parser)
+    response = megaparse.load("./tests/data/files/dummy.pdf")
+    print(response)
+    assert response.strip("\n") == "# Dummy PDF download"
