@@ -5,7 +5,7 @@ from typing import List
 from llama_index.core.schema import Document as LlamaDocument
 from llama_parse import LlamaParse as _LlamaParse
 from llama_parse.utils import Language, ResultType
-from megaparse.parser import MegaParser
+from megaparse.core.parser import MegaParser
 
 
 class LlamaParser(MegaParser):

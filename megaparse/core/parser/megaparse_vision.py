@@ -10,7 +10,7 @@ import asyncio
 import re
 from langchain_core.language_models.chat_models import BaseChatModel
 
-from megaparse.parser import MegaParser
+from megaparse.core.parser import MegaParser
 import os
 
 # BASE_OCR_PROMPT = """
@@ -190,13 +190,3 @@ class MegaParseVision(MegaParser):
         cleaned_content = cleaned_content.strip()
 
         return cleaned_content
-
-
-if __name__ == "__main__":
-    model = ChatOpenAI(model="gpt-4o", api_key=os.getenv("OPENAI_API_KEY"))  # type: ignore
-    parser = MegaParseVision(model=model)
-    responses = asyncio.run(
-        parser.convert("tests/data/input_tests/MegaFake_report.pdf")
-    )
-    print(responses)
-    print("Done!")

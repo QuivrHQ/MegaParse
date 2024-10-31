@@ -1,14 +1,14 @@
 import asyncio
 from unstructured.partition.auto import partition
 from dotenv import load_dotenv
-from megaparse.parser import MegaParser
+from megaparse.core.parser import MegaParser
 from langchain_core.language_models.chat_models import BaseChatModel
 from langchain_core.prompts import ChatPromptTemplate
 import re
 from langchain_openai import ChatOpenAI
 import os
 
-from megaparse.parser.type import StrategyEnum
+from megaparse.core.parser.type import StrategyEnum
 
 
 class UnstructuredParser(MegaParser):
@@ -109,17 +109,3 @@ class UnstructuredParser(MegaParser):
         elements_dict = [el.to_dict() for el in elements]
         markdown_content = self.convert_to_markdown(elements_dict)
         return markdown_content
-
-
-if __name__ == "__main__":
-    model = ChatOpenAI(model="gpt-4o", api_key=os.getenv("OPENAI_API_KEY"))  # type: ignore
-    parser = UnstructuredParser(strategy=StrategyEnum.AUTO, model=model)
-    response = asyncio.run(
-        parser.convert(
-            "/Users/chloed./Documents/quivr/MegaParse/tests/data/input_tests/MegaFake_report.pdf"
-        )
-    )
-    print(response)
-    # with open("megaparse/tests/output_tests/cdp.md", "w") as f:
-    #     f.write(response)
-    # print("ok"

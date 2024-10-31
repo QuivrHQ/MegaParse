@@ -3,9 +3,9 @@ from uuid import uuid4
 
 import pytest
 
-from megaparse.parser.llama import LlamaParser
-from megaparse.parser.megaparse_vision import MegaParseVision
-from megaparse.main import MegaParse
+from megaparse.core.parser.llama import LlamaParser
+from megaparse.core.parser.megaparse_vision import MegaParseVision
+from megaparse.core.megaparse import MegaParse
 from langchain_core.language_models import FakeListChatModel
 
 

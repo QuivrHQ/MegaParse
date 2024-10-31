@@ -1,9 +1,9 @@
 from langchain_openai import ChatOpenAI
-from megaparse.parser.llama import LlamaParser
-from megaparse.parser.type import StrategyEnum
-from megaparse.parser.unstructured_parser import UnstructuredParser
-from megaparse.parser.megaparse_vision import MegaParseVision
-from megaparse.main import MegaParse
+from megaparse.core.parser.llama import LlamaParser
+from megaparse.core.parser.type import StrategyEnum
+from megaparse.core.parser.unstructured_parser import UnstructuredParser
+from megaparse.core.parser.megaparse_vision import MegaParseVision
+from megaparse.core.megaparse import MegaParse
 import os
 import difflib
 

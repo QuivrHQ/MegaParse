@@ -1,7 +1,7 @@
 import pytest
 
-from megaparse.main import MegaParse
-from megaparse.parser.unstructured_parser import UnstructuredParser
+from megaparse.core.megaparse import MegaParse
+from megaparse.core.parser.unstructured_parser import UnstructuredParser
 
 
 @pytest.mark.skip("slow test")

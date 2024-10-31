@@ -1,9 +1,9 @@
 from enum import Enum
 from fastapi import HTTPException, status
 
-from megaparse.parser.llama import LlamaParser
-from megaparse.parser.megaparse_vision import MegaParseVision
-from megaparse.parser.unstructured_parser import UnstructuredParser
+from megaparse.core.parser.llama import LlamaParser
+from megaparse.core.parser.megaparse_vision import MegaParseVision
+from megaparse.core.parser.unstructured_parser import UnstructuredParser
 
 
 class HTTPModelNotSupported(HTTPException):

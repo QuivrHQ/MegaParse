@@ -1,11 +1,9 @@
 import tempfile
 from fastapi import Depends, FastAPI, UploadFile, File, HTTPException
 from megaparse.api.utils.type import HTTPModelNotSupported, parser_dict
-from megaparse.main import MegaParse
-from megaparse.parser.type import ParserType
-from megaparse.parser.unstructured_parser import StrategyEnum, UnstructuredParser
-from megaparse.parser.llama import LlamaParser
-from megaparse.parser.megaparse_vision import MegaParseVision
+from megaparse.core.megaparse import MegaParse
+from megaparse.core.parser.type import ParserType
+from megaparse.core.parser.unstructured_parser import StrategyEnum, UnstructuredParser
 import psutil
 import os
 from langchain_community.document_loaders import PlaywrightURLLoader
@@ -26,7 +24,7 @@ def get_playwright_loader():
 
 @app.get("/healthz")
 def healthz():
-    return {"message": "Hello World"}
+    return {"status": "ok"}
 
 
 def _check_free_memory() -> bool:
@@ -39,7 +37,7 @@ def _check_free_memory() -> bool:
     return True
 
 
-@app.post("v1/file")
+@app.post("/v1/file")
 async def parse_file(
     file: UploadFile = File(...),
     method: ParserType = ParserType.UNSTRUCTURED,
@@ -55,9 +53,9 @@ async def parse_file(
         )
     model = None
     if model_name:
-        if "gpt" in model_name:
+        if model_name.startswith("gpt"):
             model = ChatOpenAI(model=model_name, api_key=os.getenv("OPENAI_API_KEY"))  # type: ignore
-        elif "claude" in model_name:
+        elif model_name.startswith("claude"):
             model = ChatAnthropic(
                 model_name=model_name,
                 api_key=os.getenv("ANTHROPIC_API_KEY"),  # type: ignore
@@ -82,7 +80,7 @@ async def parse_file(
         return {"message": "File parsed successfully", "result": result}
 
 
-@app.post("v1/url")
+@app.post("/v1/url")
 async def upload_url(
     url: str, playwright_loader=Depends(get_playwright_loader)
 ) -> dict[str, str]:

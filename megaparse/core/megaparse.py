@@ -4,10 +4,10 @@ from pathlib import Path
 from langchain_openai import ChatOpenAI
 
 from megaparse.api.utils.type import FileExtension
-from megaparse.parser.unstructured_parser import UnstructuredParser
+from megaparse.core.parser.unstructured_parser import UnstructuredParser
 
-from megaparse.parser import MegaParser
-from megaparse.checker.format_checker import FormatChecker
+from megaparse.core.parser import MegaParser
+from megaparse.core.checker.format_checker import FormatChecker
 
 
 class MegaParse:
@@ -86,12 +86,3 @@ class MegaParse:
         os.makedirs(os.path.dirname(file_path), exist_ok=True)
         with open(file_path, "w+") as f:
             f.write(self.last_parsed_document)
-
-
-if __name__ == "__main__":
-    model = ChatOpenAI(model="gpt-4o", api_key=os.getenv("OPENAI_API_KEY"))  # type: ignore
-    parser = UnstructuredParser(model=model)
-    megaparse = MegaParse(parser)
-    response = megaparse.load("./tests/data/input_tests/MegaFake_report.pdf")
-    print(response)
-    # megaparse.save("megaparse/tests/output_tests/cdp.md")

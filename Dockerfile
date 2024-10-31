@@ -26,7 +26,6 @@ RUN apt-get clean && apt-get update && apt-get install -y \
     tesseract-ocr \
     libreoffice \
     libpq-dev \
-    libhdf5-serial-dev \
     pandoc && \
     rm -rf /var/lib/apt/lists/* && apt-get clean
 
@@ -45,4 +44,4 @@ ENV PYTHONPATH=/app
 COPY . .
 EXPOSE 8000
 
-CMD ["uvicorn", "megaparse.api.general:app", "--host", "0.0.0.0", "--port", "8000"]
+CMD ["uvicorn", "megaparse.api.app:app", "--host", "0.0.0.0", "--port", "8000"]
