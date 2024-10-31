@@ -17,6 +17,12 @@ import httpx
 
 app = FastAPI()
 
+playwright_loader = PlaywrightURLLoader(urls=[], remove_selectors=["header", "footer"])
+
+
+def get_playwright_loader():
+    return playwright_loader
+
 
 @app.get("/healthz")
 def healthz():
@@ -73,12 +79,14 @@ async def parse_file(
         temp_file.write(file.file.read())
         megaparse = MegaParse(parser=parser)
         result = await megaparse.aload(file_path=temp_file.name)
-        return {"message": "File uploaded successfully", "result": result}
+        return {"message": "File parsed successfully", "result": result}
 
 
 @app.post("/url")
-async def upload_url(url: str) -> dict[str, str]:
-    loader = PlaywrightURLLoader(urls=[url], remove_selectors=["header", "footer"])
+async def upload_url(
+    url: str, playwright_loader=Depends(get_playwright_loader)
+) -> dict[str, str]:
+    playwright_loader.urls = [url]
 
     if url.endswith(".pdf"):
         ## Download the file
@@ -88,15 +96,23 @@ async def upload_url(url: str) -> dict[str, str]:
         if response.status_code != 200:
             raise HTTPException(status_code=400, detail="Failed to download the file")
 
-        with tempfile.NamedTemporaryFile(delete=False, suffix=".html") as temp_file:
+        with tempfile.NamedTemporaryFile(delete=False, suffix="pdf") as temp_file:
             temp_file.write(response.content)
             megaparse = MegaParse(parser=UnstructuredParser(strategy=StrategyEnum.AUTO))
             result = megaparse.load(temp_file.name)
-            return {"message": "File uploaded successfully", "result": result}
+            return {"message": "File parsed successfully", "result": result}
     else:
-        data = await loader.aload()
+        data = await playwright_loader.aload()
         # Now turn the data into a string
         extracted_content = ""
         for page in data:
             extracted_content += page.page_content
-        return {"message": "File uploaded successfully", "result": extracted_content}
+        if not extracted_content:
+            raise HTTPException(
+                status_code=400,
+                detail="Failed to extract content from the website, have you provided the correct and entire URL?",
+            )
+        return {
+            "message": "Website content parsed successfully",
+            "result": extracted_content,
+        }
