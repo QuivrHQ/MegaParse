@@ -31,7 +31,6 @@ class LlamaParser(MegaParser):
             result_type=ResultType.MD,
             gpt4o_mode=True,
             verbose=self.verbose,
-            language=self.language,
             parsing_instruction=self.parsing_instruction,
         )
 

@@ -69,7 +69,6 @@ async def parse_file(
     parser = parser_dict[method](
         strategy=strategy,
         model=model if model and check_table else None,
-        language=language,
         parsing_instruction=parsing_instruction,
     )
 
