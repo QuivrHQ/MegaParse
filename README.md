@@ -41,6 +41,10 @@ pip install megaparse
 
 
 ```python
+from megaparse.core.megaparse import MegaParse
+from langchain_openai import ChatOpenAI
+from megaparse.core.parser.unstructured_parser import UnstructuredParser
+
 model = ChatOpenAI(model="gpt-4o", api_key=os.getenv("OPENAI_API_KEY"))  # or any langchain compatible Chat Models
 parser = UnstructuredParser(model=model)
 megaparse = MegaParse(parser)
@@ -54,6 +58,9 @@ megaparse.save("./test.md") #saves the last processed doc in md format
 * Change the parser to MegaParseVision
 
 ```python
+from megaparse.core.megaparse import MegaParse
+from langchain_openai import ChatOpenAI
+from megaparse.core.parser.megaparse_vision import MegaParseVision
 
 model = ChatOpenAI(model="gpt-4o", api_key=os.getenv("OPENAI_API_KEY"))  # type: ignore
 parser = MegaParseVision(model=model)
@@ -72,7 +79,10 @@ megaparse.save("./test.md")
 2. Change the parser to LlamaParser
 
 ```python
-from parser.llama import LlamaParser
+from megaparse.core.megaparse import MegaParse
+from langchain_openai import ChatOpenAI
+from megaparse.core.parser.llama import LlamaParser
+
 parser = LlamaParser(api_key = os.getenv("LLAMA_CLOUD_API_KEY"))
 megaparse = MegaParse(parser)
 response = megaparse.load("./test.pdf")
