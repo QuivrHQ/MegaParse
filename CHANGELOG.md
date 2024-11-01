@@ -1,5 +1,17 @@
 # Changelog
 
+## [0.0.32](https://github.com/QuivrHQ/MegaParse/compare/megaparse-v0.0.31...megaparse-v0.0.32) (2024-11-01)
+
+
+### Features
+
+* **api:** megaparse under api ([#93](https://github.com/QuivrHQ/MegaParse/issues/93)) ([2edf44b](https://github.com/QuivrHQ/MegaParse/commit/2edf44bd8c09ac7127db74206e463ebe29c68998))
+
+
+### Bug Fixes
+
+* api call error & tests ([#98](https://github.com/QuivrHQ/MegaParse/issues/98)) ([6bf1ce8](https://github.com/QuivrHQ/MegaParse/commit/6bf1ce8c6ed0e4f1e81577973a0fc71f61b10776))
+
 ## [0.0.31](https://github.com/QuivrHQ/MegaParse/compare/megaparse-v0.0.30...megaparse-v0.0.31) (2024-08-20)
 
 
