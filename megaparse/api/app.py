@@ -1,8 +1,9 @@
 import tempfile
 from fastapi import Depends, FastAPI, UploadFile, File, HTTPException
-from megaparse.api.utils.type import HTTPModelNotSupported, parser_dict
+from megaparse.api.utils.type import HTTPModelNotSupported
 from megaparse.core.megaparse import MegaParse
-from megaparse.core.parser.type import ParserType
+from megaparse.core.parser.builder import ParserBuilder
+from megaparse.core.parser.type import ParserConfig, ParserType
 from megaparse.core.parser.unstructured_parser import StrategyEnum, UnstructuredParser
 import psutil
 import os
@@ -16,6 +17,10 @@ import httpx
 app = FastAPI()
 
 playwright_loader = PlaywrightURLLoader(urls=[], remove_selectors=["header", "footer"])
+
+
+def parser_builder_dep():
+    return ParserBuilder()
 
 
 def get_playwright_loader():
@@ -46,6 +51,7 @@ async def parse_file(
     language: Language = Language.ENGLISH,
     parsing_instruction: str | None = None,
     model_name: str | None = None,
+    parser_builder=Depends(parser_builder_dep),
 ) -> dict[str, str]:
     if not _check_free_memory():
         raise HTTPException(
@@ -66,14 +72,18 @@ async def parse_file(
         else:
             raise HTTPModelNotSupported()
 
-    parser = parser_dict[method](
+    parser_config = ParserConfig(
+        method=method,
         strategy=strategy,
         model=model if model and check_table else None,
         language=language,
         parsing_instruction=parsing_instruction,
     )
 
-    with tempfile.NamedTemporaryFile(delete=False) as temp_file:
+    parser = parser_builder.build(parser_config)
+    with tempfile.NamedTemporaryFile(
+        delete=False, suffix=f".{str(file.filename).split('.')[-1]}"
+    ) as temp_file:
         temp_file.write(file.file.read())
         megaparse = MegaParse(parser=parser)
         result = await megaparse.aload(file_path=temp_file.name)

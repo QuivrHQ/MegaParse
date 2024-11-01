@@ -62,7 +62,7 @@ class TagEnum(str, Enum):
 
 
 class MegaParseVision(MegaParser):
-    def __init__(self, model: BaseChatModel):
+    def __init__(self, model: BaseChatModel, **kwargs):
         if hasattr(model, "model_name"):
             assert (
                 model.model_name  # type: ignore

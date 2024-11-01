@@ -14,7 +14,9 @@ from megaparse.core.parser.type import StrategyEnum
 class UnstructuredParser(MegaParser):
     load_dotenv()
 
-    def __init__(self, strategy=StrategyEnum.AUTO, model: BaseChatModel | None = None):
+    def __init__(
+        self, strategy=StrategyEnum.AUTO, model: BaseChatModel | None = None, **kwargs
+    ):
         self.strategy = strategy
         self.model = model
 
