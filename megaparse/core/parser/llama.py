@@ -15,6 +15,7 @@ class LlamaParser(MegaParser):
         verbose=True,
         language: Language = Language.FRENCH,
         parsing_instruction: str | None = None,
+        **kwargs,
     ) -> None:
         self.api_key = api_key
         self.verbose = verbose

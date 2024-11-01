@@ -72,8 +72,9 @@ async def parse_file(
         language=language,
         parsing_instruction=parsing_instruction,
     )
-
-    with tempfile.NamedTemporaryFile(delete=False) as temp_file:
+    with tempfile.NamedTemporaryFile(
+        delete=False, suffix=f".{str(file.filename).split('.')[-1]}"
+    ) as temp_file:
         temp_file.write(file.file.read())
         megaparse = MegaParse(parser=parser)
         result = await megaparse.aload(file_path=temp_file.name)

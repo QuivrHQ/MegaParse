@@ -24,9 +24,10 @@ class MegaParse:
         if isinstance(file_path, str):
             file_path = Path(file_path)
         file_extension: str = file_path.suffix
-        assert FileExtension(
-            file_extension
-        ), f"Unsupported file extension: {file_extension}"
+        try:
+            FileExtension(file_extension)
+        except ValueError:
+            raise ValueError("Unsupported file extension: {file_extension}")
 
         if file_extension != ".pdf":
             if self.format_checker:
