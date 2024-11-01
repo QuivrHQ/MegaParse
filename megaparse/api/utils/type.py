@@ -1,10 +1,6 @@
 from enum import Enum
 from fastapi import HTTPException, status
 
-from megaparse.core.parser.llama import LlamaParser
-from megaparse.core.parser.megaparse_vision import MegaParseVision
-from megaparse.core.parser.unstructured_parser import UnstructuredParser
-
 
 class HTTPModelNotSupported(HTTPException):
     def __init__(
@@ -15,13 +11,6 @@ class HTTPModelNotSupported(HTTPException):
         super().__init__(
             status_code=status.HTTP_501_NOT_IMPLEMENTED, detail=detail, headers=headers
         )
-
-
-parser_dict: dict[str, type] = {
-    "unstructured": UnstructuredParser,
-    "llama_parser": LlamaParser,
-    "megaparse_vision": MegaParseVision,
-}
 
 
 class MarkDownType(str, Enum):
