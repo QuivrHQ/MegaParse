@@ -1,5 +1,12 @@
 # Changelog
 
+## [0.0.33](https://github.com/QuivrHQ/MegaParse/compare/megaparse-v0.0.32...megaparse-v0.0.33) (2024-11-01)
+
+
+### Bug Fixes
+
+* readme ([#99](https://github.com/QuivrHQ/MegaParse/issues/99)) ([b3b80a3](https://github.com/QuivrHQ/MegaParse/commit/b3b80a3a599bbd4bec8ed79bb9ef44c8c7c92789))
+
 ## [0.0.32](https://github.com/QuivrHQ/MegaParse/compare/megaparse-v0.0.31...megaparse-v0.0.32) (2024-11-01)
 
 
