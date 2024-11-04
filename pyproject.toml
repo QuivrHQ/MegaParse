@@ -17,7 +17,7 @@ dependencies = [
 ]
 
 [project.optional-dependencies]
-core = [
+all = [
     "pycryptodome>=3.21.0",
     "llama-index>=0.10.0",
     "pdfplumber>=0.11.0",
@@ -34,18 +34,18 @@ core = [
     "langchain-openai>=0.1.0",
     "langchain-core>=0.2.0",
     "llama-parse>=0.4.0",
-]
-api = [
     "uvicorn>=0.32.0",
     "fastapi>=0.115.2",
     "ratelimit>=2.2.1",
     "requests>=2.32.3",
 ]
 
-all = [
-    "megaparse[core]"
-    "megaparse[api]
+[tool.rye.workspace]
+members = [
+    ".",
+    "sdk"
 ]
+
 
 [tool.hatch.metadata]
 allow-direct-references = true
