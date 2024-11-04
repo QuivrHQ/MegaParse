@@ -20,6 +20,11 @@ dependencies = [
     "langchain-openai>=0.1.0",
     "langchain-core>=0.2.0",
     "python-dotenv>=1.0.0",
+
+]
+
+[project.optional-dependencies]
+all = [
     "pycryptodome>=3.21.0",
     "llama-index>=0.10.0",
     "pdfplumber>=0.11.0",
@@ -34,9 +39,28 @@ dependencies = [
     "playwright>=1.47.0",
     "langchain-anthropic>=0.2.3",
     "python-magic>=0.4.27",
+    "unstructured[all-docs]>=0.15.0",
+    "langchain>=0.2.0",
+    "langchain-community>=0.2.0",
+    "langchain-openai>=0.1.0",
+    "langchain-core>=0.2.0",
+    "llama-parse>=0.4.0",
+    "uvicorn>=0.32.0",
+    "fastapi>=0.115.2",
+    "ratelimit>=2.2.1",
+    "requests>=2.32.3",
 ]
 requires-python = ">= 3.11"
 
+[tool.rye.workspace]
+members = [
+    ".",
+    "sdk"
+]
+
+
+[tool.hatch.metadata]
+allow-direct-references = true
 
 [build-system]
 requires = ["hatchling"]
