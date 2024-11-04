@@ -29,4 +29,4 @@ class FileUpload:
                 "parsing_instruction": parsing_instruction,
                 "model_name": model_name,
             }
-            return await self.client.request("POST", "/file", files=files, data=data)
+            return await self.client.request("POST", "/v1/file", files=files, data=data)
