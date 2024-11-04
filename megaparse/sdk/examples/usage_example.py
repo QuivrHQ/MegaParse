@@ -1,22 +1,28 @@
-from megaparse.sdk import MegaParseSDK
 import asyncio
+import os
+
+from megaparse.sdk import MegaParseSDK
 
 
 async def main():
-    api_key = "your_api_key_here"  # Replace with actual API key
+    api_key = str(os.getenv("MEGAPARSE_API_KEY"))
     megaparse = MegaParseSDK(api_key)
 
-    # # Upload a URL
-    # url_response = megaparse.url.upload("https://www.quivr.com")
-    # print(url_response)
+    url = "https://www.quivr.com"
 
+    # Upload a URL
+    url_response = await megaparse.url.upload(url)
+    print(f"\n----- URL Response : {url} -----\n")
+    print(url_response)
+
+    file_path = "megaparse/sdk/pdf/MegaFake_report.pdf"
     # Upload a file
     response = await megaparse.file.upload(
-        file_path="megaparse/sdk/pdf/MegaFake_report.pdf",
+        file_path=file_path,
         method="unstructured",  # type: ignore  # unstructured, llama_parser, megaparse_vision
         strategy="auto",
     )
-
+    print(f"\n----- File Response : {file_path} -----\n")
     print(response)
     await megaparse.close()
 

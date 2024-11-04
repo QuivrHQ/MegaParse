@@ -6,5 +6,6 @@ class URLUpload:
         self.client = client
 
     async def upload(self, url: str):
-        data = {"url": url}
-        return await self.client.request("POST", "/url", json=data)
+        endpoint = f"/v1/url?url={url}"
+        headers = {"accept": "application/json"}
+        return await self.client.request("POST", endpoint, headers=headers, data="")

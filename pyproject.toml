@@ -1,5 +1,5 @@
 [project]
-name = "megaparse"
+name = "megaparse-monorepo"
 version = "0.0.33"
 description = "Parse complex files (PDF,Docx,PPTX) for LLM consumption"
 authors = [
@@ -46,12 +46,16 @@ all = [
     "megaparse[core]"
     "megaparse[api]
 ]
+
+[tool.hatch.metadata]
+allow-direct-references = true
+
 [build-system]
 requires = ["hatchling"]
 build-backend = "hatchling.build"
 
 [tool.rye]
-python = "3.11.9"
+python = ">= 3.11"
 managed = true
 universal = true
 dev-dependencies = [
@@ -67,8 +71,39 @@ dev-dependencies = [
     "pytest-cov>=5.0.0",
 ]
 
-[tool.hatch.metadata]
-allow-direct-references = true
+[tool.ruff]
+line-length = 88
+exclude = [".git", "__pycache__", ".mypy_cache", ".pytest_cache"]
+
+[tool.ruff.lint]
+select = [
+    "E", # pycodestyle errors
+    "W", # pycodestyle warnings
+    "F", # pyflakes
+    "I", # isort
+    "C", # flake8-comprehensions
+    "B", # flake8-bugbear
+]
+ignore = [
+    "B904",
+    "B006",
+    "E501", # line too long, handled by black
+    "B008", # do not perform function calls in argument defaults
+    "C901", # too complex
+]
+
+[tool.ruff.lint.isort]
+order-by-type = true
+relative-imports-order = "closest-to-furthest"
+extra-standard-library = ["typing"]
+section-order = [
+    "future",
+    "standard-library",
+    "third-party",
+    "first-party",
+    "local-folder",
+]
+known-first-party = []
 
 [tool.hatch.build.targets.wheel]
 packages = ["megaparse"]
