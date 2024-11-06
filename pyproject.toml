@@ -1,5 +1,5 @@
 [project]
-name = "megaparse-monorepo"
+name = "megaparse"
 version = "0.0.33"
 description = "Parse complex files (PDF,Docx,PPTX) for LLM consumption"
 authors = [
@@ -11,9 +11,7 @@ readme = "README.md"
 requires-python = ">= 3.11"
 
 dependencies = [
-    "mammoth>=1.8.0",
     "python-dotenv>=1.0.0",
-
 ]
 
 [project.optional-dependencies]
@@ -43,7 +41,7 @@ all = [
 [tool.rye.workspace]
 members = [
     ".",
-    "sdk"
+    "megaparse/sdk"
 ]
 
 

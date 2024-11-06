@@ -3,16 +3,12 @@ name = "megaparse-sdk"
 version = "0.1.0"
 description = "Megaparse SDK"
 dependencies = [
-    "mammoth>=1.8.0",
-    "llama-parse>=0.4.0",
-    "unstructured[all-docs]>=0.15.0",
     "python-dotenv>=1.0.0",
     "pycryptodome>=3.21.0",
-    "pdfplumber>=0.11.0",
-    "pypdf>=5.0.1",
     "psutil>=6.1.0",
-    "numpy<=2.0.0",
-    "python-magic>=0.4.27",
+    "llama-parse>=0.4.0",
+    "httpx>=0.27.0",
+
 ]
 
 readme = "README.md"

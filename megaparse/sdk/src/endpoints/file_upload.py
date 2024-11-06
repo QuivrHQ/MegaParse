@@ -1,7 +1,7 @@
 from typing import Optional
 from httpx import Response
 from megaparse.sdk.src.client import MegaParseClient
-from megaparse.core.parser.type import ParserType, StrategyEnum
+from megaparse.sdk.utils.type import ParserType, StrategyEnum
 from llama_parse.utils import Language
 
 
