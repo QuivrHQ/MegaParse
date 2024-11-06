@@ -1,23 +1,23 @@
 import asyncio
 import os
 from pathlib import Path
-from langchain_openai import ChatOpenAI
 
 from megaparse.api.utils.type import FileExtension
 from megaparse.core.parser.unstructured_parser import UnstructuredParser
 
 from megaparse.core.parser import MegaParser
-from megaparse.core.checker.format_checker import FormatChecker
+from megaparse.core.formatter.formatter import Formatter
+from typing import List
 
 
 class MegaParse:
     def __init__(
         self,
         parser: MegaParser = UnstructuredParser(),
-        format_checker: FormatChecker | None = None,
+        formatters: List[Formatter] | None = None,
     ) -> None:
         self.parser = parser
-        self.format_checker = format_checker
+        self.formatters = formatters
         self.last_parsed_document: str = ""
 
     async def aload(self, file_path: Path | str) -> str:
@@ -30,20 +30,20 @@ class MegaParse:
             raise ValueError("Unsupported file extension: {file_extension}")
 
         if file_extension != ".pdf":
-            if self.format_checker:
-                raise ValueError(
-                    f"Format Checker : Unsupported file extension: {file_extension}"
-                )
             if not isinstance(self.parser, UnstructuredParser):
                 raise ValueError(
                     f" Unsupported file extension : Parser {self.parser} do not support {file_extension}"
                 )
 
         try:
-            parsed_document: str = await self.parser.convert(file_path)
-            # @chloe FIXME: format_checker needs unstructured Elements as input which is to change
-            # if self.format_checker:
-            #     parsed_document: str = await self.format_checker.check(parsed_document)
+            parsed_document = await self.parser.convert(file_path)
+            if self.formatters:
+                for formatter in self.formatters:
+                    parsed_document = await formatter.format(
+                        parsed_document, file_path=str(file_path)
+                    )
+
+            assert isinstance(parsed_document, str), "The end result should be a string"
 
         except Exception as e:
             raise ValueError(f"Error while parsing {file_path}: {e}")
@@ -52,36 +52,7 @@ class MegaParse:
         return parsed_document
 
     def load(self, file_path: Path | str) -> str:
-        if isinstance(file_path, str):
-            file_path = Path(file_path)
-        file_extension: str = file_path.suffix
-
-        if file_extension != ".pdf":
-            if self.format_checker:
-                raise ValueError(
-                    f"Format Checker : Unsupported file extension: {file_extension}"
-                )
-            if not isinstance(self.parser, UnstructuredParser):
-                raise ValueError(
-                    f"Parser {self.parser}: Unsupported file extension: {file_extension}"
-                )
-
-        try:
-            loop = asyncio.get_event_loop()
-            parsed_document: str = loop.run_until_complete(
-                self.parser.convert(file_path)
-            )
-            # @chloe FIXME: format_checker needs unstructured Elements as input which is to change
-            # if self.format_checker:
-            #     parsed_document: str = loop.run_until_complete(
-            #         self.format_checker.check(parsed_document)
-            #     )
-
-        except Exception as e:
-            raise ValueError(f"Error while parsing {file_path}: {e}")
-
-        self.last_parsed_document = parsed_document
-        return parsed_document
+        return asyncio.run(self.aload(file_path))
 
     def save(self, file_path: Path | str) -> None:
         os.makedirs(os.path.dirname(file_path), exist_ok=True)

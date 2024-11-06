@@ -1,11 +1,13 @@
 from abc import ABC
 from pathlib import Path
+from typing import List
+from unstructured.documents.elements import Element
 
 
 class MegaParser(ABC):
     """Mother Class for all the parsers [Unstructured, LlamaParse, MegaParseVision]"""
 
-    async def convert(self, file_path: str | Path, **kwargs) -> str:
+    async def convert(self, file_path: str | Path, **kwargs) -> str | List[Element]:
         """
         Convert the given file to a specific format.
 
