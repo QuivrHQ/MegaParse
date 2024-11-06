@@ -3,219 +3,71 @@
 #
 # last locked with the following flags:
 #   pre: false
-#   features: ["all"]
+#   features: []
 #   all-features: false
 #   with-sources: false
 #   generate-hashes: false
 #   universal: true
 
 -e file:.
+-e file:megaparse/sdk
 aiohappyeyeballs==2.4.3
     # via aiohttp
 aiohttp==3.10.10
-    # via langchain
-    # via langchain-community
     # via llama-index-core
 aiosignal==1.3.1
     # via aiohttp
 annotated-types==0.7.0
     # via pydantic
-anthropic==0.38.0
-    # via langchain-anthropic
-antlr4-python3-runtime==4.9.3
-    # via omegaconf
 anyio==4.6.2.post1
-    # via anthropic
     # via httpx
-    # via openai
-    # via starlette
 attrs==24.2.0
     # via aiohttp
-backoff==2.2.1
-    # via megaparse-monorepo
-    # via unstructured
-beautifulsoup4==4.12.3
-    # via unstructured
-cachetools==5.5.0
-    # via google-auth
 certifi==2024.8.30
     # via httpcore
     # via httpx
     # via requests
-cffi==1.17.1 ; platform_python_implementation != 'PyPy'
-    # via cryptography
-chardet==5.2.0
-    # via unstructured
 charset-normalizer==3.4.0
-    # via pdfminer-six
     # via requests
 click==8.1.7
     # via llama-parse
     # via nltk
-    # via python-oxmsg
-    # via uvicorn
 colorama==0.4.6 ; platform_system == 'Windows'
     # via click
     # via tqdm
-coloredlogs==15.0.1
-    # via onnxruntime
-contourpy==1.3.0
-    # via matplotlib
-cryptography==43.0.3
-    # via pdfminer-six
-    # via unstructured-client
-cycler==0.12.1
-    # via matplotlib
 dataclasses-json==0.6.7
-    # via langchain-community
     # via llama-index-core
-    # via unstructured
-defusedxml==0.7.1
-    # via langchain-anthropic
 deprecated==1.2.14
     # via llama-index-core
-    # via pikepdf
 dirtyjson==1.0.8
     # via llama-index-core
-distro==1.9.0
-    # via anthropic
-    # via openai
-effdet==0.4.1
-    # via unstructured
-emoji==2.14.0
-    # via unstructured
-et-xmlfile==2.0.0
-    # via openpyxl
-eval-type-backport==0.2.0
-    # via unstructured-client
-fastapi==0.115.4
-    # via megaparse-monorepo
-filelock==3.16.1
-    # via huggingface-hub
-    # via torch
-    # via transformers
-    # via triton
-filetype==1.2.0
-    # via unstructured
-flatbuffers==24.3.25
-    # via onnxruntime
-fonttools==4.54.1
-    # via matplotlib
 frozenlist==1.5.0
     # via aiohttp
     # via aiosignal
 fsspec==2024.10.0
-    # via huggingface-hub
     # via llama-index-core
-    # via torch
-google-api-core==2.22.0
-    # via google-cloud-vision
-google-auth==2.35.0
-    # via google-api-core
-    # via google-cloud-vision
-google-cloud-vision==3.8.0
-    # via unstructured
-googleapis-common-protos==1.65.0
-    # via google-api-core
-    # via grpcio-status
 greenlet==3.1.1
-    # via playwright
     # via sqlalchemy
-grpcio==1.67.1
-    # via google-api-core
-    # via grpcio-status
-grpcio-status==1.67.1
-    # via google-api-core
 h11==0.14.0
     # via httpcore
-    # via uvicorn
-html5lib==1.1
-    # via unstructured
 httpcore==1.0.6
     # via httpx
 httpx==0.27.2
-    # via anthropic
-    # via langsmith
     # via llama-index-core
-    # via openai
-    # via unstructured-client
-httpx-sse==0.4.0
-    # via langchain-community
-huggingface-hub==0.26.2
-    # via timm
-    # via tokenizers
-    # via transformers
-    # via unstructured-inference
-humanfriendly==10.0
-    # via coloredlogs
+    # via megaparse-sdk
 idna==3.10
     # via anyio
     # via httpx
     # via requests
     # via yarl
-iopath==0.1.10
-    # via layoutparser
-jinja2==3.1.4
-    # via torch
-jiter==0.7.0
-    # via anthropic
-    # via openai
 joblib==1.4.2
     # via nltk
-jsonpatch==1.33
-    # via langchain-core
-jsonpath-python==1.0.6
-    # via unstructured-client
-jsonpointer==3.0.0
-    # via jsonpatch
-kiwisolver==1.4.7
-    # via matplotlib
-langchain==0.3.7
-    # via langchain-community
-    # via megaparse-monorepo
-langchain-anthropic==0.2.4
-    # via megaparse-monorepo
-langchain-community==0.3.5
-    # via megaparse-monorepo
-langchain-core==0.3.15
-    # via langchain
-    # via langchain-anthropic
-    # via langchain-community
-    # via langchain-openai
-    # via langchain-text-splitters
-    # via megaparse-monorepo
-langchain-openai==0.2.5
-    # via megaparse-monorepo
-langchain-text-splitters==0.3.2
-    # via langchain
-langdetect==1.0.9
-    # via unstructured
-langsmith==0.1.139
-    # via langchain
-    # via langchain-community
-    # via langchain-core
-layoutparser==0.3.4
-    # via unstructured-inference
-llama-index-core==0.11.21
+llama-index-core==0.11.22
     # via llama-parse
 llama-parse==0.5.13
-    # via megaparse-monorepo
-lxml==5.3.0
-    # via pikepdf
-    # via python-docx
-    # via python-pptx
-    # via unstructured
-markdown==3.7
-    # via unstructured
-markupsafe==3.0.2
-    # via jinja2
+    # via megaparse-sdk
 marshmallow==3.23.1
     # via dataclasses-json
-matplotlib==3.9.2
-    # via pycocotools
-    # via unstructured-inference
-mpmath==1.3.0
-    # via sympy
 multidict==6.1.0
     # via aiohttp
     # via yarl
@@ -223,342 +75,62 @@ mypy-extensions==1.0.0
     # via typing-inspect
 nest-asyncio==1.6.0
     # via llama-index-core
-    # via unstructured-client
 networkx==3.4.2
     # via llama-index-core
-    # via torch
-    # via unstructured
 nltk==3.9.1
     # via llama-index-core
-    # via unstructured
 numpy==1.26.4
-    # via contourpy
-    # via langchain
-    # via langchain-community
-    # via layoutparser
     # via llama-index-core
-    # via matplotlib
-    # via megaparse-monorepo
-    # via onnx
-    # via onnxruntime
-    # via opencv-python
-    # via pandas
-    # via pycocotools
-    # via scipy
-    # via torchvision
-    # via transformers
-    # via unstructured
-    # via unstructured-inference
-nvidia-cublas-cu12==12.4.5.8 ; platform_machine == 'x86_64' and platform_system == 'Linux'
-    # via nvidia-cudnn-cu12
-    # via nvidia-cusolver-cu12
-    # via torch
-nvidia-cuda-cupti-cu12==12.4.127 ; platform_machine == 'x86_64' and platform_system == 'Linux'
-    # via torch
-nvidia-cuda-nvrtc-cu12==12.4.127 ; platform_machine == 'x86_64' and platform_system == 'Linux'
-    # via torch
-nvidia-cuda-runtime-cu12==12.4.127 ; platform_machine == 'x86_64' and platform_system == 'Linux'
-    # via torch
-nvidia-cudnn-cu12==9.1.0.70 ; platform_machine == 'x86_64' and platform_system == 'Linux'
-    # via torch
-nvidia-cufft-cu12==11.2.1.3 ; platform_machine == 'x86_64' and platform_system == 'Linux'
-    # via torch
-nvidia-curand-cu12==10.3.5.147 ; platform_machine == 'x86_64' and platform_system == 'Linux'
-    # via torch
-nvidia-cusolver-cu12==11.6.1.9 ; platform_machine == 'x86_64' and platform_system == 'Linux'
-    # via torch
-nvidia-cusparse-cu12==12.3.1.170 ; platform_machine == 'x86_64' and platform_system == 'Linux'
-    # via nvidia-cusolver-cu12
-    # via torch
-nvidia-nccl-cu12==2.21.5 ; platform_machine == 'x86_64' and platform_system == 'Linux'
-    # via torch
-nvidia-nvjitlink-cu12==12.4.127 ; platform_machine == 'x86_64' and platform_system == 'Linux'
-    # via nvidia-cufft-cu12
-    # via nvidia-cusolver-cu12
-    # via nvidia-cusparse-cu12
-    # via torch
-nvidia-nvtx-cu12==12.4.127 ; platform_machine == 'x86_64' and platform_system == 'Linux'
-    # via torch
-olefile==0.47
-    # via python-oxmsg
-omegaconf==2.3.0
-    # via effdet
-onnx==1.17.0
-    # via unstructured
-    # via unstructured-inference
-onnxruntime==1.20.0
-    # via unstructured-inference
-openai==1.53.1
-    # via langchain-openai
-opencv-python==4.10.0.84
-    # via layoutparser
-    # via unstructured-inference
-openpyxl==3.1.5
-    # via unstructured
-orjson==3.10.11
-    # via langsmith
 packaging==24.1
-    # via huggingface-hub
-    # via langchain-core
     # via marshmallow
-    # via matplotlib
-    # via onnxruntime
-    # via pikepdf
-    # via transformers
-    # via unstructured-pytesseract
-pandas==2.2.3
-    # via layoutparser
-    # via unstructured
-pdf2image==1.17.0
-    # via layoutparser
-    # via unstructured
-pdfminer-six==20231228
-    # via pdfplumber
-    # via unstructured
-pdfplumber==0.11.4
-    # via layoutparser
-    # via megaparse-monorepo
-pi-heif==0.20.0
-    # via unstructured
-pikepdf==9.4.0
-    # via unstructured
 pillow==11.0.0
-    # via layoutparser
     # via llama-index-core
-    # via matplotlib
-    # via pdf2image
-    # via pdfplumber
-    # via pi-heif
-    # via pikepdf
-    # via python-pptx
-    # via torchvision
-    # via unstructured-pytesseract
-playwright==1.48.0
-    # via megaparse-monorepo
-portalocker==2.10.1
-    # via iopath
 propcache==0.2.0
     # via yarl
-proto-plus==1.25.0
-    # via google-api-core
-    # via google-cloud-vision
-protobuf==5.28.3
-    # via google-api-core
-    # via google-cloud-vision
-    # via googleapis-common-protos
-    # via grpcio-status
-    # via onnx
-    # via onnxruntime
-    # via proto-plus
 psutil==6.1.0
-    # via megaparse-monorepo
-    # via unstructured
-pyasn1==0.6.1
-    # via pyasn1-modules
-    # via rsa
-pyasn1-modules==0.4.1
-    # via google-auth
-pycocotools==2.0.8
-    # via effdet
-pycparser==2.22 ; platform_python_implementation != 'PyPy'
-    # via cffi
+    # via megaparse-sdk
 pycryptodome==3.21.0
-    # via megaparse-monorepo
+    # via megaparse-sdk
 pydantic==2.9.2
-    # via anthropic
-    # via fastapi
-    # via langchain
-    # via langchain-anthropic
-    # via langchain-core
-    # via langsmith
     # via llama-index-core
-    # via openai
-    # via pydantic-settings
-    # via unstructured-client
 pydantic-core==2.23.4
     # via pydantic
-pydantic-settings==2.6.1
-    # via langchain-community
-pyee==12.0.0
-    # via playwright
-pypandoc==1.14
-    # via unstructured
-pyparsing==3.2.0
-    # via matplotlib
-pypdf==5.1.0
-    # via megaparse-monorepo
-    # via unstructured
-    # via unstructured-client
-pypdfium2==4.30.0
-    # via pdfplumber
-pyreadline3==3.5.4 ; sys_platform == 'win32'
-    # via humanfriendly
-python-dateutil==2.8.2
-    # via matplotlib
-    # via pandas
-    # via unstructured-client
-python-docx==1.1.2
-    # via unstructured
 python-dotenv==1.0.1
-    # via megaparse-monorepo
-    # via pydantic-settings
-python-iso639==2024.10.22
-    # via unstructured
-python-magic==0.4.27
-    # via megaparse-monorepo
-    # via unstructured
-python-multipart==0.0.17
-    # via unstructured-inference
-python-oxmsg==0.0.1
-    # via unstructured
-python-pptx==1.0.2
-    # via unstructured
-pytz==2024.2
-    # via pandas
-pywin32==308 ; platform_system == 'Windows'
-    # via portalocker
+    # via megaparse
+    # via megaparse-sdk
 pyyaml==6.0.2
-    # via huggingface-hub
-    # via langchain
-    # via langchain-community
-    # via langchain-core
-    # via layoutparser
     # via llama-index-core
-    # via omegaconf
-    # via timm
-    # via transformers
-rapidfuzz==3.10.1
-    # via unstructured
-    # via unstructured-inference
-ratelimit==2.2.1
-    # via megaparse-monorepo
 regex==2024.9.11
     # via nltk
     # via tiktoken
-    # via transformers
 requests==2.32.3
-    # via google-api-core
-    # via huggingface-hub
-    # via langchain
-    # via langchain-community
-    # via langsmith
     # via llama-index-core
-    # via megaparse-monorepo
-    # via requests-toolbelt
     # via tiktoken
-    # via transformers
-    # via unstructured
-requests-toolbelt==1.0.0
-    # via langsmith
-    # via unstructured-client
-rsa==4.9
-    # via google-auth
-safetensors==0.4.5
-    # via timm
-    # via transformers
-scipy==1.14.1
-    # via layoutparser
-setuptools==75.3.0
-    # via torch
-six==1.16.0
-    # via html5lib
-    # via langdetect
-    # via python-dateutil
 sniffio==1.3.1
-    # via anthropic
     # via anyio
     # via httpx
-    # via openai
-soupsieve==2.6
-    # via beautifulsoup4
-sqlalchemy==2.0.35
-    # via langchain
-    # via langchain-community
+sqlalchemy==2.0.36
     # via llama-index-core
-starlette==0.41.2
-    # via fastapi
-sympy==1.13.1
-    # via onnxruntime
-    # via torch
 tenacity==8.5.0
-    # via langchain
-    # via langchain-community
-    # via langchain-core
     # via llama-index-core
 tiktoken==0.8.0
-    # via langchain-openai
     # via llama-index-core
-timm==1.0.11
-    # via effdet
-    # via unstructured-inference
-tokenizers==0.20.1
-    # via anthropic
-    # via transformers
-torch==2.5.1
-    # via effdet
-    # via timm
-    # via torchvision
-    # via unstructured-inference
-torchvision==0.20.1
-    # via effdet
-    # via timm
-tqdm==4.66.6
-    # via huggingface-hub
-    # via iopath
+tqdm==4.67.0
     # via llama-index-core
     # via nltk
-    # via openai
-    # via transformers
-    # via unstructured
-transformers==4.46.1
-    # via unstructured-inference
-triton==3.1.0 ; python_full_version < '3.13' and platform_machine == 'x86_64' and platform_system == 'Linux'
-    # via torch
 typing-extensions==4.12.2
-    # via anthropic
-    # via fastapi
-    # via huggingface-hub
-    # via iopath
-    # via langchain-core
     # via llama-index-core
-    # via openai
     # via pydantic
     # via pydantic-core
-    # via pyee
-    # via python-docx
-    # via python-oxmsg
-    # via python-pptx
     # via sqlalchemy
-    # via torch
     # via typing-inspect
-    # via unstructured
 typing-inspect==0.9.0
     # via dataclasses-json
     # via llama-index-core
-    # via unstructured-client
-tzdata==2024.2
-    # via pandas
-unstructured==0.16.4
-    # via megaparse-monorepo
-unstructured-client==0.27.0
-    # via unstructured
-unstructured-inference==0.8.1
-    # via unstructured
-unstructured-pytesseract==0.3.13
-    # via unstructured
 urllib3==2.2.3
     # via requests
-uvicorn==0.32.0
-    # via megaparse-monorepo
-webencodings==0.5.1
-    # via html5lib
 wrapt==1.16.0
     # via deprecated
     # via llama-index-core
-    # via unstructured
-xlrd==2.0.1
-    # via unstructured
-xlsxwriter==3.2.0
-    # via python-pptx
 yarl==1.17.1
     # via aiohttp
