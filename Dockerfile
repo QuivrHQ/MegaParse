@@ -30,6 +30,8 @@ RUN apt-get clean && apt-get update && apt-get install -y \
     rm -rf /var/lib/apt/lists/* && apt-get clean
 
 COPY requirements.lock  pyproject.toml README.md ./
+COPY megaparse/sdk/pyproject.toml megaparse/sdk/README.md megaparse/sdk/
+
 
 RUN PYTHONDONTWRITEBYTECODE=1 pip install --no-cache-dir -r requirements.lock
 
