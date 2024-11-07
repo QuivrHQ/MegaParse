@@ -1,5 +1,12 @@
 # Changelog
 
+## [0.0.37](https://github.com/QuivrHQ/MegaParse/compare/megaparse-v0.0.36...megaparse-v0.0.37) (2024-11-07)
+
+
+### Features
+
+* bump megaparse-sdk version to 0.1.1 ([ed3fdfb](https://github.com/QuivrHQ/MegaParse/commit/ed3fdfb10498c95d4f9a510df3a2913e0dfc3c23))
+
 ## [0.0.36](https://github.com/QuivrHQ/MegaParse/compare/megaparse-v0.0.35...megaparse-v0.0.36) (2024-11-07)
 
 
