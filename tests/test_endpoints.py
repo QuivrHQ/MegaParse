@@ -1,4 +1,3 @@
-# tests/test_endpoints.py
 import pytest
 
 

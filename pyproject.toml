@@ -8,25 +8,17 @@ authors = [
 ]
 
 readme = "README.md"
+requires-python = ">= 3.11"
+
 dependencies = [
-    "python-docx>=1.1.0",
-    "mammoth>=1.8.0",
-    "python-pptx>=1.0.2",
-    "llama-parse>=0.4.0",
-    "pdf2docx>=0.5.0",
-    "unstructured[all-docs]>=0.15.0",
-    "langchain>=0.2.0",
-    "langchain-community>=0.2.0",
-    "langchain-openai>=0.1.0",
-    "langchain-core>=0.2.0",
     "python-dotenv>=1.0.0",
+]
+
+[project.optional-dependencies]
+all = [
     "pycryptodome>=3.21.0",
     "llama-index>=0.10.0",
     "pdfplumber>=0.11.0",
-    "fastapi>=0.115.2",
-    "uvicorn>=0.32.0",
-    "ratelimit>=2.2.1",
-    "requests>=2.32.3",
     "backoff>=2.2.1",
     "pypdf>=5.0.1",
     "psutil>=6.1.0",
@@ -34,16 +26,34 @@ dependencies = [
     "playwright>=1.47.0",
     "langchain-anthropic>=0.2.3",
     "python-magic>=0.4.27",
+    "unstructured[all-docs]>=0.15.0",
+    "langchain>=0.2.0",
+    "langchain-community>=0.2.0",
+    "langchain-openai>=0.1.0",
+    "langchain-core>=0.2.0",
+    "llama-parse>=0.4.0",
+    "uvicorn>=0.32.0",
+    "fastapi>=0.115.2",
+    "ratelimit>=2.2.1",
+    "requests>=2.32.3",
 ]
-requires-python = ">= 3.11"
 
+[tool.rye.workspace]
+members = [
+    ".",
+    "megaparse/sdk"
+]
+
+
+[tool.hatch.metadata]
+allow-direct-references = true
 
 [build-system]
 requires = ["hatchling"]
 build-backend = "hatchling.build"
 
 [tool.rye]
-python = "3.11.9"
+python = ">= 3.11"
 managed = true
 universal = true
 dev-dependencies = [
@@ -59,8 +69,39 @@ dev-dependencies = [
     "pytest-cov>=5.0.0",
 ]
 
-[tool.hatch.metadata]
-allow-direct-references = true
+[tool.ruff]
+line-length = 88
+exclude = [".git", "__pycache__", ".mypy_cache", ".pytest_cache"]
+
+[tool.ruff.lint]
+select = [
+    "E", # pycodestyle errors
+    "W", # pycodestyle warnings
+    "F", # pyflakes
+    "I", # isort
+    "C", # flake8-comprehensions
+    "B", # flake8-bugbear
+]
+ignore = [
+    "B904",
+    "B006",
+    "E501", # line too long, handled by black
+    "B008", # do not perform function calls in argument defaults
+    "C901", # too complex
+]
+
+[tool.ruff.lint.isort]
+order-by-type = true
+relative-imports-order = "closest-to-furthest"
+extra-standard-library = ["typing"]
+section-order = [
+    "future",
+    "standard-library",
+    "third-party",
+    "first-party",
+    "local-folder",
+]
+known-first-party = []
 
 [tool.hatch.build.targets.wheel]
 packages = ["megaparse"]
