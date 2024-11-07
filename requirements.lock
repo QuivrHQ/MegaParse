@@ -251,7 +251,6 @@ llama-index-readers-llama-parse==0.1.6
 llama-parse==0.4.9
     # via llama-index-readers-llama-parse
     # via megaparse
-    # via megaparse-sdk
 llamaindex-py-client==0.1.19
     # via llama-index-indices-managed-llama-cloud
 lxml==5.3.0
