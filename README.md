@@ -1,4 +1,4 @@
-# MegaParse - Your Mega Parser for every type of documents
+# MegaParse - Your Parser for every type of documents
 
 <div align="center">
     <img src="https://raw.githubusercontent.com/QuivrHQ/MegaParse/main/logo.png" alt="Quivr-logo" width="30%"  style="border-radius: 50%; padding-bottom: 20px"/>
