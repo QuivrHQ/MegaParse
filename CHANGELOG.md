@@ -1,5 +1,12 @@
 # Changelog
 
+## [0.0.38](https://github.com/QuivrHQ/MegaParse/compare/megaparse-v0.0.37...megaparse-v0.0.38) (2024-11-07)
+
+
+### Bug Fixes
+
+* env roots, imports root ([#112](https://github.com/QuivrHQ/MegaParse/issues/112)) ([a04230d](https://github.com/QuivrHQ/MegaParse/commit/a04230dc2de9e0bb0bde39ab66b2208f80743922))
+
 ## [0.0.37](https://github.com/QuivrHQ/MegaParse/compare/megaparse-v0.0.36...megaparse-v0.0.37) (2024-11-07)
 
 
