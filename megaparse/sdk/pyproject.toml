@@ -6,7 +6,6 @@ dependencies = [
     "python-dotenv>=1.0.0",
     "pycryptodome>=3.21.0",
     "psutil>=6.1.0",
-    "llama-parse>=0.4.0",
     "httpx>=0.27.0",
 
 ]
