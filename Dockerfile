@@ -41,7 +41,7 @@ RUN playwright install --with-deps && \
     python -c "from unstructured.partition.model_init import initialize; initialize()"
 
 
-ENV PYTHONPATH=/app
+ENV PYTHONPATH="/app:/app/megaparse/sdk"
 
 COPY . .
 EXPOSE 8000
