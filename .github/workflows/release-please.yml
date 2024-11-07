@@ -48,3 +48,20 @@ jobs:
         run: rye build
       - name: Rye Publish
         run: rye publish --token ${{ secrets.PYPI_API_TOKEN }} --yes
+  
+  deploy-sdk:
+    if: needs.release-please.outputs.release_created == 'true'
+    needs: release-please
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Install Rye
+        uses: eifinger/setup-rye@v2
+        with:
+          enable-cache: true
+      - name: Rye Sync
+        run: cd megaparse/sdk && rye sync --no-lock
+      - name: Rye Build
+        run: cd megaparse/sdk && rye build
+      - name: Rye Publish
+        run: cd megaparse/sdk && rye publish --token ${{ secrets.PYPI_API_TOKEN }} --yes
