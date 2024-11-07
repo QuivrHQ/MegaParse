@@ -1,18 +1,19 @@
+import os
 import tempfile
-from fastapi import Depends, FastAPI, UploadFile, File, HTTPException
+
+import httpx
+import psutil
+from fastapi import Depends, FastAPI, File, HTTPException, UploadFile
+from langchain_anthropic import ChatAnthropic
+from langchain_community.document_loaders import PlaywrightURLLoader
+from langchain_openai import ChatOpenAI
+from llama_parse.utils import Language
+
 from megaparse.api.utils.type import HTTPModelNotSupported
 from megaparse.core.megaparse import MegaParse
 from megaparse.core.parser.builder import ParserBuilder
 from megaparse.core.parser.type import ParserConfig, ParserType
 from megaparse.core.parser.unstructured_parser import StrategyEnum, UnstructuredParser
-import psutil
-import os
-from langchain_community.document_loaders import PlaywrightURLLoader
-
-from langchain_openai import ChatOpenAI
-from langchain_anthropic import ChatAnthropic
-from llama_parse.utils import Language
-import httpx
 
 app = FastAPI()
 

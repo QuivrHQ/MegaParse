@@ -1,8 +1,10 @@
 from typing import Optional
+
 from httpx import Response
+from llama_parse.utils import Language
+
 from megaparse.sdk.src.client import MegaParseClient
 from megaparse.sdk.utils.type import ParserType, StrategyEnum
-from llama_parse.utils import Language
 
 
 class FileUpload:
