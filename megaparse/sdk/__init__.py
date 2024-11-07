@@ -1,3 +1,3 @@
-from megaparse.sdk.src import MegaParseSDK
+from megaparse.sdk.megaparse_sdk import MegaParseSDK
 
 __all__ = ["MegaParseSDK"]
