@@ -1,6 +1,6 @@
 """My library with optional components."""
 
-__version__ = "0.1.0"
+__version__ = "0.0.34"
 
 # Import only SDK components by default
 from megaparse import sdk

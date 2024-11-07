@@ -1,5 +1,12 @@
 # Changelog
 
+## [0.0.34](https://github.com/QuivrHQ/MegaParse/compare/megaparse-v0.0.33...megaparse-v0.0.34) (2024-11-07)
+
+
+### Features
+
+* megaparse-sdk-cherry ([#105](https://github.com/QuivrHQ/MegaParse/issues/105)) ([ad44aa3](https://github.com/QuivrHQ/MegaParse/commit/ad44aa34999596e156c78f91adab97bce7ceeb0e))
+
 ## [0.0.33](https://github.com/QuivrHQ/MegaParse/compare/megaparse-v0.0.32...megaparse-v0.0.33) (2024-11-01)
 
 
