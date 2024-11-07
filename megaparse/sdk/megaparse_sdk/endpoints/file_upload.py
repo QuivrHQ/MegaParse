@@ -1,9 +1,8 @@
 from typing import Optional
 
 from httpx import Response
-
-from megaparse.sdk.megaparse_sdk.client import MegaParseClient
-from megaparse.sdk.utils.type import Language, ParserType, StrategyEnum
+from megaparse_sdk.client import MegaParseClient
+from megaparse_sdk.utils.type import Language, ParserType, StrategyEnum
 
 
 class FileUpload:
