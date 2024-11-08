@@ -1,3 +1,4 @@
+import os
 from typing import Any
 
 import httpx
@@ -5,7 +6,9 @@ import httpx
 
 class MegaParseClient:
     def __init__(self, api_key: str | None = None):
-        self.base_url = "https://megaparse.tooling.quivr.app"
+        self.base_url = os.getenv(
+            "MEGAPARSE_URL", "https://megaparse.tooling.quivr.app"
+        )
 
         self.api_key = api_key
         if self.api_key:
