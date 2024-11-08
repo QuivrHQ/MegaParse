@@ -1,7 +1,7 @@
 import asyncio
 import os
 
-from megaparse.sdk import MegaParseSDK
+from megaparse_sdk import MegaParseSDK
 
 
 async def main():
