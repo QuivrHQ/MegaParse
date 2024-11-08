@@ -1,13 +1,11 @@
-import asyncio
-from unstructured.partition.auto import partition
+import re
+
 from dotenv import load_dotenv
-from megaparse.core.parser import MegaParser
 from langchain_core.language_models.chat_models import BaseChatModel
 from langchain_core.prompts import ChatPromptTemplate
-import re
-from langchain_openai import ChatOpenAI
-import os
+from unstructured.partition.auto import partition
 
+from megaparse.core.parser import MegaParser
 from megaparse.core.parser.type import StrategyEnum
 
 
