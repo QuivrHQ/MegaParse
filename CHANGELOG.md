@@ -1,5 +1,12 @@
 # Changelog
 
+## [0.0.41](https://github.com/QuivrHQ/MegaParse/compare/megaparse-v0.0.40...megaparse-v0.0.41) (2024-11-08)
+
+
+### Bug Fixes
+
+* add megaparse url env variable ([#118](https://github.com/QuivrHQ/MegaParse/issues/118)) ([132c2eb](https://github.com/QuivrHQ/MegaParse/commit/132c2ebd13177fd116c4e710a4b1c864a9fa04bb))
+
 ## [0.0.40](https://github.com/QuivrHQ/MegaParse/compare/megaparse-v0.0.39...megaparse-v0.0.40) (2024-11-08)
 
 
