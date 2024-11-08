@@ -1,5 +1,12 @@
 # Changelog
 
+## [0.0.42](https://github.com/QuivrHQ/MegaParse/compare/megaparse-v0.0.41...megaparse-v0.0.42) (2024-11-08)
+
+
+### Features
+
+* **sdk:** new version ([e377cd6](https://github.com/QuivrHQ/MegaParse/commit/e377cd6df98b3ea9265788a4d907b43bde796196))
+
 ## [0.0.41](https://github.com/QuivrHQ/MegaParse/compare/megaparse-v0.0.40...megaparse-v0.0.41) (2024-11-08)
 
 
