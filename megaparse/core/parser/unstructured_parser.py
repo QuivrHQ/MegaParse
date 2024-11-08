@@ -1,8 +1,10 @@
 from typing import List
-from unstructured.partition.auto import partition
+
 from dotenv import load_dotenv
-from megaparse.core.parser import MegaParser
 from unstructured.documents.elements import Element
+from unstructured.partition.auto import partition
+
+from megaparse.core.parser import MegaParser
 from megaparse.core.parser.type import StrategyEnum
 
 
