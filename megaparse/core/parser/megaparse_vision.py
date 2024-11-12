@@ -1,17 +1,16 @@
-from enum import Enum
+import asyncio
+import base64
+import re
 from io import BytesIO
 from pathlib import Path
 from typing import List
-from langchain_core.messages import HumanMessage
-from langchain_openai import ChatOpenAI
-import base64
-from pdf2image import convert_from_path
-import asyncio
-import re
+
 from langchain_core.language_models.chat_models import BaseChatModel
+from langchain_core.messages import HumanMessage
+from pdf2image import convert_from_path
 
 from megaparse.core.parser import MegaParser
-import os
+from megaparse.core.parser.entity import SupportedModel, TagEnum
 
 # BASE_OCR_PROMPT = """
 # Transcribe the content of this file into markdown. Be mindful of the formatting.
@@ -52,30 +51,14 @@ Follow these instructions to complete the task:
 """
 
 
-class TagEnum(str, Enum):
-    """Possible tags for the elements in the file"""
-
-    TABLE = "TABLE"
-    TOC = "TOC"
-    HEADER = "HEADER"
-    IMAGE = "IMAGE"
-
-
 class MegaParseVision(MegaParser):
     def __init__(self, model: BaseChatModel, **kwargs):
         if hasattr(model, "model_name"):
-            assert (
-                model.model_name  # type: ignore
-                in [
-                    "gpt-4o",
-                    "gpt-4o-turbo",
-                    "claude-3-5-sonnet-20241022",
-                    "claude-3-5-sonnet-latest",
-                    "claude-3-opus-20240229",
-                    "claude-3-opus-latest",
-                ]
-            ), "Invald model name, MegaParse vision only supports model that have vision capabilities such as gpt-4, gpt-4o and claude-3.5"
-
+            if not SupportedModel.is_supported(model.model_name):
+                raise ValueError(
+                    f"Invald model name, MegaParse vision only supports model that have vision capabilities. "
+                    f"{model.model_name} is not supported."
+                )
         self.model = model
 
         self.parsed_chunks: list[str] | None = None
