@@ -30,3 +30,14 @@ class ParserConfig(BaseModel):
     model: BaseChatModel | None = None
     language: Language = Language.ENGLISH
     parsing_instruction: str | None = None
+
+
+class ParserConfigInput(BaseModel):
+    """Parser configuration model."""
+
+    method: ParserType = ParserType.UNSTRUCTURED
+    strategy: StrategyEnum = StrategyEnum.FAST
+    check_table: bool = False
+    parsing_instruction: str | None = None
+    model_name: str = "gpt-4o"
+    language: Language = Language.ENGLISH

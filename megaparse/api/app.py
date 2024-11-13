@@ -1,8 +1,10 @@
 import os
 import tempfile
+from typing import Optional
 
 import httpx
 import psutil
+import uvicorn
 from fastapi import Depends, FastAPI, File, HTTPException, UploadFile
 from langchain_anthropic import ChatAnthropic
 from langchain_community.document_loaders import PlaywrightURLLoader
@@ -12,7 +14,7 @@ from llama_parse.utils import Language
 from megaparse.api.utils.type import HTTPModelNotSupported
 from megaparse.core.megaparse import MegaParse
 from megaparse.core.parser.builder import ParserBuilder
-from megaparse.core.parser.type import ParserConfig, ParserType
+from megaparse.core.parser.type import ParserConfig, ParserConfigInput
 from megaparse.core.parser.unstructured_parser import StrategyEnum, UnstructuredParser
 
 app = FastAPI()
@@ -46,27 +48,29 @@ def _check_free_memory() -> bool:
 
 
 @app.post("/v1/file")
+@app.post(
+    "/v1/file",
+)
 async def parse_file(
-    file: UploadFile = File(...),
-    method: ParserType = ParserType.UNSTRUCTURED,
-    strategy: StrategyEnum = StrategyEnum.AUTO,
-    check_table=False,
-    language: Language = Language.ENGLISH,
-    parsing_instruction: str | None = None,
-    model_name: str | None = None,
+    file: UploadFile,
+    parser_config: str = File(...),
     parser_builder=Depends(parser_builder_dep),
 ) -> dict[str, str]:
+    in_parser_config = ParserConfigInput.model_validate_json(parser_config)
+
     if not _check_free_memory():
         raise HTTPException(
             status_code=503, detail="Service unavailable due to low memory"
         )
     model = None
-    if model_name:
-        if model_name.startswith("gpt"):
-            model = ChatOpenAI(model=model_name, api_key=os.getenv("OPENAI_API_KEY"))  # type: ignore
-        elif model_name.startswith("claude"):
+    if in_parser_config.model_name:
+        if in_parser_config.model_name.startswith("gpt"):
+            model = ChatOpenAI(
+                model=in_parser_config.model_name, api_key=os.getenv("OPENAI_API_KEY")
+            )  # type: ignore
+        elif in_parser_config.model_name.startswith("claude"):
             model = ChatAnthropic(
-                model_name=model_name,
+                model_name=in_parser_config.model_name,
                 api_key=os.getenv("ANTHROPIC_API_KEY"),  # type: ignore
                 timeout=60,
                 stop=None,
@@ -75,12 +79,12 @@ async def parse_file(
         else:
             raise HTTPModelNotSupported()
 
-    parser_config = ParserConfig(
-        method=method,
-        strategy=strategy,
-        model=model if model and check_table else None,
-        language=language,
-        parsing_instruction=parsing_instruction,
+    out_parser_config = ParserConfig(
+        method=in_parser_config.method,
+        strategy=in_parser_config.strategy,
+        model=model if model and in_parser_config.check_table else None,
+        language=in_parser_config.language,
+        parsing_instruction=in_parser_config.parsing_instruction,
     )
 
     # TODO: move to function or metaclass in Megaparse
@@ -141,3 +145,7 @@ async def upload_url(
             "message": "Website content parsed successfully",
             "result": extracted_content,
         }
+
+
+if __name__ == "__main__":
+    uvicorn.run(app, host="0.0.0.0", port=8000)
