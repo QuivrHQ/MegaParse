@@ -43,7 +43,6 @@ all = [
 [tool.rye.workspace]
 members = [
     ".",
-    "megaparse/sdk"
 ]
 
 
