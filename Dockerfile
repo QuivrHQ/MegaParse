@@ -32,7 +32,6 @@ RUN apt-get clean && apt-get update && apt-get install -y \
 COPY requirements.lock  pyproject.toml README.md ./
 COPY megaparse/sdk/pyproject.toml megaparse/sdk/README.md megaparse/sdk/
 
-
 RUN PYTHONDONTWRITEBYTECODE=1 pip install --no-cache-dir -r requirements.lock
 
 RUN playwright install --with-deps && \
@@ -46,4 +45,4 @@ ENV PYTHONPATH="/app:/app/megaparse/sdk"
 COPY . .
 EXPOSE 8000
 
-CMD ["uvicorn", "megaparse.api.app:app", "--host", "0.0.0.0", "--port", "8000"]
+CMD ["uvicorn", "megaparse.api.app:app", "--host", "0.0.0.0", "--port", "8000", "--workers", "3"]

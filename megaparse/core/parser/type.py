@@ -1,7 +1,7 @@
 from enum import Enum
 from llama_parse.utils import Language
 from langchain_core.language_models.chat_models import BaseChatModel
-from pydantic import BaseModel
+from pydantic import BaseModel, ConfigDict
 
 
 class ParserType(str, Enum):
@@ -22,6 +22,8 @@ class StrategyEnum(str, Enum):
 
 class ParserConfig(BaseModel):
     """Parser configuration model."""
+
+    model_config = ConfigDict(frozen=True)
 
     method: ParserType = ParserType.UNSTRUCTURED
     strategy: StrategyEnum = StrategyEnum.AUTO

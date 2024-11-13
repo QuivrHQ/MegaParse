@@ -19,6 +19,8 @@ app = FastAPI()
 
 playwright_loader = PlaywrightURLLoader(urls=[], remove_selectors=["header", "footer"])
 
+_megaparse_instances_cache = {}
+
 
 def parser_builder_dep():
     return ParserBuilder()
@@ -80,13 +82,20 @@ async def parse_file(
         language=language,
         parsing_instruction=parsing_instruction,
     )
-    try:
+
+    # TODO: move to function or metaclass in Megaparse
+    if hash(parser_config) in _megaparse_instances_cache:
+        megaparse = _megaparse_instances_cache[hash(parser_config)]
+    else:
         parser = parser_builder.build(parser_config)
+        megaparse = MegaParse(parser=parser)
+        _megaparse_instances_cache[hash(parser_config)] = megaparse
+
+    try:
         with tempfile.NamedTemporaryFile(
             delete=False, suffix=f".{str(file.filename).split('.')[-1]}"
         ) as temp_file:
             temp_file.write(file.file.read())
-            megaparse = MegaParse(parser=parser)
             result = await megaparse.aload(file_path=temp_file.name)
             return {"message": "File parsed successfully", "result": result}
     except Exception as e:
