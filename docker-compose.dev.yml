@@ -1,0 +1,22 @@
+version: "3.8"
+
+services:
+  megaparse:
+    build:
+      context: .
+      dockerfile: Dockerfile
+      cache_from:
+        - megaparse:latest
+      args:
+        - DEV_MODE=true
+    image: megaparse:latest
+    extra_hosts:
+      - "host.docker.internal:host-gateway"
+    container_name: megaparse
+    volumes:
+      - ./:/app/
+    command: >
+      /bin/bash -c "python -m uvicorn megaparse.api.app:app --host 0.0.0.0 --log-level info --reload --port 8000"
+    restart: always
+    ports:
+      - 8000:8000

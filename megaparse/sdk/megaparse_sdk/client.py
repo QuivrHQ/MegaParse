@@ -1,22 +1,25 @@
-import os
 from typing import Any
 
 import httpx
 
+from .config import MegaparseConfig
+
 
 class MegaParseClient:
-    def __init__(self, api_key: str | None = None):
-        self.base_url = os.getenv(
-            "MEGAPARSE_URL", "https://megaparse.tooling.quivr.app"
-        )
-
-        self.api_key = api_key
+    def __init__(
+        self,
+        api_key: str | None = None,
+        base_url: str | None = None,
+    ):
+        config = MegaparseConfig()
+        self.base_url = base_url or config.url
+        self.api_key = api_key or config.api_key
         if self.api_key:
             self.session = httpx.AsyncClient(
-                headers={"x-api-key": self.api_key}, timeout=60
+                headers={"x-api-key": self.api_key}, timeout=config.timeout
             )
         else:
-            self.session = httpx.AsyncClient(timeout=60)
+            self.session = httpx.AsyncClient(timeout=config.timeout)
 
     async def request(self, method: str, endpoint: str, **kwargs: Any) -> Any:
         url = f"{self.base_url}{endpoint}"

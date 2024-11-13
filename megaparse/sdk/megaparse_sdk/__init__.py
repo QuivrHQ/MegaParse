@@ -4,8 +4,8 @@ from .endpoints.url_upload import URLUpload
 
 
 class MegaParseSDK:
-    def __init__(self, api_key: str):
-        self.client = MegaParseClient(api_key)
+    def __init__(self, api_key: str | None = None, base_url: str | None = None):
+        self.client = MegaParseClient(api_key, base_url)
         self.file = FileUpload(self.client)
         self.url = URLUpload(self.client)
 
