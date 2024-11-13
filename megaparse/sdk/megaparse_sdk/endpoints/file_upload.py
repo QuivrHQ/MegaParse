@@ -3,6 +3,7 @@ from typing import Optional
 from httpx import Response
 from megaparse_sdk.client import MegaParseClient
 from megaparse_sdk.utils.type import Language, ParserType, StrategyEnum
+import json
 
 
 class FileUpload:
@@ -19,14 +20,21 @@ class FileUpload:
         parsing_instruction: Optional[str] = None,
         model_name: str = "gpt-4o",
     ) -> Response:
+        mc_data = {
+            "method": method,
+            "strategy": strategy,
+            "check_table": check_table,
+            "language": language.value,
+            "parsing_instruction": parsing_instruction,
+            "model_name": model_name,
+        }
         with open(file_path, "rb") as file:
-            files = {"file": (file_path, file)}
-            data = {
-                "method": method,
-                "strategy": strategy,
-                "check_table": check_table,
-                "language": language.value,
-                "parsing_instruction": parsing_instruction,
-                "model_name": model_name,
+            multipart_data = {
+                "parser_config": (None, json.dumps(mc_data), "application/json"),
+                "file": (file_path, file),
             }
-            return await self.client.request("POST", "/v1/file", files=files, data=data)
+            return await self.client.request(
+                "POST",
+                "/v1/file",
+                files=multipart_data,
+            )

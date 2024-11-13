@@ -101,11 +101,7 @@ class UnstructuredParser(MegaParser):
 
     async def convert(self, file_path, **kwargs) -> str:
         # Partition the PDF
-        elements = partition(
-            filename=str(file_path),
-            strategy=self.strategy,
-            skip_infer_table_types=[],
-        )
+        elements = partition(filename=str(file_path), strategy=self.strategy)
         elements_dict = [el.to_dict() for el in elements]
         markdown_content = self.convert_to_markdown(elements_dict)
         return markdown_content

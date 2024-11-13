@@ -7,7 +7,8 @@ import httpx
 class MegaParseClient:
     def __init__(self, api_key: str | None = None):
         self.base_url = os.getenv(
-            "MEGAPARSE_URL", "https://megaparse.tooling.quivr.app"
+            "MEGAPARSE_URL",
+            "http://localhost:8000",  # https://megaparse.tooling.quivr.app"
         )
 
         self.api_key = api_key
