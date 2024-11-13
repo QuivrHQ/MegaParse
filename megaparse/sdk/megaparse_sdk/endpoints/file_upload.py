@@ -1,3 +1,4 @@
+from enum import Enum
 from typing import Optional
 
 from httpx import Response
@@ -22,10 +23,10 @@ class FileUpload:
         with open(file_path, "rb") as file:
             files = {"file": (file_path, file)}
             data = {
-                "method": method,
-                "strategy": strategy,
+                "method": method.value if isinstance(method, Enum) else method,
+                "strategy": strategy.value if isinstance(strategy, Enum) else strategy,
                 "check_table": check_table,
-                "language": language.value,
+                "language": language.value if isinstance(language, Enum) else language,
                 "parsing_instruction": parsing_instruction,
                 "model_name": model_name,
             }

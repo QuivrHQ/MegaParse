@@ -1,9 +1,10 @@
 import os
 import tempfile
+from typing import Optional
 
 import httpx
 import psutil
-from fastapi import Depends, FastAPI, File, HTTPException, UploadFile
+from fastapi import Depends, FastAPI, File, Form, HTTPException, UploadFile
 from langchain_anthropic import ChatAnthropic
 from langchain_community.document_loaders import PlaywrightURLLoader
 from langchain_openai import ChatOpenAI
@@ -46,12 +47,12 @@ def _check_free_memory() -> bool:
 @app.post("/v1/file")
 async def parse_file(
     file: UploadFile = File(...),
-    method: ParserType = ParserType.UNSTRUCTURED,
-    strategy: StrategyEnum = StrategyEnum.AUTO,
-    check_table=False,
-    language: Language = Language.ENGLISH,
-    parsing_instruction: str | None = None,
-    model_name: str | None = None,
+    method: ParserType = Form(ParserType.UNSTRUCTURED),
+    strategy: StrategyEnum = Form(StrategyEnum.AUTO),
+    check_table: bool = Form(False),
+    language: Language = Form(Language.ENGLISH),
+    parsing_instruction: Optional[str] = Form(None),
+    model_name: Optional[str] = Form("gpt-4o"),
     parser_builder=Depends(parser_builder_dep),
 ) -> dict[str, str]:
     if not _check_free_memory():
@@ -59,7 +60,7 @@ async def parse_file(
             status_code=503, detail="Service unavailable due to low memory"
         )
     model = None
-    if model_name:
+    if model_name and check_table:
         if model_name.startswith("gpt"):
             model = ChatOpenAI(model=model_name, api_key=os.getenv("OPENAI_API_KEY"))  # type: ignore
         elif model_name.startswith("claude"):

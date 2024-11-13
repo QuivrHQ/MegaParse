@@ -33,7 +33,7 @@ class UnstructuredParser(MegaParser):
         metadata = el["metadata"]
         parent_id = metadata.get("parent_id", None)
         category_depth = metadata.get("category_depth", 0)
-        table_stack = []
+        table_stack = []  # type: ignore
 
         if "emphasized_text_contents" in metadata:
             print(metadata["emphasized_text_contents"])
@@ -69,8 +69,8 @@ class UnstructuredParser(MegaParser):
                     (
                         "human",
                         """You are an expert in markdown tables, match this text and this html table to fill a md table. You answer with just the table in pure markdown, nothing else.
-                        <TEXT> 
-                        {text} 
+                        <TEXT>
+                        {text}
                         </TEXT>
                         <HTML>
                         {html}
