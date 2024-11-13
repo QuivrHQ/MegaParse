@@ -1,0 +1,16 @@
+version: "3.8"
+
+services:
+  megaparse:
+    image: megaparse:latest
+    pull_policy: if_not_present
+    container_name: megaparse
+    extra_hosts:
+      - "host.docker.internal:host-gateway"
+    healthcheck:
+      test: [ "CMD", "curl", "http://localhost:5050/healthz" ]
+    command: >
+      /bin/bash -c "python -m uvicorn megaparse.api.app:app --host 0.0.0.0 --log-level info --reload --port 8000 --loop uvloop"
+    restart: always
+    ports:
+      - 8000:8000
