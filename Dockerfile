@@ -45,4 +45,4 @@ ENV PYTHONPATH="/app:/app/megaparse/sdk"
 COPY . .
 EXPOSE 8000
 
-CMD ["uvicorn", "megaparse.api.app:app", "--host", "0.0.0.0", "--port", "8000", "--workers", "3"]
+CMD ["uvicorn", "megaparse.api.app:app", "--host", "0.0.0.0", "--port", "8000", "--workers", "4"]

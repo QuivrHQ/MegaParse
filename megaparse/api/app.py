@@ -88,12 +88,12 @@ async def parse_file(
     )
 
     # TODO: move to function or metaclass in Megaparse
-    if hash(parser_config) in _megaparse_instances_cache:
-        megaparse = _megaparse_instances_cache[hash(parser_config)]
-    else:
-        parser = parser_builder.build(parser_config)
-        megaparse = MegaParse(parser=parser)
-        _megaparse_instances_cache[hash(parser_config)] = megaparse
+    # if hash(out_parser_config) in _megaparse_instances_cache:
+    #     megaparse = _megaparse_instances_cache[hash(out_parser_config)]
+    # else:
+    parser = parser_builder.build(out_parser_config)
+    megaparse = MegaParse(parser=parser)
+    # _megaparse_instances_cache[hash(out_parser_config)] = megaparse
 
     try:
         with tempfile.NamedTemporaryFile(

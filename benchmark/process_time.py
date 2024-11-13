@@ -13,10 +13,10 @@ async def process_file(megaparse: MegaParseSDK, file_path):
         response = await megaparse.file.upload(
             file_path=file_path,
             method="unstructured",  # type: ignore  # unstructured, llama_parser, megaparse_vision
-            strategy="fast",
+            strategy="auto",
         )
-        await megaparse.close()
-        return time.perf_counter() - t0
+        total = time.perf_counter() - t0
+        return total
     except Exception as e:
         print(f"Exception occured: {e}")
         return None
@@ -30,9 +30,8 @@ async def test_process_folder(folder_path, api_key):
     task = []
 
     megaparse = MegaParseSDK(api_key)
-    for file in files[:10]:
+    for file in files:
         task.append(process_file(megaparse, os.path.join(folder_path, file)))
-
     list_process_time = await asyncio.gather(*task)
 
     n_errors = sum([t is None for t in list_process_time])
@@ -40,7 +39,7 @@ async def test_process_folder(folder_path, api_key):
 
     np_list_process_time = np.array(list_process_time)
     print(f"All errors : {n_errors}")
-    print(f"Average time taken: {np_list_process_time.mean}")
+    print(f"Average time taken: {np_list_process_time.mean()}")
     print(f"Median time taken: {np.median(list_process_time)}")
     print(f"Standard deviation of time taken: {np.std(list_process_time)}")
     print(f"Max time taken: {np.max(list_process_time)}")
