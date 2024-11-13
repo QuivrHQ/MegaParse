@@ -1,7 +1,7 @@
 import asyncio
 import os
 
-from megaparse_sdk import MegaParseSDK
+from megaparse.sdk import MegaParseSDK
 
 
 async def main():
@@ -20,7 +20,7 @@ async def main():
     response = await megaparse.file.upload(
         file_path=file_path,
         method="unstructured",  # type: ignore  # unstructured, llama_parser, megaparse_vision
-        strategy="auto",
+        strategy="fast",
     )
     print(f"\n----- File Response : {file_path} -----\n")
     print(response)
