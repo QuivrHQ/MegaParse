@@ -12,7 +12,8 @@ requires-python = ">= 3.11"
 
 dependencies = [
     "python-dotenv>=1.0.0",
-    "uvloop>=0.21.0",
+    "uvloop>=0.18.0",
+    "pydantic-settings>=2.6.1",
 ]
 
 [project.optional-dependencies]
@@ -25,13 +26,13 @@ all = [
     "psutil>=6.1.0",
     "numpy<=2.0.0",
     "playwright>=1.47.0",
-    "langchain-anthropic>=0.2.3",
+    "langchain-anthropic>=0.1.23",
     "python-magic>=0.4.27",
     "unstructured[all-docs]==0.15.0",
-    "langchain>=0.2.0",
+    "langchain>=0.2.14,<0.3.0",
     "langchain-community>=0.2.0",
-    "langchain-openai>=0.1.0",
-    "langchain-core>=0.2.0",
+    "langchain-openai>=0.1.21",
+    "langchain-core>=0.2.38",
     "llama-parse>=0.4.0",
     "uvicorn>=0.32.0",
     "fastapi>=0.115.2",
