@@ -1,5 +1,18 @@
 # Changelog
 
+## [0.0.43](https://github.com/QuivrHQ/MegaParse/compare/megaparse-v0.0.42...megaparse-v0.0.43) (2024-11-14)
+
+
+### Features
+
+* increase the robustness of megaparse ([#121](https://github.com/QuivrHQ/MegaParse/issues/121)) ([d21d8bb](https://github.com/QuivrHQ/MegaParse/commit/d21d8bb77bd8e687b1a951db6b81653e4e47a8bb))
+
+
+### Bug Fixes
+
+* uvicorn version ([#127](https://github.com/QuivrHQ/MegaParse/issues/127)) ([ceaba3d](https://github.com/QuivrHQ/MegaParse/commit/ceaba3df2951be27e6a4835e5784917a62867896))
+* version requirements ([#126](https://github.com/QuivrHQ/MegaParse/issues/126)) ([a10d502](https://github.com/QuivrHQ/MegaParse/commit/a10d502f1b3576690cebe33b656d2480a24defe3))
+
 ## [0.0.42](https://github.com/QuivrHQ/MegaParse/compare/megaparse-v0.0.41...megaparse-v0.0.42) (2024-11-08)
 
 
