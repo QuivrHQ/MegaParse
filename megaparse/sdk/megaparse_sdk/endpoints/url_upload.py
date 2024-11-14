@@ -1,4 +1,4 @@
-from megaparse_sdk.client import MegaParseClient
+from megaparse.sdk.megaparse_sdk.client import MegaParseClient
 
 
 class URLUpload:
