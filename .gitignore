@@ -15,3 +15,4 @@ venv
 !megaparse/tests/output_tests/MegaFake_report.md
 *.DS_Store
 .tool-versions
+megaparse/sdk/examples/only_pdfs/*
