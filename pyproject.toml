@@ -1,6 +1,6 @@
 [project]
 name = "megaparse"
-version = "0.0.42"
+version = "0.0.43"
 description = "Parse complex files (PDF,Docx,PPTX) for LLM consumption"
 authors = [
     { name = "Stan Girard", email = "stan@quivr.app" },
