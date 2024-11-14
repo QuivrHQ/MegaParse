@@ -10,7 +10,6 @@
 #   universal: true
 
 -e file:.
--e file:megaparse/sdk
 aiohappyeyeballs==2.4.3
     # via aiohttp
 aiohttp==3.10.10
@@ -146,7 +145,6 @@ httpx==0.27.2
     # via llama-index-core
     # via llama-index-legacy
     # via llamaindex-py-client
-    # via megaparse-sdk
     # via openai
     # via unstructured-client
 huggingface-hub==0.26.2
@@ -410,7 +408,6 @@ protobuf==5.28.3
     # via proto-plus
 psutil==6.1.0
     # via megaparse
-    # via megaparse-sdk
     # via unstructured
 pyasn1==0.6.1
     # via pyasn1-modules
@@ -423,7 +420,6 @@ pycparser==2.22 ; platform_python_implementation != 'PyPy'
     # via cffi
 pycryptodome==3.21.0
     # via megaparse
-    # via megaparse-sdk
 pydantic==2.9.2
     # via anthropic
     # via fastapi
@@ -465,7 +461,6 @@ python-docx==1.1.2
     # via unstructured
 python-dotenv==1.0.1
     # via megaparse
-    # via megaparse-sdk
     # via pydantic-settings
 python-iso639==2024.10.22
     # via unstructured
