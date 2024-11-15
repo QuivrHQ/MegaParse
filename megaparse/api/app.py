@@ -15,6 +15,7 @@ from megaparse.core.megaparse import MegaParse
 from megaparse.core.parser.builder import ParserBuilder
 from megaparse.core.parser.type import ParserConfig, ParserType
 from megaparse.core.parser.unstructured_parser import StrategyEnum, UnstructuredParser
+import uvicorn
 
 app = FastAPI()
 
@@ -133,3 +134,7 @@ async def upload_url(
             "message": "Website content parsed successfully",
             "result": extracted_content,
         }
+
+
+if __name__ == "__main__":
+    uvicorn.run(app, host="0.0.0.0", port=8000)

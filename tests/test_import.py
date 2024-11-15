@@ -1,10 +1,10 @@
 import pytest
 from llama_parse.utils import Language
-from megaparse_sdk.utils.type import StrategyEnum
 
 from megaparse.core.megaparse import MegaParse
 from megaparse.core.parser.unstructured_parser import UnstructuredParser
 from megaparse.sdk.megaparse_sdk import MegaParseSDK
+from megaparse.sdk.megaparse_sdk.utils.type import StrategyEnum
 
 
 @pytest.mark.skip("slow test")
