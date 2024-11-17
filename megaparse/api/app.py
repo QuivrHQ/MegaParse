@@ -1,3 +1,4 @@
+import io
 import os
 import tempfile
 
@@ -84,11 +85,14 @@ async def parse_file(
         parser = parser_builder.build(parser_config)
 
         megaparse = MegaParse(parser=parser)
-        result = await megaparse.aload(
-            file=file.file, file_extension=file.filename.split(".")[-1]
-        )
+        _, extension = os.path.splitext(file.filename)
+        file_bytes = await file.read()
+        file_stream = io.BytesIO(file_bytes)
+
+        result = await megaparse.aload(file=file_stream, file_extension=extension)
         return {"message": "File parsed successfully", "result": result}
     except Exception as e:
+        print(e)
         raise HTTPException(status_code=500, detail=str(e))
 
 

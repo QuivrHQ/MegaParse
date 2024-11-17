@@ -107,6 +107,13 @@ class UnstructuredParser(BaseParser):
         file: IO[bytes] | None = None,
         **kwargs,
     ) -> str:
+        params = {
+            "filename": str(file_path) if file_path else None,
+            "file": file if file else None,
+            "strategy": self.strategy,
+            "skip_infer_table_types": [],
+        }
+        print(params)
         # Partition the PDF
         elements = partition(
             filename=str(file_path) if file_path else None,
