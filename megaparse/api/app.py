@@ -10,7 +10,7 @@ from langchain_community.document_loaders import PlaywrightURLLoader
 from langchain_openai import ChatOpenAI
 from llama_parse.utils import Language
 
-from megaparse.api.utils.type import HTTPModelNotSupported
+from megaparse.api.utils.type import APIOutputType, HTTPModelNotSupported
 from megaparse.core.megaparse import MegaParse
 from megaparse.core.parser.builder import ParserBuilder
 from megaparse.core.parser.type import ParserConfig, ParserType
@@ -44,7 +44,10 @@ def _check_free_memory() -> bool:
     return True
 
 
-@app.post("/v1/file")
+@app.post(
+    "/v1/file",
+    response_model=APIOutputType,
+)
 async def parse_file(
     file: UploadFile = File(...),
     method: ParserType = ParserType.UNSTRUCTURED,
@@ -85,6 +88,8 @@ async def parse_file(
         parser = parser_builder.build(parser_config)
 
         megaparse = MegaParse(parser=parser)
+        if not file.filename:
+            raise Exception("No filename provided")
         _, extension = os.path.splitext(file.filename)
         file_bytes = await file.read()
         file_stream = io.BytesIO(file_bytes)
@@ -92,11 +97,13 @@ async def parse_file(
         result = await megaparse.aload(file=file_stream, file_extension=extension)
         return {"message": "File parsed successfully", "result": result}
     except Exception as e:
-        print(e)
         raise HTTPException(status_code=500, detail=str(e))
 
 
-@app.post("/v1/url")
+@app.post(
+    "/v1/url",
+    response_model=APIOutputType,
+)
 async def upload_url(
     url: str, playwright_loader=Depends(get_playwright_loader)
 ) -> dict[str, str]:

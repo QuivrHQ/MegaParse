@@ -3,6 +3,8 @@ from typing import Optional
 from httpx import Response
 from megaparse.sdk.megaparse_sdk.client import MegaParseClient
 from megaparse.sdk.megaparse_sdk.utils.type import Language, ParserType, StrategyEnum
+import asyncio
+import httpx
 
 
 class FileUpload:
@@ -18,6 +20,7 @@ class FileUpload:
         language: Language = Language.ENGLISH,
         parsing_instruction: Optional[str] = None,
         model_name: str = "gpt-4o",
+        max_retries: int = 3,
     ) -> Response:
         with open(file_path, "rb") as file:
             files = {"file": (file_path, file)}
@@ -29,4 +32,14 @@ class FileUpload:
                 "parsing_instruction": parsing_instruction,
                 "model_name": model_name,
             }
-            return await self.client.request("POST", "/v1/file", files=files, data=data)
+            for attempt in range(max_retries):
+                try:
+                    response = await self.client.request(
+                        "POST", "/v1/file", files=files, data=data
+                    )
+                    return response
+                except (httpx.HTTPStatusError, httpx.RequestError) as e:
+                    if attempt < max_retries - 1:
+                        await asyncio.sleep(2**attempt)  # Exponential backoff
+
+            raise RuntimeError("Can't send file to the server.")

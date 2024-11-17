@@ -1,3 +1,8 @@
+import asyncio
+
+import httpx
+from httpx import Response
+
 from megaparse.sdk.megaparse_sdk.client import MegaParseClient
 
 
@@ -5,7 +10,17 @@ class URLUpload:
     def __init__(self, client: MegaParseClient):
         self.client = client
 
-    async def upload(self, url: str):
+    async def upload(self, url: str, max_retries: int = 3) -> Response:
         endpoint = f"/v1/url?url={url}"
         headers = {"accept": "application/json"}
-        return await self.client.request("POST", endpoint, headers=headers, data="")
+        for attempt in range(max_retries):
+            try:
+                response = await self.client.request(
+                    "POST", endpoint, headers=headers, data=""
+                )
+                return response
+            except (httpx.HTTPStatusError, httpx.RequestError):
+                if attempt < max_retries - 1:
+                    await asyncio.sleep(2**attempt)  # Exponential backoff
+
+        raise RuntimeError("Can't upload URL to the server.")

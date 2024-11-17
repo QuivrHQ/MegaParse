@@ -1,5 +1,7 @@
 from enum import Enum
+
 from fastapi import HTTPException, status
+from pydantic import BaseModel
 
 
 class HTTPModelNotSupported(HTTPException):
@@ -54,3 +56,10 @@ class FileExtension(str, Enum):
     JSON = ".json"
     MD = ".md"
     MARKDOWN = ".markdown"
+
+
+class APIOutputType(BaseModel):
+    """API output type."""
+
+    message: str
+    result: str
