@@ -82,13 +82,12 @@ async def parse_file(
     )
     try:
         parser = parser_builder.build(parser_config)
-        with tempfile.NamedTemporaryFile(
-            delete=False, suffix=f".{str(file.filename).split('.')[-1]}"
-        ) as temp_file:
-            temp_file.write(file.file.read())
-            megaparse = MegaParse(parser=parser)
-            result = await megaparse.aload(file_path=temp_file.name)
-            return {"message": "File parsed successfully", "result": result}
+
+        megaparse = MegaParse(parser=parser)
+        result = await megaparse.aload(
+            file=file.file, file_extension=file.filename.split(".")[-1]
+        )
+        return {"message": "File parsed successfully", "result": result}
     except Exception as e:
         raise HTTPException(status_code=500, detail=str(e))
 

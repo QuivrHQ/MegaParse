@@ -9,7 +9,7 @@ from langchain_core.language_models.chat_models import BaseChatModel
 from langchain_core.messages import HumanMessage
 from pdf2image import convert_from_path
 
-from megaparse.core.parser import MegaParser
+from megaparse.core.parser import BaseParser
 from megaparse.core.parser.entity import SupportedModel, TagEnum
 
 # BASE_OCR_PROMPT = """
@@ -51,7 +51,7 @@ Follow these instructions to complete the task:
 """
 
 
-class MegaParseVision(MegaParser):
+class MegaParseVision(BaseParser):
     def __init__(self, model: BaseChatModel, **kwargs):
         if hasattr(model, "model_name"):
             if not SupportedModel.is_supported(model.model_name):

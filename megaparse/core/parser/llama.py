@@ -5,10 +5,10 @@ from typing import List
 from llama_index.core.schema import Document as LlamaDocument
 from llama_parse import LlamaParse as _LlamaParse
 from llama_parse.utils import Language, ResultType
-from megaparse.core.parser import MegaParser
+from megaparse.core.parser import BaseParser
 
 
-class LlamaParser(MegaParser):
+class LlamaParser(BaseParser):
     def __init__(
         self,
         api_key: str,
