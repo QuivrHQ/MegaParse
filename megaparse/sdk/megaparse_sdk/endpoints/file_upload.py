@@ -34,21 +34,17 @@ class FileUpload:
         )
         with open(file_path, "rb") as file:
             files = {"file": (file_path, file)}
-            data = {
-                "method": method,
-                "strategy": strategy,
-                "check_table": check_table,
-                "language": language.value,
-                "parsing_instruction": parsing_instruction,
-                "model_name": model_name,
-            }
             for attempt in range(max_retries):
                 try:
                     response = await self.client.request(
-                        "POST", "/v1/file", files=files, data=data
+                        "POST",
+                        "/v1/file",
+                        files=files,
+                        data=data.model_dump(mode="json"),
                     )
                     return response
                 except (httpx.HTTPStatusError, httpx.RequestError) as e:
+                    print(e)
                     if attempt < max_retries - 1:
                         await asyncio.sleep(2**attempt)  # Exponential backoff
 
