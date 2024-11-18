@@ -4,18 +4,18 @@ from typing import Optional
 
 import httpx
 import psutil
+import uvicorn
 from fastapi import Depends, FastAPI, File, Form, HTTPException, UploadFile
 from langchain_anthropic import ChatAnthropic
 from langchain_community.document_loaders import PlaywrightURLLoader
 from langchain_openai import ChatOpenAI
 from llama_parse.utils import Language
 
-from megaparse.api.utils.type import HTTPModelNotSupported
+from megaparse.api.utils.type import HTTPModelNotSupported, SupportedModel
 from megaparse.core.megaparse import MegaParse
 from megaparse.core.parser.builder import ParserBuilder
 from megaparse.core.parser.type import ParserConfig, ParserType
 from megaparse.core.parser.unstructured_parser import StrategyEnum, UnstructuredParser
-import uvicorn
 
 app = FastAPI()
 
@@ -53,7 +53,7 @@ async def parse_file(
     check_table: bool = Form(False),
     language: Language = Form(Language.ENGLISH),
     parsing_instruction: Optional[str] = Form(None),
-    model_name: Optional[str] = Form("gpt-4o"),
+    model_name: Optional[SupportedModel] = Form(SupportedModel.GPT_4O),
     parser_builder=Depends(parser_builder_dep),
 ) -> dict[str, str]:
     if not _check_free_memory():
