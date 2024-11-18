@@ -25,7 +25,6 @@ async def test_load_SDK():
         "strategy": StrategyEnum.FAST,
         "language": Language.FRENCH,
     }
-    print("CA EXISSTE ?", os.path.exists("./tests/data/dummy.pdf"))
     response = await megaparse.file.upload("./tests/data/dummy.pdf", **data)
     print(response["result"])
     assert response["result"].strip("\n") == "# Dummy PDF download"

@@ -13,6 +13,5 @@ class URLUpload:
     async def upload(self, url: str, max_retries: int = 3) -> Response:
         endpoint = f"/v1/url?url={url}"
         headers = {"accept": "application/json"}
-
         response = await self.client.request("POST", endpoint, headers=headers, data="")
         return response

@@ -98,21 +98,22 @@ async def parse_file(
     )
     try:
         parser = parser_builder.build(parser_config)
-
         megaparse = MegaParse(parser=parser)
         if not file.filename:
             raise HTTPFileNotFound("No filename provided")
         _, extension = os.path.splitext(file.filename)
         file_bytes = await file.read()
         file_stream = io.BytesIO(file_bytes)
-
         result = await megaparse.aload(file=file_stream, file_extension=extension)
         return {"message": "File parsed successfully", "result": result}
-    except ParsingException:
+    except ParsingException as e:
+        print(e)
         raise HTTPParsingException(file.filename)
     except ValueError as e:
+        print(e)
         raise HTTPException(status_code=400, detail=str(e))
     except Exception as e:
+        print(e)
         raise HTTPException(status_code=500, detail=str(e))
 
 
