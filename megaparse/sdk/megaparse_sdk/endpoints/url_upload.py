@@ -13,14 +13,6 @@ class URLUpload:
     async def upload(self, url: str, max_retries: int = 3) -> Response:
         endpoint = f"/v1/url?url={url}"
         headers = {"accept": "application/json"}
-        for attempt in range(max_retries):
-            try:
-                response = await self.client.request(
-                    "POST", endpoint, headers=headers, data=""
-                )
-                return response
-            except (httpx.HTTPStatusError, httpx.RequestError) as e:
-                if attempt < max_retries - 1:
-                    await asyncio.sleep(2**attempt)  # Exponential backoff
 
-        raise RuntimeError("Can't upload URL to the server.")
+        response = await self.client.request("POST", endpoint, headers=headers, data="")
+        return response

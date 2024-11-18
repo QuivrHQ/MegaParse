@@ -22,7 +22,6 @@ class FileUpload:
         language: Language = Language.ENGLISH,
         parsing_instruction: Optional[str] = None,
         model_name: str = "gpt-4o",
-        max_retries: int = 3,
     ) -> Response:
         data = UploadFileConfig(
             method=method,
@@ -34,17 +33,11 @@ class FileUpload:
         )
         with open(file_path, "rb") as file:
             files = {"file": (file_path, file)}
-            for attempt in range(max_retries):
-                try:
-                    response = await self.client.request(
-                        "POST",
-                        "/v1/file",
-                        files=files,
-                        data=data.model_dump(mode="json"),
-                    )
-                    return response
-                except (httpx.HTTPStatusError, httpx.RequestError) as e:
-                    if attempt < max_retries - 1:
-                        await asyncio.sleep(2**attempt)  # Exponential backoff
 
-            raise RuntimeError("Can't send file to the server.")
+            response = await self.client.request(
+                "POST",
+                "/v1/file",
+                files=files,
+                data=data.model_dump(mode="json"),
+            )
+            return response
