@@ -3,7 +3,7 @@ from typing import Optional
 from httpx import Response
 
 from megaparse.sdk.megaparse_sdk.client import MegaParseClient
-from megaparse.sdk.megaparse_sdk.config import UploadFileInput
+from megaparse.sdk.megaparse_sdk.config import UploadFileConfig
 from megaparse.sdk.megaparse_sdk.utils.type import Language, ParserType, StrategyEnum
 
 
@@ -21,7 +21,7 @@ class FileUpload:
         parsing_instruction: Optional[str] = None,
         model_name: str = "gpt-4o",
     ) -> Response:
-        data = UploadFileInput(
+        data = UploadFileConfig(
             method=method,
             strategy=strategy,
             check_table=check_table,

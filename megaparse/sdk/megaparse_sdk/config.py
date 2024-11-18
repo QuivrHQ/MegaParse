@@ -17,7 +17,7 @@ class MegaparseConfig(BaseSettings):
     timeout: int = 600
 
 
-class UploadFileInput(BaseModel):
+class UploadFileConfig(BaseModel):
     method: ParserType = ParserType.UNSTRUCTURED
     strategy: StrategyEnum = StrategyEnum.AUTO
     check_table: bool = False
