@@ -12,6 +12,12 @@ from langchain_community.document_loaders import PlaywrightURLLoader
 from langchain_openai import ChatOpenAI
 from llama_parse.utils import Language
 
+from megaparse.api.utils.exceptions import (
+    HTTPDownloadError,
+    HTTPFileNotFound,
+    HTTPParsingException,
+    ParsingException,
+)
 from megaparse.api.utils.type import (
     APIOutputType,
     HTTPModelNotSupported,
@@ -95,13 +101,15 @@ async def parse_file(
 
         megaparse = MegaParse(parser=parser)
         if not file.filename:
-            raise Exception("No filename provided")
+            raise HTTPFileNotFound("No filename provided")
         _, extension = os.path.splitext(file.filename)
         file_bytes = await file.read()
         file_stream = io.BytesIO(file_bytes)
 
         result = await megaparse.aload(file=file_stream, file_extension=extension)
         return {"message": "File parsed successfully", "result": result}
+    except ParsingException:
+        raise HTTPParsingException(file.filename)
     except Exception as e:
         raise HTTPException(status_code=500, detail=str(e))
 
@@ -121,7 +129,7 @@ async def upload_url(
         async with httpx.AsyncClient() as client:
             response = await client.get(url)
         if response.status_code != 200:
-            raise HTTPException(status_code=400, detail="Failed to download the file")
+            raise HTTPDownloadError(url)
 
         with tempfile.NamedTemporaryFile(delete=False, suffix="pdf") as temp_file:
             temp_file.write(response.content)
@@ -129,10 +137,10 @@ async def upload_url(
                 megaparse = MegaParse(
                     parser=UnstructuredParser(strategy=StrategyEnum.AUTO)
                 )
-                result = megaparse.load(temp_file.name)
+                result = await megaparse.aload(temp_file.name)
                 return {"message": "File parsed successfully", "result": result}
-            except Exception as e:
-                raise HTTPException(status_code=500, detail=str(e))
+            except ParsingException:
+                raise HTTPParsingException(url)
     else:
         data = await playwright_loader.aload()
         # Now turn the data into a string
@@ -140,9 +148,9 @@ async def upload_url(
         for page in data:
             extracted_content += page.page_content
         if not extracted_content:
-            raise HTTPException(
-                status_code=400,
-                detail="Failed to extract content from the website, have you provided the correct and entire URL?",
+            raise HTTPDownloadError(
+                url,
+                message="Failed to extract content from the website. Valid URL example : https://www.quivr.com",
             )
         return {
             "message": "Website content parsed successfully",

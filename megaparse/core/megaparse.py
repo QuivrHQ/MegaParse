@@ -9,6 +9,7 @@ from megaparse.core.parser.unstructured_parser import UnstructuredParser
 
 from megaparse.core.parser import BaseParser
 from megaparse.core.checker.format_checker import FormatChecker
+from megaparse.core.utils.exceptions import ParsingException
 
 
 class MegaParse:
@@ -54,8 +55,6 @@ class MegaParse:
                 )
 
         try:
-            print("file_path", file_path)
-            print("file", file)
             parsed_document: str = await self.parser.convert(
                 file_path=file_path, file=file
             )
@@ -64,7 +63,7 @@ class MegaParse:
             #     parsed_document: str = await self.format_checker.check(parsed_document)
 
         except Exception as e:
-            raise ValueError(f"Error while parsing {file_path}: {e}")
+            raise ParsingException(f"Error while parsing {file_path}: {e}")
 
         self.last_parsed_document = parsed_document
         return parsed_document
