@@ -204,7 +204,7 @@
 ## 0.0.15 (2024-06-26)
 
 ## What's Changed
-* add: llm BaseParser by @chloedia in https://github.com/QuivrHQ/MegaParse/pull/42
+* add: llm megaparser by @chloedia in https://github.com/QuivrHQ/MegaParse/pull/42
 
 
 **Full Changelog**: https://github.com/QuivrHQ/MegaParse/compare/v0.0.14...v0.0.15
