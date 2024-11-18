@@ -110,6 +110,8 @@ async def parse_file(
         return {"message": "File parsed successfully", "result": result}
     except ParsingException:
         raise HTTPParsingException(file.filename)
+    except ValueError as e:
+        raise HTTPException(status_code=400, detail=str(e))
     except Exception as e:
         raise HTTPException(status_code=500, detail=str(e))
 

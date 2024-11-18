@@ -28,15 +28,20 @@ class MegaParse:
         file: IO[bytes] | None = None,
         file_extension: str | None = "",
     ) -> str:
-        assert file_path or file, "Either file_path or file should be provided"
+        if not (file_path or file):
+            raise ValueError("Either file_path or file should be provided")
+        if file_path and file:
+            raise ValueError("Only one of file_path or file should be provided")
+
         if file_path:
             if isinstance(file_path, str):
                 file_path = Path(file_path)
             file_extension = file_path.suffix
         elif file:
-            assert (
-                file_extension
-            ), "file_extension should be provided when given file argument"
+            if not file_extension:
+                raise ValueError(
+                    "file_extension should be provided when given file argument"
+                )
             file.seek(0)
 
         try:
