@@ -1,5 +1,12 @@
 # Changelog
 
+## [0.0.44](https://github.com/QuivrHQ/MegaParse/compare/megaparse-v0.0.43...megaparse-v0.0.44) (2024-11-18)
+
+
+### Bug Fixes
+
+* fixing the wrong passing of arguments to the parse_file endpoint ([#123](https://github.com/QuivrHQ/MegaParse/issues/123)) ([9105672](https://github.com/QuivrHQ/MegaParse/commit/9105672abc0942f26785e494053112d486e8d2d9))
+
 ## [0.0.43](https://github.com/QuivrHQ/MegaParse/compare/megaparse-v0.0.42...megaparse-v0.0.43) (2024-11-14)
 
 
