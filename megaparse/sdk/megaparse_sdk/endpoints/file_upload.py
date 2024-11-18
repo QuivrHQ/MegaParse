@@ -1,10 +1,12 @@
+import asyncio
 from typing import Optional
 
-from httpx import Response
-from megaparse.sdk.megaparse_sdk.client import MegaParseClient
-from megaparse.sdk.megaparse_sdk.utils.type import Language, ParserType, StrategyEnum
-import asyncio
 import httpx
+from httpx import Response
+
+from megaparse.sdk.megaparse_sdk.client import MegaParseClient
+from megaparse.sdk.megaparse_sdk.config import UploadFileConfig
+from megaparse.sdk.megaparse_sdk.utils.type import Language, ParserType, StrategyEnum
 
 
 class FileUpload:
@@ -15,13 +17,21 @@ class FileUpload:
         self,
         file_path: str,
         method: ParserType = ParserType.UNSTRUCTURED,
-        strategy: str = StrategyEnum.AUTO,
+        strategy: StrategyEnum = StrategyEnum.AUTO,
         check_table: bool = False,
         language: Language = Language.ENGLISH,
         parsing_instruction: Optional[str] = None,
         model_name: str = "gpt-4o",
         max_retries: int = 3,
     ) -> Response:
+        data = UploadFileConfig(
+            method=method,
+            strategy=strategy,
+            check_table=check_table,
+            language=language,
+            parsing_instruction=parsing_instruction,
+            model_name=model_name,
+        )
         with open(file_path, "rb") as file:
             files = {"file": (file_path, file)}
             data = {

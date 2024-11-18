@@ -14,6 +14,7 @@ dependencies = [
     "python-dotenv>=1.0.0",
     "uvloop>=0.18.0",
     "pydantic-settings>=2.6.1",
+    "uvicorn>=0.32.0",
 ]
 
 [project.optional-dependencies]
