@@ -20,7 +20,6 @@ class URLUpload:
                 )
                 return response
             except (httpx.HTTPStatusError, httpx.RequestError) as e:
-                print(e)
                 if attempt < max_retries - 1:
                     await asyncio.sleep(2**attempt)  # Exponential backoff
 
