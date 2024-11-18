@@ -10,7 +10,7 @@ async def test_parse_file_endpoint(test_client):
         data={
             "method": "unstructured",
             "strategy": "auto",
-            "language": "english",
+            "language": "en",
             "check_table": False,
         },
     )
