@@ -9,6 +9,9 @@ from unstructured.partition.auto import partition
 
 from megaparse.core.parser import BaseParser
 from megaparse.core.parser.type import StrategyEnum
+from pypdf import PdfReader
+import copy
+import time
 
 
 class UnstructuredParser(BaseParser):
@@ -98,18 +101,66 @@ class UnstructuredParser(BaseParser):
 
         return markdown_line
 
+    def get_strategy(
+        self,
+        file_path_: str | Path | None = None,
+        file_: IO[bytes] | None = None,
+        threshold=0.5,
+        page_threshold=0.8,
+    ) -> StrategyEnum:
+        t0 = time.perf_counter()
+        file = copy.deepcopy(file_)
+        file_path = copy.deepcopy(file_path_)
+
+        if self.strategy != StrategyEnum.AUTO:
+            raise ValueError("Strategy must be AUTO to use get_strategy")
+        reader: PdfReader | None = None
+        if file_path:
+            reader = PdfReader(file_path)  # accepts stream bytes
+        if file:
+            reader = PdfReader(file)
+
+        if reader is None:
+            raise ValueError("No file or file path provided")
+
+        image_proportion_per_pages = []
+
+        for page in reader.pages:
+            page_texts = page.extract_text()
+            page_images = page.images
+            image_proportion_per_pages.append(
+                len(page_images) / (len(page_texts) + len(page_images))
+            )
+        total_proportion = sum(
+            1 for prop in image_proportion_per_pages if prop > page_threshold
+        ) / len(reader.pages)
+
+        print(f"Time taken to get strategy: {time.perf_counter() - t0}")
+        print(f"Total proportion of images: {total_proportion}")
+        print(
+            f"Mean Image proportion per page: {sum(image_proportion_per_pages) / len(image_proportion_per_pages)}"
+        )
+
+        if total_proportion > threshold:
+            return StrategyEnum.HI_RES
+
+        return StrategyEnum.FAST
+
     async def convert(
         self,
         file_path: str | Path | None = None,
         file: IO[bytes] | None = None,
         **kwargs,
     ) -> str:
+        if self.strategy == StrategyEnum.AUTO:
+            self.strategy = self.get_strategy(file_path_=file_path, file_=file)
+
+        print(f"Strategy: {self.strategy}")
         # Partition the PDF
         elements = partition(
             filename=str(file_path) if file_path else None,
             file=file,
             strategy=self.strategy,
-            skip_infer_table_types=[],
         )
         elements_dict = [el.to_dict() for el in elements]
         markdown_content = self.convert_to_markdown(elements_dict)

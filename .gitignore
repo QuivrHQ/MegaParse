@@ -16,3 +16,4 @@ venv
 *.DS_Store
 .tool-versions
 megaparse/sdk/examples/only_pdfs/*
+

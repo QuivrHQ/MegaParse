@@ -49,5 +49,5 @@ async def test_process_folder(folder_path, api_key):
 if __name__ == "__main__":
     api_key = os.getenv("MEGAPARSE_API_KEY")
     # folder_path = "megaparse/sdk/examples/only_pdfs"
-    folder_path = "/Users/amine/data/quivr/only_pdfs/"
+    folder_path = "megaparse/sdk/examples/only_pdfs"
     asyncio.run(test_process_folder(folder_path, api_key))

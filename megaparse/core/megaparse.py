@@ -66,7 +66,7 @@ class MegaParse:
             #     parsed_document: str = await self.format_checker.check(parsed_document)
 
         except Exception as e:
-            raise ParsingException(f"Error while parsing {file_path}: {e}")
+            raise ParsingException(f"Error while parsing {file_extension}: {e}")
 
         self.last_parsed_document = parsed_document
         return parsed_document
