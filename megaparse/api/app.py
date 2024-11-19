@@ -12,15 +12,15 @@ from langchain_community.document_loaders import PlaywrightURLLoader
 from langchain_openai import ChatOpenAI
 from llama_parse.utils import Language
 
-from megaparse.api.utils.exceptions import (
+from megaparse.api.exceptions.base import (
     HTTPDownloadError,
     HTTPFileNotFound,
+    HTTPModelNotSupported,
     HTTPParsingException,
     ParsingException,
 )
-from megaparse.api.utils.type import (
+from megaparse.api.models.base import (
     APIOutputType,
-    HTTPModelNotSupported,
     SupportedModel,
 )
 from megaparse.core.megaparse import MegaParse

@@ -15,6 +15,7 @@ class MegaparseConfig(BaseSettings):
     api_key: str | None = None
     url: str = "https://megaparse.tooling.quivr.app"
     timeout: int = 600
+    max_retries: int = 3
 
 
 class UploadFileConfig(BaseModel):

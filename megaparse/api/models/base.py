@@ -1,18 +1,6 @@
 from enum import Enum
 
-from fastapi import HTTPException, status
 from pydantic import BaseModel
-
-
-class HTTPModelNotSupported(HTTPException):
-    def __init__(
-        self,
-        detail: str = "The requested model is not supported yet.",
-        headers: dict | None = None,
-    ):
-        super().__init__(
-            status_code=status.HTTP_501_NOT_IMPLEMENTED, detail=detail, headers=headers
-        )
 
 
 class MarkDownType(str, Enum):
@@ -59,8 +47,6 @@ class FileExtension(str, Enum):
 
 
 class APIOutputType(BaseModel):
-    """API output type."""
-
     message: str
     result: str
 

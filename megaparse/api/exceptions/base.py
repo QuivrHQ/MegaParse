@@ -1,8 +1,20 @@
 from fastapi import HTTPException
 
 
+class HTTPModelNotSupported(HTTPException):
+    def __init__(
+        self,
+        detail: str = "The requested model is not supported yet.",
+        headers: dict | None = None,
+    ):
+        super().__init__(status_code=501, detail=detail, headers=headers)
+
+
 class HTTPFileNotFound(HTTPException):
-    def __init__(self, message="File name not found"):
+    def __init__(
+        self,
+        message="The UploadFile.filename does not exist and is needed for this operation",
+    ):
         super().__init__(status_code=404, detail=message)
 
 

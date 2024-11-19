@@ -15,6 +15,7 @@ class MegaParseClient:
         config = MegaparseConfig()
         self.base_url = base_url or config.url
         self.api_key = api_key or config.api_key
+        self.max_retries = config.max_retries
         if self.api_key:
             self.session = httpx.AsyncClient(
                 headers={"x-api-key": self.api_key}, timeout=config.timeout
@@ -22,18 +23,16 @@ class MegaParseClient:
         else:
             self.session = httpx.AsyncClient(timeout=config.timeout)
 
-    async def request(
-        self, method: str, endpoint: str, max_retries: int = 3, **kwargs: Any
-    ) -> Any:
+    async def request(self, method: str, endpoint: str, **kwargs: Any) -> Any:
         url = f"{self.base_url}{endpoint}"
         client = self.session
-        for attempt in range(max_retries):
+        for attempt in range(self.max_retries):
             try:
                 response = await client.request(method, url, **kwargs)
                 response.raise_for_status()
                 return response.json()
             except (httpx.HTTPStatusError, httpx.RequestError):
-                if attempt < max_retries - 1:
+                if attempt < self.max_retries - 1:
                     await asyncio.sleep(2**attempt)  # Exponential backoff
 
         raise RuntimeError(f"Can't send request to the server: {url}")

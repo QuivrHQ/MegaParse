@@ -2,14 +2,12 @@ import asyncio
 import os
 from pathlib import Path
 from typing import IO
-from langchain_openai import ChatOpenAI
 
-from megaparse.api.utils.type import FileExtension
-from megaparse.core.parser.unstructured_parser import UnstructuredParser
-
-from megaparse.core.parser import BaseParser
+from megaparse.api.models.base import FileExtension
 from megaparse.core.checker.format_checker import FormatChecker
-from megaparse.core.utils.exceptions import ParsingException
+from megaparse.core.exceptions.base import ParsingException
+from megaparse.core.parser import BaseParser
+from megaparse.core.parser.unstructured_parser import UnstructuredParser
 
 
 class MegaParse:

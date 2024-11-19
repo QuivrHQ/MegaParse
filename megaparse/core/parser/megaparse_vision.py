@@ -3,7 +3,7 @@ import base64
 import re
 from io import BytesIO
 from pathlib import Path
-from typing import List
+from typing import IO, List
 
 from langchain_core.language_models.chat_models import BaseChatModel
 from langchain_core.messages import HumanMessage
@@ -115,7 +115,11 @@ class MegaParseVision(BaseParser):
         return str(response.content)
 
     async def convert(
-        self, file_path: str | Path, batch_size: int = 3, **kwargs
+        self,
+        file_path: str | Path | None = None,
+        file: IO[bytes] | None = None,
+        batch_size: int = 3,
+        **kwargs,
     ) -> str:
         """
         Parse a PDF file and process its content using the language model.
@@ -124,6 +128,9 @@ class MegaParseVision(BaseParser):
         :param batch_size: Number of pages to process concurrently
         :return: List of processed content strings
         """
+        if not file_path:
+            raise ValueError("File_path should be provided to run MegaParseVision")
+
         if isinstance(file_path, Path):
             file_path = str(file_path)
         pdf_base64 = self.process_file(file_path)
