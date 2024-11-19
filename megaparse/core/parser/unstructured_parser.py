@@ -1,15 +1,17 @@
 import re
+from pathlib import Path
+from typing import IO
 
 from dotenv import load_dotenv
 from langchain_core.language_models.chat_models import BaseChatModel
 from langchain_core.prompts import ChatPromptTemplate
 from unstructured.partition.auto import partition
 
-from megaparse.core.parser import MegaParser
+from megaparse.core.parser import BaseParser
 from megaparse.core.parser.type import StrategyEnum
 
 
-class UnstructuredParser(MegaParser):
+class UnstructuredParser(BaseParser):
     load_dotenv()
 
     def __init__(
@@ -34,9 +36,6 @@ class UnstructuredParser(MegaParser):
         parent_id = metadata.get("parent_id", None)
         category_depth = metadata.get("category_depth", 0)
         table_stack = []  # type: ignore
-
-        if "emphasized_text_contents" in metadata:
-            print(metadata["emphasized_text_contents"])
 
         # Markdown line defaults to empty
         markdown_line = ""
@@ -99,10 +98,16 @@ class UnstructuredParser(MegaParser):
 
         return markdown_line
 
-    async def convert(self, file_path, **kwargs) -> str:
+    async def convert(
+        self,
+        file_path: str | Path | None = None,
+        file: IO[bytes] | None = None,
+        **kwargs,
+    ) -> str:
         # Partition the PDF
         elements = partition(
-            filename=str(file_path),
+            filename=str(file_path) if file_path else None,
+            file=file,
             strategy=self.strategy,
             skip_infer_table_types=[],
         )

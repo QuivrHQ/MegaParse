@@ -1,11 +1,18 @@
-from abc import ABC
+from abc import ABC, abstractmethod
 from pathlib import Path
+from typing import IO
 
 
-class MegaParser(ABC):
+class BaseParser(ABC):
     """Mother Class for all the parsers [Unstructured, LlamaParse, MegaParseVision]"""
 
-    async def convert(self, file_path: str | Path, **kwargs) -> str:
+    @abstractmethod
+    async def convert(
+        self,
+        file_path: str | Path | None = None,
+        file: IO[bytes] | None = None,
+        **kwargs,
+    ) -> str:
         """
         Convert the given file to a specific format.
 

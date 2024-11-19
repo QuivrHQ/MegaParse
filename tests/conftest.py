@@ -1,12 +1,42 @@
+from pathlib import Path
+from typing import IO
+
 import pytest_asyncio
-from httpx import AsyncClient
-from megaparse.api.app import app, parser_builder_dep, get_playwright_loader
-from megaparse.core.parser.builder import (
-    FakeParserBuilder,
-)
-from httpx import ASGITransport
+from httpx import ASGITransport, AsyncClient
 from langchain_community.document_loaders import PlaywrightURLLoader
 from langchain_core.documents import Document
+
+from megaparse.api.app import app, get_playwright_loader, parser_builder_dep
+from megaparse.core.parser.base import BaseParser
+from megaparse.core.parser.type import ParserConfig
+
+
+class FakeParserBuilder:
+    def build(self, config: ParserConfig) -> BaseParser:
+        """
+        Build a fake parser based on the given configuration.
+
+        Args:
+            config (ParserDict): The configuration to be used for building the parser.
+
+        Returns:
+            BaseParser: The built fake parser.
+
+        Raises:
+            ValueError: If the configuration is invalid.
+        """
+
+        class FakeParser(BaseParser):
+            async def convert(
+                self,
+                file_path: str | Path | None = None,
+                file: IO[bytes] | None = None,
+                **kwargs,
+            ) -> str:
+                print("Fake parser is converting the file")
+                return "Fake conversion result"
+
+        return FakeParser()
 
 
 @pytest_asyncio.fixture(scope="function")

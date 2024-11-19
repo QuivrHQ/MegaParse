@@ -1,5 +1,6 @@
 from pathlib import Path
-from megaparse.core.parser.megaparser import MegaParser
+from typing import IO
+from megaparse.core.parser.base import BaseParser
 from megaparse.core.parser.type import ParserConfig
 
 from megaparse.core.parser.llama import LlamaParser
@@ -14,7 +15,7 @@ parser_dict: dict[str, type] = {
 
 
 class ParserBuilder:
-    def build(self, config: ParserConfig) -> MegaParser:
+    def build(self, config: ParserConfig) -> BaseParser:
         """
         Build a parser based on the given configuration.
 
@@ -22,31 +23,9 @@ class ParserBuilder:
             config (ParserDict): The configuration to be used for building the parser.
 
         Returns:
-            MegaParser: The built parser.
+            BaseParser: The built parser.
 
         Raises:
             ValueError: If the configuration is invalid.
         """
         return parser_dict[config.method](**config.model_dump())
-
-
-class FakeParserBuilder:
-    def build(self, config: ParserConfig) -> MegaParser:
-        """
-        Build a fake parser based on the given configuration.
-
-        Args:
-            config (ParserDict): The configuration to be used for building the parser.
-
-        Returns:
-            MegaParser: The built fake parser.
-
-        Raises:
-            ValueError: If the configuration is invalid.
-        """
-
-        class FakeParser(MegaParser):
-            async def convert(self, file_path: str | Path, **kwargs) -> str:
-                return "Fake conversion result"
-
-        return FakeParser()

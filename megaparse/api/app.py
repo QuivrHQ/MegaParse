@@ -1,3 +1,4 @@
+import io
 import os
 import tempfile
 from typing import Optional
@@ -11,7 +12,17 @@ from langchain_community.document_loaders import PlaywrightURLLoader
 from langchain_openai import ChatOpenAI
 from llama_parse.utils import Language
 
-from megaparse.api.utils.type import HTTPModelNotSupported, SupportedModel
+from megaparse.api.exceptions.base import (
+    HTTPDownloadError,
+    HTTPFileNotFound,
+    HTTPModelNotSupported,
+    HTTPParsingException,
+    ParsingException,
+)
+from megaparse.api.models.base import (
+    APIOutputType,
+    SupportedModel,
+)
 from megaparse.core.megaparse import MegaParse
 from megaparse.core.parser.builder import ParserBuilder
 from megaparse.core.parser.type import ParserConfig, ParserType
@@ -45,7 +56,10 @@ def _check_free_memory() -> bool:
     return True
 
 
-@app.post("/v1/file")
+@app.post(
+    "/v1/file",
+    response_model=APIOutputType,
+)
 async def parse_file(
     file: UploadFile = File(...),
     method: ParserType = Form(ParserType.UNSTRUCTURED),
@@ -84,18 +98,29 @@ async def parse_file(
     )
     try:
         parser = parser_builder.build(parser_config)
-        with tempfile.NamedTemporaryFile(
-            delete=False, suffix=f".{str(file.filename).split('.')[-1]}"
-        ) as temp_file:
-            temp_file.write(file.file.read())
-            megaparse = MegaParse(parser=parser)
-            result = await megaparse.aload(file_path=temp_file.name)
-            return {"message": "File parsed successfully", "result": result}
+        megaparse = MegaParse(parser=parser)
+        if not file.filename:
+            raise HTTPFileNotFound("No filename provided")
+        _, extension = os.path.splitext(file.filename)
+        file_bytes = await file.read()
+        file_stream = io.BytesIO(file_bytes)
+        result = await megaparse.aload(file=file_stream, file_extension=extension)
+        return {"message": "File parsed successfully", "result": result}
+    except ParsingException as e:
+        print(e)
+        raise HTTPParsingException(file.filename)
+    except ValueError as e:
+        print(e)
+        raise HTTPException(status_code=400, detail=str(e))
     except Exception as e:
+        print(e)
         raise HTTPException(status_code=500, detail=str(e))
 
 
-@app.post("/v1/url")
+@app.post(
+    "/v1/url",
+    response_model=APIOutputType,
+)
 async def upload_url(
     url: str, playwright_loader=Depends(get_playwright_loader)
 ) -> dict[str, str]:
@@ -107,7 +132,7 @@ async def upload_url(
         async with httpx.AsyncClient() as client:
             response = await client.get(url)
         if response.status_code != 200:
-            raise HTTPException(status_code=400, detail="Failed to download the file")
+            raise HTTPDownloadError(url)
 
         with tempfile.NamedTemporaryFile(delete=False, suffix="pdf") as temp_file:
             temp_file.write(response.content)
@@ -115,10 +140,10 @@ async def upload_url(
                 megaparse = MegaParse(
                     parser=UnstructuredParser(strategy=StrategyEnum.AUTO)
                 )
-                result = megaparse.load(temp_file.name)
+                result = await megaparse.aload(temp_file.name)
                 return {"message": "File parsed successfully", "result": result}
-            except Exception as e:
-                raise HTTPException(status_code=500, detail=str(e))
+            except ParsingException:
+                raise HTTPParsingException(url)
     else:
         data = await playwright_loader.aload()
         # Now turn the data into a string
@@ -126,9 +151,9 @@ async def upload_url(
         for page in data:
             extracted_content += page.page_content
         if not extracted_content:
-            raise HTTPException(
-                status_code=400,
-                detail="Failed to extract content from the website, have you provided the correct and entire URL?",
+            raise HTTPDownloadError(
+                url,
+                message="Failed to extract content from the website. Valid URL example : https://www.quivr.com",
             )
         return {
             "message": "Website content parsed successfully",

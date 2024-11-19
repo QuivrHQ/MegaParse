@@ -1,5 +1,7 @@
+import asyncio
 from typing import Optional
 
+import httpx
 from httpx import Response
 
 from megaparse.sdk.megaparse_sdk.client import MegaParseClient
@@ -31,6 +33,11 @@ class FileUpload:
         )
         with open(file_path, "rb") as file:
             files = {"file": (file_path, file)}
-            return await self.client.request(
-                "POST", "/v1/file", files=files, data=data.model_dump(mode="json")
+
+            response = await self.client.request(
+                "POST",
+                "/v1/file",
+                files=files,
+                data=data.model_dump(mode="json"),
             )
+            return response

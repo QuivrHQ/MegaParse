@@ -1,14 +1,14 @@
 from pathlib import Path
-from typing import List
+from typing import IO, List
 
 
 from llama_index.core.schema import Document as LlamaDocument
 from llama_parse import LlamaParse as _LlamaParse
 from llama_parse.utils import Language, ResultType
-from megaparse.core.parser import MegaParser
+from megaparse.core.parser import BaseParser
 
 
-class LlamaParser(MegaParser):
+class LlamaParser(BaseParser):
     def __init__(
         self,
         api_key: str,
@@ -26,7 +26,15 @@ class LlamaParser(MegaParser):
             self.parsing_instruction = """Do not take into account the page breaks (no --- between pages), 
             do not repeat the header and the footer so the tables are merged if needed. Keep the same format for similar tables."""
 
-    async def convert(self, file_path: str | Path, **kwargs) -> str:
+    async def convert(
+        self,
+        file_path: str | Path | None = None,
+        file: IO[bytes] | None = None,
+        **kwargs,
+    ) -> str:
+        if not file_path:
+            raise ValueError("File_path should be provided to run LlamaParser")
+
         llama_parser = _LlamaParse(
             api_key=self.api_key,
             result_type=ResultType.MD,

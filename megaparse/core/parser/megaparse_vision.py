@@ -3,13 +3,13 @@ import base64
 import re
 from io import BytesIO
 from pathlib import Path
-from typing import List
+from typing import IO, List
 
 from langchain_core.language_models.chat_models import BaseChatModel
 from langchain_core.messages import HumanMessage
 from pdf2image import convert_from_path
 
-from megaparse.core.parser import MegaParser
+from megaparse.core.parser import BaseParser
 from megaparse.core.parser.entity import SupportedModel, TagEnum
 
 # BASE_OCR_PROMPT = """
@@ -51,7 +51,7 @@ Follow these instructions to complete the task:
 """
 
 
-class MegaParseVision(MegaParser):
+class MegaParseVision(BaseParser):
     def __init__(self, model: BaseChatModel, **kwargs):
         if hasattr(model, "model_name"):
             if not SupportedModel.is_supported(model.model_name):
@@ -115,7 +115,11 @@ class MegaParseVision(MegaParser):
         return str(response.content)
 
     async def convert(
-        self, file_path: str | Path, batch_size: int = 3, **kwargs
+        self,
+        file_path: str | Path | None = None,
+        file: IO[bytes] | None = None,
+        batch_size: int = 3,
+        **kwargs,
     ) -> str:
         """
         Parse a PDF file and process its content using the language model.
@@ -124,6 +128,9 @@ class MegaParseVision(MegaParser):
         :param batch_size: Number of pages to process concurrently
         :return: List of processed content strings
         """
+        if not file_path:
+            raise ValueError("File_path should be provided to run MegaParseVision")
+
         if isinstance(file_path, Path):
             file_path = str(file_path)
         pdf_base64 = self.process_file(file_path)

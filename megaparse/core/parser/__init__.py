@@ -1,4 +1,4 @@
-from megaparse.core.parser.megaparser import MegaParser
+from megaparse.core.parser.base import BaseParser
 
 
-__all__ = ["MegaParser"]
+__all__ = ["BaseParser"]
