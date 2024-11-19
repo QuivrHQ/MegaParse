@@ -11,6 +11,7 @@ class BaseParser(ABC):
         self,
         file_path: str | Path | None = None,
         file: IO[bytes] | None = None,
+        file_extensions: str = "",
         **kwargs,
     ) -> str:
         """

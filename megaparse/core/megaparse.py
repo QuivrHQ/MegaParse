@@ -59,7 +59,7 @@ class MegaParse:
 
         try:
             parsed_document: str = await self.parser.convert(
-                file_path=file_path, file=file
+                file_path=file_path, file=file, file_extensions=str(file_extension)
             )
             # @chloe FIXME: format_checker needs unstructured Elements as input which is to change
             # if self.format_checker:

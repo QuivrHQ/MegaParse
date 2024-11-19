@@ -150,12 +150,11 @@ class UnstructuredParser(BaseParser):
         self,
         file_path: str | Path | None = None,
         file: IO[bytes] | None = None,
+        file_extensions: str = "",
         **kwargs,
     ) -> str:
-        if self.strategy == StrategyEnum.AUTO:
+        if file_extensions == ".pdf" and self.strategy == StrategyEnum.AUTO:
             self.strategy = self.get_strategy(file_path_=file_path, file_=file)
-
-        print(f"Strategy: {self.strategy}")
         # Partition the PDF
         elements = partition(
             filename=str(file_path) if file_path else None,

@@ -118,6 +118,7 @@ class MegaParseVision(BaseParser):
         self,
         file_path: str | Path | None = None,
         file: IO[bytes] | None = None,
+        file_extensions: str = "",
         batch_size: int = 3,
         **kwargs,
     ) -> str:
