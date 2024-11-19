@@ -1,54 +1,16 @@
 [project]
-name = "megaparse"
-version = "0.0.45"
-description = "Parse complex files (PDF,Docx,PPTX) for LLM consumption"
+name = "megaparse-monorepo"
+version = "0.0.1"
+description = "Megaparse monorepo"
 authors = [
     { name = "Stan Girard", email = "stan@quivr.app" },
-    { name = "Chloé Daems", email = "chloe@quivr.app" }
+    { name = "Chloé Daems", email = "chloe@quivr.app" },
+    { name = "Amine Dirhoussi", email = "amine@quivr.app" },
+    { name = "Jacopo Chevallard", email = "jacopo@quivr.app" },
 ]
-
 readme = "README.md"
 requires-python = ">= 3.11"
-
-dependencies = [
-    "python-dotenv>=1.0.0",
-    "uvloop>=0.18.0",
-    "pydantic-settings>=2.6.1",
-    "uvicorn>=0.32.0",
-]
-
-[project.optional-dependencies]
-all = [
-    "pycryptodome>=3.21.0",
-    "llama-index>=0.10.0",
-    "pdfplumber>=0.11.0",
-    "backoff>=2.2.1",
-    "pypdf>=5.0.1",
-    "psutil>=6.1.0",
-    "numpy<=2.0.0",
-    "playwright>=1.47.0",
-    "langchain-anthropic>=0.1.23",
-    "python-magic>=0.4.27",
-    "unstructured[all-docs]==0.15.0",
-    "langchain>=0.2.14,<0.3.0",
-    "langchain-community>=0.2.0",
-    "langchain-openai>=0.1.21",
-    "langchain-core>=0.2.38",
-    "llama-parse>=0.4.0",
-    "uvicorn>=0.25.0",
-    "fastapi>=0.115.2",
-    "ratelimit>=2.2.1",
-    "requests>=2.32.3",
-]
-
-[tool.rye.workspace]
-members = [
-    ".",
-]
-
-
-[tool.hatch.metadata]
-allow-direct-references = true
+dependencies = ["packaging>=22.0"]
 
 [build-system]
 requires = ["hatchling"]
@@ -70,6 +32,15 @@ dev-dependencies = [
     "pytest-xdist>=3.6.1",
     "pytest-cov>=5.0.0",
 ]
+
+[tool.rye.workspace]
+members = ["libs/*"]
+
+[tool.hatch.metadata]
+allow-direct-references = true
+
+[tool.hatch.build.targets.wheel]
+packages = ["src/megaparse"]
 
 [tool.ruff]
 line-length = 88
@@ -104,6 +75,3 @@ section-order = [
     "local-folder",
 ]
 known-first-party = []
-
-[tool.hatch.build.targets.wheel]
-packages = ["megaparse"]
