@@ -1,3 +1,4 @@
+from io import IOBase
 import re
 from pathlib import Path
 from typing import IO
@@ -9,9 +10,11 @@ from unstructured.partition.auto import partition
 
 from megaparse.core.parser import BaseParser
 from megaparse.core.parser.type import StrategyEnum
-from pypdf import PdfReader
 import copy
 import time
+from pdfminer.high_level import extract_pages
+from pdfminer.layout import LTImage, LTPage, LTFigure
+from pdfminer.utils import FileOrName
 
 
 class UnstructuredParser(BaseParser):
@@ -107,33 +110,46 @@ class UnstructuredParser(BaseParser):
         file_: IO[bytes] | None = None,
         threshold=0.5,
         page_threshold=0.8,
+        dpi=72,
     ) -> StrategyEnum:
         t0 = time.perf_counter()
         file = copy.deepcopy(file_)
         file_path = copy.deepcopy(file_path_)
 
+        source_pdf: FileOrName = file_path if file_path else file  # type: ignore
+
         if self.strategy != StrategyEnum.AUTO:
             raise ValueError("Strategy must be AUTO to use get_strategy")
-        reader: PdfReader | None = None
-        if file_path:
-            reader = PdfReader(file_path)  # accepts stream bytes
-        if file:
-            reader = PdfReader(file)
-
-        if reader is None:
-            raise ValueError("No file or file path provided")
-
         image_proportion_per_pages = []
+        num_pages = 0
 
-        for page in reader.pages:
-            page_texts = page.extract_text()
-            page_images = page.images
-            image_proportion_per_pages.append(
-                len(page_images) / (len(page_texts) + len(page_images))
-            )
-        total_proportion = sum(
-            1 for prop in image_proportion_per_pages if prop > page_threshold
-        ) / len(reader.pages)
+        for page_layout in extract_pages(source_pdf):
+            if isinstance(page_layout, LTPage):
+                page_width = page_layout.width
+                page_height = page_layout.height
+                page_area = page_width * page_height
+
+                total_image_area = 0
+
+                for element in page_layout:
+                    if isinstance(element, LTImage) or isinstance(element, LTFigure):
+                        bbox = element.bbox  # (x0, y0, x1, y1)
+                        if bbox:
+                            image_width = bbox[2] - bbox[0]  # x1 - x0
+                            image_height = bbox[3] - bbox[1]  # y1 - y0
+                            image_area = image_width * image_height
+                            total_image_area += image_area
+
+                coverage = total_image_area / page_area if page_area > 0 else 0
+                image_proportion_per_pages.append(coverage)
+                num_pages += 1
+
+        total_proportion = (
+            sum(1 for prop in image_proportion_per_pages if prop > page_threshold)
+            / num_pages
+            if num_pages > 0
+            else 0
+        )
 
         print(f"Time taken to get strategy: {time.perf_counter() - t0}")
         print(f"Total proportion of images: {total_proportion}")
