@@ -1,9 +1,20 @@
 from typing import Optional
 
 from httpx import Response
-from megaparse.sdk.megaparse_sdk.client import MegaParseClient
-from megaparse.sdk.megaparse_sdk.config import UploadFileConfig
-from megaparse.sdk.megaparse_sdk.utils.type import Language, ParserType, StrategyEnum
+from pydantic import BaseModel
+
+from megaparse_sdk.client import MegaParseClient
+from megaparse_sdk.schema.languages import Language
+from megaparse_sdk.schema.parser_config import ParserType, StrategyEnum
+
+
+class UploadFileConfig(BaseModel):
+    method: ParserType
+    strategy: StrategyEnum
+    check_table: bool
+    language: Language
+    parsing_instruction: str | None = None
+    model_name: str = "gpt-4o"
 
 
 class FileUpload:

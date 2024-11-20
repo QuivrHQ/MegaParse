@@ -4,7 +4,7 @@ from pydantic import FilePath
 from pydantic_settings import BaseSettings, SettingsConfigDict
 
 
-class MegaparseConfig(BaseSettings):
+class MegaParseConfig(BaseSettings):
     """
     Configuration for the Megaparse SDK.
     """
