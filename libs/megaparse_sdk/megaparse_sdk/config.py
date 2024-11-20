@@ -1,5 +1,6 @@
 from typing import Literal
 
+from pydantic import FilePath
 from pydantic_settings import BaseSettings, SettingsConfigDict
 
 
@@ -15,6 +16,12 @@ class MegaparseConfig(BaseSettings):
     max_retries: int = 3
 
 
+class SSLConfig(BaseSettings):
+    ca_cert_file: FilePath
+    ssl_key_file: FilePath
+    ssl_cert_file: FilePath
+
+
 class ClientNATSConfig(BaseSettings):
     model_config = SettingsConfigDict(env_prefix="megaparse_nats")
     subject: Literal["parsing"] = "parsing"
@@ -22,3 +29,4 @@ class ClientNATSConfig(BaseSettings):
     timeout: int = 600
     max_retries: int = 5
     backoff: int = 3
+    ssl_config: SSLConfig | None = None

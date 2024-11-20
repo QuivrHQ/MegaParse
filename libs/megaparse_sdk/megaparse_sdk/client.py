@@ -2,8 +2,7 @@ import asyncio
 import logging
 from io import BytesIO
 from pathlib import Path
-from ssl import SSLContext
-from typing import Any, Coroutine, Optional
+from typing import Any
 
 import httpx
 import nats
@@ -28,24 +27,9 @@ from megaparse_sdk.schema.mp_outputs import (
     MPOutput,
     MPOutputType,
 )
+from megaparse_sdk.utils.load_ssl import load_ssl_cxt
 
 logger = logging.getLogger("megparse_sdk")
-
-
-def retry(max_retries: int, backoff: int):
-    def _retry(f: Coroutine[Any, Any, Any]):
-        async def wrapper():
-            for attempt in range(max_retries):
-                try:
-                    return await f
-                except TimeoutError:
-                    if attempt < max_retries - 1:
-                        await asyncio.sleep(2**backoff)
-            pass
-
-        return wrapper
-
-    return _retry
 
 
 class MegaParseClient:
@@ -84,12 +68,12 @@ class MegaParseClient:
 
 
 class MegaParseNATSClient:
-    def __init__(self, ssl_context: Optional[SSLContext]):
-        self.nc_config = ClientNATSConfig()
-
+    def __init__(self, config: ClientNATSConfig = ClientNATSConfig()):
+        self.nc_config = config
         self.max_retries = self.nc_config.max_retries
         self.backoff = self.nc_config.backoff
-        self.ssl_ctx = ssl_context
+        if self.nc_config.ssl_config:
+            self.ssl_ctx = load_ssl_cxt(self.nc_config.ssl_config)
 
     async def _get_nc(self):
         if self._nc is None:
