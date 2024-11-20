@@ -8,7 +8,7 @@ import httpx
 import nats
 from nats.errors import TimeoutError
 
-from megaparse_sdk.config import ClientNATSConfig, MegaparseConfig
+from megaparse_sdk.config import ClientNATSConfig, MegaParseConfig
 from megaparse_sdk.schema.mp_exceptions import (
     DownloadError,
     InternalServiceError,
@@ -38,7 +38,7 @@ class MegaParseClient:
         api_key: str | None = None,
         base_url: str | None = None,
     ):
-        config = MegaparseConfig()
+        config = MegaParseConfig()
         self.base_url = base_url or config.url
         self.api_key = api_key or config.api_key
         self.max_retries = config.max_retries
@@ -139,8 +139,6 @@ class MegaParseNATSClient:
                     raise DownloadError
                 case MPErrorType.PARSING_ERROR:
                     raise ParsingException
-                case _:
-                    raise ValueError("Unknown err_code from megaparse service")
         else:
             raise ValueError(f"unknown service response type: {response}")
 
