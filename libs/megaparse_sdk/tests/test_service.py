@@ -1,13 +1,13 @@
 import nats
 import pytest
 from api.utils.load_ssl import load_ssl_cxt
-from megaparse_schema.mp_inputs import (
+from megaparse_sdk.schema.mp_inputs import (
     FileInput,
     MPInput,
     ParseFileConfig,
     ParseFileInput,
 )
-from megaparse_schema.mp_outputs import MPOutput, MPOutputType
+from megaparse_sdk.schema.mp_outputs import MPOutput, MPOutputType
 
 
 @pytest.mark.asyncio

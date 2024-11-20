@@ -1,4 +1,4 @@
-from megaparse_schema.parser_config import ParseFileConfig
+from megaparse_sdk.schema.parser_config import ParseFileConfig
 
 from megaparse.parser.base import BaseParser
 from megaparse.parser.llama import LlamaParser

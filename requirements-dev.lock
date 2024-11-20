@@ -11,9 +11,8 @@
 
 -e file:.
 -e file:libs/megaparse
--e file:libs/megaparse_schema
-    # via megaparse
 -e file:libs/megaparse_sdk
+    # via megaparse
 aiohappyeyeballs==2.4.3
     # via aiohttp
 aiohttp==3.11.5
@@ -302,7 +301,6 @@ llama-parse==0.5.14
     # via llama-index-readers-llama-parse
     # via megaparse
 loguru==0.7.2
-    # via megaparse
     # via megaparse-sdk
 lxml==5.3.0
     # via pikepdf
@@ -531,7 +529,6 @@ pydantic==2.9.2
     # via langsmith
     # via llama-cloud
     # via llama-index-core
-    # via megaparse-schema
     # via openai
     # via pydantic-settings
     # via unstructured-client
@@ -539,7 +536,6 @@ pydantic-core==2.23.4
     # via pydantic
 pydantic-settings==2.6.1
     # via megaparse
-    # via megaparse-schema
 pyee==12.0.0
     # via playwright
 pyflakes==3.2.0

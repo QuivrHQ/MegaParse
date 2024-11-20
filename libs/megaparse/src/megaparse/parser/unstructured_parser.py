@@ -5,7 +5,7 @@ from typing import IO
 from dotenv import load_dotenv
 from langchain_core.language_models.chat_models import BaseChatModel
 from langchain_core.prompts import ChatPromptTemplate
-from megaparse_schema.parser_config import StrategyEnum
+from megaparse_sdk.schema.parser_config import StrategyEnum
 from unstructured.partition.auto import partition
 
 from megaparse.parser import BaseParser

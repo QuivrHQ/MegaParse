@@ -3,7 +3,7 @@ import os
 from pathlib import Path
 from typing import IO
 
-from megaparse_schema.extensions import FileExtension
+from megaparse_sdk.schema.extensions import FileExtension
 
 from megaparse.checker.format_checker import FormatChecker
 from megaparse.exceptions.base import ParsingException
