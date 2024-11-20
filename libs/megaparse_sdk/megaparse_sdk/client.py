@@ -1,38 +1,33 @@
-from configparser import ParsingError
-from pathlib import Path
-from io import BytesIO
+import asyncio
 import logging
-from anthropic import InternalServerError
+from io import BytesIO
+from pathlib import Path
+from ssl import SSLContext
+from typing import Any, Coroutine, Optional
+
+import httpx
+import nats
+from nats.errors import TimeoutError
+
+from megaparse_sdk.config import ClientNATSConfig, MegaparseConfig
 from megaparse_sdk.schema.mp_exceptions import (
     DownloadError,
     InternalServiceError,
     ModelNotSupported,
     ParsingException,
 )
-import nats
-from typing import Coroutine, Optional
-import asyncio
-from ssl import SSLContext
-from typing import Any
 from megaparse_sdk.schema.mp_inputs import (
-    ParseUrlInput,
-    ParseFileInput,
-    ParseFileConfig,
     FileInput,
     MPInput,
+    ParseFileConfig,
+    ParseFileInput,
+    ParseUrlInput,
 )
 from megaparse_sdk.schema.mp_outputs import (
     MPErrorType,
     MPOutput,
     MPOutputType,
-    ParseError,
 )
-from nats.errors import TimeoutError
-
-import httpx
-from typing import Callable, Awaitable
-
-from megaparse_sdk.config import ClientNATSConfig, MegaparseConfig
 
 logger = logging.getLogger("megparse_sdk")
 
@@ -129,7 +124,7 @@ class MegaParseNATSClient:
         for attempt in range(self.max_retries):
             try:
                 return await self._send_req_inner(inp)
-            except TimeoutError as e:
+            except TimeoutError:
                 logger.error(f"Timeout error parsing. Retrying {attempt} time")
                 if attempt < self.max_retries - 1:
                     await asyncio.sleep(2**self.backoff)
