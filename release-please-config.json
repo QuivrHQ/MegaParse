@@ -1,24 +1,21 @@
 {
   "$schema": "https://raw.githubusercontent.com/googleapis/release-please/main/schemas/config.json",
   "separate-pull-requests": true,
+  "include-v-in-tag": true,
+  "bump-patch-for-minor-pre-major": true,
+  "include-component-in-tag": true,
   "packages": {
     "megaparse": {
       "release-type": "python",
       "path": "libs/megaparse",
       "package-name": "megaparse",
-      "bump-patch-for-minor-pre-major": true,
-      "changelog-notes-type": "github",
-      "include-v-in-tag": true,
-      "include-component-in-tag": true
+      "changelog-notes-type": "github"
     },
     "megaparse-sdk": {
       "release-type": "python",
       "path": "libs/megaparse_sdk",
       "package-name": "megaparse-sdk",
-      "bump-patch-for-minor-pre-major": true,
-      "changelog-notes-type": "github",
-      "include-v-in-tag": true,
-      "include-component-in-tag": true
+      "changelog-notes-type": "github"
     }
   }
 }
