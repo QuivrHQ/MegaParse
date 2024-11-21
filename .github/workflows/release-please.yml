@@ -13,7 +13,8 @@ jobs:
   release-please:
     runs-on: ubuntu-latest
     outputs:
-      release_created: ${{ steps.release.outputs.release_created }}
+      release_created: ${{ steps.release.outputs["megaparse/libs/megaparse--release_created" }}
+      release_created_sdk: ${{ steps.release.outputs["megaparse/libs/megaparse-sdk--release_created" }}
     steps:
       - name: Checkout repository
         uses: actions/checkout@v3
@@ -32,7 +33,7 @@ jobs:
           token: ${{ secrets.RELEASE_PLEASE_TOKEN }}
 
   deploy-megaparse:
-    if: needs.release-please.outputs["megaparse/libs/megaparse--release_created"] == 'true'
+    if: needs.release-please.outputs.release_created == 'true'
     needs: release-please
     runs-on: ubuntu-latest
     steps:
@@ -49,7 +50,7 @@ jobs:
         run: cd libs/megaparse && rye publish --token ${{ secrets.PYPI_API_TOKEN }} --yes
 
   deploy-sdk:
-    if: needs.release-please.outputs["megaparse/libs/megaparse-sdk--release_created"] == 'true'
+    if: needs.release-please.outputs.release_created_sdk == 'true'
     needs: release-please
     runs-on: ubuntu-latest
     steps:
