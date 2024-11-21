@@ -2,6 +2,8 @@ name: Deploy to Amazon ECS
 
 on:
   push:
+    tags:
+      - "v*"
     branches: [main]
 
 env:
