@@ -2,7 +2,7 @@
 
 Welcome to the MegaParse SDK! This SDK allows you to easily interact with the MegaParse API to upload URLs and files for processing.
 
-### Installation
+### Installation.
 
 To install the MegaParse SDK, use pip:
 
@@ -81,4 +81,4 @@ For more details, refer to the [usage example](#file:usage_example.py-context).
 
 We hope you find the MegaParse SDK useful for your projects!
 
-Enjoy, *Quivr Team* ! 
+Enjoy, _Quivr Team_ !
