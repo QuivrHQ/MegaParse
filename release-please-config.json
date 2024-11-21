@@ -6,15 +6,17 @@
       "package-name": "megaparse",
       "bump-patch-for-minor-pre-major": true,
       "changelog-notes-type": "github",
-      "include-v-in-tag": true
+      "include-v-in-tag": true,
+      "include-component-in-tag": true
     },
     "megaparse-sdk": {
-      "path": "libs/megaparse_sdk",
       "release-type": "python",
+      "path": "libs/megaparse_sdk",
       "package-name": "megaparse-sdk",
       "bump-patch-for-minor-pre-major": true,
       "changelog-notes-type": "github",
-      "include-v-in-tag": true
+      "include-v-in-tag": true,
+      "include-component-in-tag": true
     }
   }
 }
