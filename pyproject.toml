@@ -1,6 +1,6 @@
 [project]
 name = "megaparse-monorepo"
-version = "0.0.46"
+version = "0.0.1"
 description = "Megaparse monorepo"
 authors = [
     { name = "Stan Girard", email = "stan@quivr.app" },
