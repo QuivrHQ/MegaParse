@@ -1,3 +1,3 @@
 # MegaParse CORE
 
-- Core package
+- Core package of megaparse
