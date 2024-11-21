@@ -23,7 +23,7 @@ jobs:
       - name: Setup Python
         uses: actions/setup-python@v4
         with:
-          python-version: '3.11'
+          python-version: "3.11"
 
       - name: Run release-please
         id: release
@@ -31,8 +31,7 @@ jobs:
         with:
           token: ${{ secrets.RELEASE_PLEASE_TOKEN }}
 
-
-  deploy:
+  deploy-megaparse:
     if: needs.release-please.outputs.release_created == 'true'
     needs: release-please
     runs-on: ubuntu-latest
@@ -45,10 +44,10 @@ jobs:
       - name: Rye Sync
         run: rye sync --no-lock
       - name: Rye Build
-        run: rye build
+        run: cd libs/megaparse && rye build
       - name: Rye Publish
-        run: rye publish --token ${{ secrets.PYPI_API_TOKEN }} --yes
-  
+        run: cd libs/megaparse && rye publish --token ${{ secrets.PYPI_API_TOKEN }} --yes
+
   deploy-sdk:
     if: needs.release-please.outputs.release_created == 'true'
     needs: release-please
@@ -60,8 +59,8 @@ jobs:
         with:
           enable-cache: true
       - name: Rye Sync
-        run: cd megaparse/sdk && rye sync --no-lock
+        run: cd libs/megaparse_sdk && rye sync --no-lock
       - name: Rye Build
-        run: cd megaparse/sdk && rye build
+        run: cd libs/megaparse_sdk && rye build
       - name: Rye Publish
-        run: cd megaparse/sdk && rye publish --token ${{ secrets.PYPI_API_TOKEN }} --yes
+        run: cd libs/megaparse_sdk && rye publish --token ${{ secrets.PYPI_API_TOKEN }} --yes

@@ -1,6 +1,5 @@
 import nats
 import pytest
-from api.utils.load_ssl import load_ssl_cxt
 from megaparse_sdk.schema.mp_inputs import (
     FileInput,
     MPInput,
@@ -8,16 +7,16 @@ from megaparse_sdk.schema.mp_inputs import (
     ParseFileInput,
 )
 from megaparse_sdk.schema.mp_outputs import MPOutput, MPOutputType
+from megaparse_sdk.utils.load_ssl import load_ssl_cxt
 
 
 @pytest.mark.asyncio
 async def test_parse_file_nats():
     NATS_URL = "nats://test@localhost:4222"
     NATS_SUBJECT = "parse.file"
-
     SSL_CERT_FILE = "./tests/certs/client-cert.pem"
     SSL_KEY_FILE = "./tests/certs/client-key.pem"
-    CA_CERT_FILE = "/Users/amine/Library/Application Support/mkcert/rootCA.pem"
+    CA_CERT_FILE = "./test/certs/rootCA.pem"
     ctx = load_ssl_cxt(
         cert_file=SSL_CERT_FILE, ca_cert_file=CA_CERT_FILE, key_file=SSL_KEY_FILE
     )

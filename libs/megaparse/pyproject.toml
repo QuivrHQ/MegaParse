@@ -14,7 +14,6 @@ requires-python = ">= 3.11"
 dependencies = [
     "megaparse-sdk",
     "pycryptodome>=3.21.0",
-    "llama-index>=0.10.0",
     "pdfplumber>=0.11.0",
     "backoff>=2.2.1",
     "pypdf>=5.0.1",
