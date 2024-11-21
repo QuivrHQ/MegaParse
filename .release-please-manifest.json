@@ -1,4 +1,4 @@
 {
-  "megaparse": "0.0.46",
-  "megaparse-sdk": "0.1.4"
+  "megaparse/libs/megaparse": "0.0.46",
+  "megaparse/libs/megaparse-sdk": "0.1.4"
 }
