@@ -43,6 +43,5 @@ COPY . .
 
 RUN uv pip install --no-cache --system /app/libs/megaparse /app/libs/megaparse_sdk
 
-
 EXPOSE 8000
 CMD ["uvicorn", "megaparse.api.app:app", "--host", "0.0.0.0", "--port", "8000"]
