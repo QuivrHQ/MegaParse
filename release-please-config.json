@@ -1,11 +1,20 @@
 {
-    "packages": {
-        ".": {
-            "release-type": "python",
-            "package-name": "megaparse",
-            "bump-patch-for-minor-pre-major": true,
-            "changelog-notes-type": "github",
-            "include-v-in-tag": true
-        }
+  "packages": {
+    "megaparse": {
+      "release-type": "python",
+      "path": "libs/megaparse",
+      "package-name": "megaparse",
+      "bump-patch-for-minor-pre-major": true,
+      "changelog-notes-type": "github",
+      "include-v-in-tag": true
+    },
+    "megaparse-sdk": {
+      "path": "libs/megaparse_sdk",
+      "release-type": "python",
+      "package-name": "megaparse-sdk",
+      "bump-patch-for-minor-pre-major": true,
+      "changelog-notes-type": "github",
+      "include-v-in-tag": true
     }
+  }
 }
