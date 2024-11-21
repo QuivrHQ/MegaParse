@@ -1,5 +1,12 @@
 # Changelog
 
+## [0.0.46](https://github.com/QuivrHQ/MegaParse/compare/megaparse-v0.0.45...megaparse-v0.0.46) (2024-11-21)
+
+
+### Features
+
+* refacto megaparse for service ([#132](https://github.com/QuivrHQ/MegaParse/issues/132)) ([ab9ad7f](https://github.com/QuivrHQ/MegaParse/commit/ab9ad7fb7db580a04a998d144dd2ba3407068334))
+
 ## [0.0.45](https://github.com/QuivrHQ/MegaParse/compare/megaparse-v0.0.44...megaparse-v0.0.45) (2024-11-19)
 
 
