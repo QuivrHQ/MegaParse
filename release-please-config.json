@@ -10,7 +10,7 @@
       "package-name": "megaparse",
       "changelog-notes-type": "github"
     },
-    "megaparse/libs/megaparse-sdk": {
+    "megaparse/libs/megaparse_sdk": {
       "release-type": "python",
       "package-name": "megaparse-sdk",
       "changelog-notes-type": "github"
