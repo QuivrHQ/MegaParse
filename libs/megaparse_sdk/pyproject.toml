@@ -1,0 +1,30 @@
+[project]
+name = "megaparse-sdk"
+version = "0.1.4"
+description = "Megaparse SDK"
+dependencies = [
+    "python-dotenv>=1.0.0",
+    "pycryptodome>=3.21.0",
+    "psutil>=6.1.0",
+    "httpx>=0.27.0",
+    "nats-py>=2.9.0",
+    "loguru>=0.7.2",
+]
+
+readme = "README.md"
+requires-python = "< 3.12"
+
+[build-system]
+requires = ["hatchling"]
+build-backend = "hatchling.build"
+
+[tool.rye]
+managed = true
+dev-dependencies = []
+universal = true
+
+[tool.hatch.metadata]
+allow-direct-references = true
+
+[tool.hatch.build.targets.wheel]
+packages = ["megaparse_sdk"]

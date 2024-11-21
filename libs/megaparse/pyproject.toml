@@ -1,0 +1,58 @@
+[project]
+name = "megaparse"
+version = "0.0.45"
+authors = [
+    { name = "Stan Girard", email = "stan@quivr.app" },
+    { name = "Chloé Daems", email = "chloe@quivr.app" },
+    { name = "Amine Dirhoussi", email = "amine@quivr.app" },
+    { name = "Jacopo Chevallard", email = "jacopo@quivr.app" },
+]
+
+readme = "README.md"
+requires-python = ">= 3.11"
+
+dependencies = [
+    "megaparse-sdk",
+    "pycryptodome>=3.21.0",
+    "pdfplumber>=0.11.0",
+    "backoff>=2.2.1",
+    "pypdf>=5.0.1",
+    "psutil>=6.1.0",
+    "numpy<=2.0.0",
+    "playwright>=1.47.0",
+    "langchain-anthropic>=0.1.23",
+    "python-magic>=0.4.27",
+    "unstructured[all-docs]==0.15.0",
+    "langchain>=0.2.14,<0.3.0",
+    "langchain-community>=0.2.0",
+    "langchain-openai>=0.1.21",
+    "langchain-core>=0.2.38",
+    "llama-parse>=0.4.0",
+]
+
+[project.optional-dependencies]
+api = [
+    "python-dotenv>=1.0.0",
+    "uvloop>=0.18.0",
+    "pydantic-settings>=2.6.1",
+    "uvicorn>=0.32.0",
+    "fastapi>=0.115.2",
+    "ratelimit>=2.2.1",
+    "nats-py>=2.9.0",
+]
+
+
+[build-system]
+requires = ["hatchling"]
+build-backend = "hatchling.build"
+
+[tool.rye]
+managed = true
+dev-dependencies = []
+universal = true
+
+[tool.hatch.metadata]
+allow-direct-references = true
+
+[tool.hatch.build.targets.wheel]
+packages = ["src/megaparse", "src/api"]

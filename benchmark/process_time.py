@@ -3,7 +3,6 @@ import os
 import time
 
 import numpy as np
-
 from megaparse.sdk import MegaParseSDK
 from pathlib import Path
 

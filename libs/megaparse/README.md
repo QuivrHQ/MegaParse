@@ -1,0 +1,3 @@
+# MegaParse CORE
+
+- Core package
