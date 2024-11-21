@@ -13,8 +13,8 @@ jobs:
   release-please:
     runs-on: ubuntu-latest
     outputs:
-      release_created: ${{ steps.release.outputs['megaparse/libs/megaparse--release_created'] }}
-      release_created_sdk: ${{ steps.release.outputs['megaparse/libs/megaparse_sdk--release_created'] }}
+      release_created: ${{ steps.release.outputs['libs/megaparse--release_created'] }}
+      release_created_sdk: ${{ steps.release.outputs['libs/megaparse_sdk--release_created'] }}
     steps:
       - name: Checkout repository
         uses: actions/checkout@v3
