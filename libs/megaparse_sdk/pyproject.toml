@@ -1,6 +1,6 @@
 [project]
 name = "megaparse-sdk"
-version = "0.1.4"
+version = "0.1.5"
 description = "Megaparse SDK"
 dependencies = [
     "python-dotenv>=1.0.0",
