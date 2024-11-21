@@ -5,6 +5,7 @@ import time
 import numpy as np
 
 from megaparse.sdk import MegaParseSDK
+from pathlib import Path
 
 
 async def process_file(megaparse: MegaParseSDK, file_path):
@@ -15,7 +16,12 @@ async def process_file(megaparse: MegaParseSDK, file_path):
             method="unstructured",  # type: ignore  # unstructured, llama_parser, megaparse_vision
             strategy="auto",
         )
+        path = Path(file_path)
         total = time.perf_counter() - t0
+        output_dir = Path("benchmark/auto")
+        output_dir.mkdir(parents=True, exist_ok=True)
+        with open(output_dir / f"{path.stem}.md", "w") as f:
+            f.write(response["result"])
         return total
     except Exception as e:
         print(f"Exception occured: {e}")
@@ -49,5 +55,5 @@ async def test_process_folder(folder_path, api_key):
 if __name__ == "__main__":
     api_key = os.getenv("MEGAPARSE_API_KEY")
     # folder_path = "megaparse/sdk/examples/only_pdfs"
-    folder_path = "/Users/amine/data/quivr/only_pdfs/"
+    folder_path = "megaparse/sdk/examples/only_pdfs"
     asyncio.run(test_process_folder(folder_path, api_key))

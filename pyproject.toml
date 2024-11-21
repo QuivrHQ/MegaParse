@@ -15,6 +15,7 @@ dependencies = [
     "uvloop>=0.18.0",
     "pydantic-settings>=2.6.1",
     "uvicorn>=0.32.0",
+    "pypdf[image]>=5.1.0",
 ]
 
 [project.optional-dependencies]

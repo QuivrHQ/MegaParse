@@ -1,12 +1,14 @@
-import asyncio
+import os
 from typing import Optional
 
-import httpx
+from dotenv import load_dotenv
 from httpx import Response
 
 from megaparse.sdk.megaparse_sdk.client import MegaParseClient
 from megaparse.sdk.megaparse_sdk.config import UploadFileConfig
 from megaparse.sdk.megaparse_sdk.utils.type import Language, ParserType, StrategyEnum
+
+load_dotenv()
 
 
 class FileUpload:

@@ -383,6 +383,7 @@ pillow==11.0.0
     # via pdfplumber
     # via pikepdf
     # via pillow-heif
+    # via pypdf
     # via pytesseract
     # via python-pptx
     # via torchvision

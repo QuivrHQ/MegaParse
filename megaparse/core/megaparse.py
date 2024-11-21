@@ -59,14 +59,14 @@ class MegaParse:
 
         try:
             parsed_document: str = await self.parser.convert(
-                file_path=file_path, file=file
+                file_path=file_path, file=file, file_extensions=str(file_extension)
             )
             # @chloe FIXME: format_checker needs unstructured Elements as input which is to change
             # if self.format_checker:
             #     parsed_document: str = await self.format_checker.check(parsed_document)
 
         except Exception as e:
-            raise ParsingException(f"Error while parsing {file_path}: {e}")
+            raise ParsingException(f"Error while parsing {file_extension}: {e}")
 
         self.last_parsed_document = parsed_document
         return parsed_document
