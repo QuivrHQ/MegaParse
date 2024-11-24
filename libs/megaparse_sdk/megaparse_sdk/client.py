@@ -14,6 +14,7 @@ from megaparse_sdk.config import ClientNATSConfig, MegaParseConfig
 from megaparse_sdk.schema.mp_exceptions import (
     DownloadError,
     InternalServiceError,
+    MemoryLimitExceeded,
     ModelNotSupported,
     ParsingException,
 )
@@ -169,7 +170,7 @@ class MegaParseNATSClient:
             assert response.err, "Parsing OK but response is None"
             match response.err.mp_err_code:
                 case MPErrorType.MEMORY_LIMIT:
-                    raise ModelNotSupported
+                    raise MemoryLimitExceeded
                 case MPErrorType.INTERNAL_SERVER_ERROR:
                     raise InternalServiceError
                 case MPErrorType.MODEL_NOT_SUPPORTED:

@@ -7,9 +7,20 @@ import pytest
 import pytest_asyncio
 from megaparse_sdk.client import ClientState, MegaParseNATSClient
 from megaparse_sdk.config import ClientNATSConfig, SSLConfig
-from megaparse_sdk.schema.mp_exceptions import ParsingException
+from megaparse_sdk.schema.mp_exceptions import (
+    DownloadError,
+    InternalServiceError,
+    MemoryLimitExceeded,
+    ModelNotSupported,
+    ParsingException,
+)
 from megaparse_sdk.schema.mp_inputs import MPInput, ParseFileInput, ParseUrlInput
-from megaparse_sdk.schema.mp_outputs import MPOutput, MPOutputType
+from megaparse_sdk.schema.mp_outputs import (
+    MPErrorType,
+    MPOutput,
+    MPOutputType,
+    ParseError,
+)
 from megaparse_sdk.utils.load_ssl import load_ssl_cxt
 from nats.aio.client import Client
 
@@ -142,3 +153,36 @@ async def test_client_parse_timeout_retry(nats_service: Client, ssl_config: SSLC
         async with MegaParseNATSClient(nc_config) as mp_client:
             await mp_client.parse_file(file=file_path)
     assert len(msgs) == 2
+
+
+@pytest.mark.asyncio(loop_scope="session")
+@pytest.mark.parametrize(
+    "mp_error_type, exception_class",
+    [
+        ("MEMORY_LIMIT", MemoryLimitExceeded),
+        ("INTERNAL_SERVER_ERROR", InternalServiceError),
+        ("MODEL_NOT_SUPPORTED", ModelNotSupported),
+        ("DOWNLOAD_ERROR", DownloadError),
+        ("PARSING_ERROR", ParsingException),
+    ],
+)
+async def test_client_parse_file_excp(
+    nats_service: Client, nc_config: ClientNATSConfig, mp_error_type, exception_class
+):
+    async def message_handler(msg):
+        parsed_input = MPInput.model_validate_json(msg.data.decode("utf-8")).input
+        assert isinstance(parsed_input, ParseFileInput)
+        err = ParseError(mp_err_code=MPErrorType[mp_error_type], message="")
+        output = MPOutput(
+            output_type=MPOutputType.PARSE_ERR,
+            err=err,
+            result=None,
+        )
+        await nats_service.publish(msg.reply, output.model_dump_json().encode("utf-8"))
+
+    await nats_service.subscribe(NATS_SUBJECT, "worker", cb=message_handler)
+
+    file_path = Path("./tests/pdf/sample_table.pdf")
+    with pytest.raises(exception_class):
+        async with MegaParseNATSClient(nc_config) as mp_client:
+            await mp_client.parse_file(file=file_path)
