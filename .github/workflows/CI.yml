@@ -44,7 +44,6 @@ jobs:
             build-essential \
             libtool \
             gcc \
-            # Additional dependencies for document handling
             libmagic-dev \
             poppler-utils \
             tesseract-ocr \
