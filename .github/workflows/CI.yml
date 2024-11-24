@@ -5,7 +5,7 @@ on:
   workflow_dispatch:
 
 env:
-  TOKEN: test
+  NATS_TOKEN: test
 
 jobs:
   test:
@@ -82,7 +82,7 @@ jobs:
 
       - name: 🔌 Start NATS Server
         run: |
-          nohup nats-server -c config.conf > nats.log 2>&1 &
+          nohup TOKEN=$NATS_TOKEN nats-server -c config.conf > nats.log 2>&1 &
 
       - name: 🚀 Run tests
         run: |
