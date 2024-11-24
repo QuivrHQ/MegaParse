@@ -58,10 +58,7 @@ jobs:
             --tls \
             --tlscert "./libs/megaparse_sdk/tests/certs/client-cert.pem" \
             --tlskey "./libs/megaparse_sdk/tests/certs/client-key.pem" \
-            --tlsverify \
-            --max_payload 20MB \
-            --max_pending 200MB \
-            --http_port 8222 > nats.log 2>&1 &
+            --tlsverify  > nats.log 2>&1 &
 
       - name: 🔨 Install the latest version of rye
         uses: eifinger/setup-rye@v4
