@@ -61,34 +61,30 @@ jobs:
         run: |
           curl -sf https://binaries.nats.dev/nats-io/nats-server/v2@v2.10.20 | sh
 
-      - name: 🛠️ Set up NATS config
+      - name: 🛠️ Set up NATS arguments
         run: |
-          cat << EOF > config.conf
-          # General config
-          listen: 0.0.0.0:4222
-          # Auth
-          authorization: {
-              token: $TOKEN
-          }
-          tls: {
-            cert_file: "./libs/megaparse_sdk/tests/cert/client-cert.pem"
-            key_file: "./libs/megaparse_sdk/tests/cert/client-key.pem"
-            verify: true
-          }
-          # Avg knowledge_size: 1.5MB
-          # Std knowledge_size: 4.72MB
-          # p99.9 mean +4-std-dev: 1.5MB+3*4MB ~ 20MB
-          # Limits: 3 env * 3 workers * 10msg/clients pending * max_payload ~ 2GB of ram
-          max_payload: 20MB
-          max_pending: 200MB
+          nohup nats-server \
+            --addr 0.0.0.0 \
+            --port 4222 \
+            --auth "$NATS_TOKEN" \
+            --tls \
+            --tlscert "./libs/megaparse_sdk/tests/cert/client-cert.pem" \
+            --tlskey "./libs/megaparse_sdk/tests/cert/client-key.pem" \
+            --tlsverify \
+            --max_payload 20MB \
+            --max_pending 200MB \
+            --http_port 8222 > nats.log 2>&1 &
 
-          # Monitoring
-          https_port: 8222
-          EOF
-
-      - name: 🔌 Start NATS Server
+      - name: 🔍 Verify NATS Server is Running
         run: |
-          nohup TOKEN=$NATS_TOKEN nats-server -c config.conf > nats.log 2>&1 &
+          sleep 1 # Give the server some time to start
+          if nc -zv 127.0.0.1 4222; then
+            echo "✅ NATS Server is running on port 4222."
+          else
+            echo "❌ Failed to start NATS Server."
+            cat nats.log
+            exit 1
+          fi
 
       - name: 🚀 Run tests
         run: |
