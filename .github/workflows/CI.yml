@@ -21,7 +21,6 @@ jobs:
         uses: eifinger/setup-rye@v4
         with:
           enable-cache: true
-          working-directory: backend
 
       - name: 🎯 Cache hit!
         if: steps.setup-rye.outputs.cache-hit == 'true'
@@ -29,7 +28,6 @@ jobs:
 
       - name: 🔄 Sync dependencies
         run: |
-          cd backend
           UV_INDEX_STRATEGY=unsafe-first-match rye sync --no-lock
 
       - name: 😭 Install system dependencies
