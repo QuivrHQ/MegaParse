@@ -60,7 +60,7 @@ jobs:
       - name: 🔽 Download and Install NATS Server
         run: |
           curl -L https://github.com/nats-io/nats-server/releases/download/v2.10.23/nats-server-vX.Y.Z-linux-amd64.zip -o nats-server.zip
-          unzip nats-server.zip && sudo cp nats-server/nats-server-v2.10.23-linux-amd64/nats-server /usr/bin
+          unzip nats-server.zip -d nats-server && sudo cp nats-server/nats-server-v2.10.23-linux-amd64/nats-server /usr/bin
 
       - name: 🛠️ Set up NATS arguments
         run: |
