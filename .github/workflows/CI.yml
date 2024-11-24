@@ -10,9 +10,6 @@ env:
 jobs:
   test:
     name: Run tests
-    runs-on:
-      group: big-boys
-
     steps:
       - name: 👀 Checkout code
         uses: actions/checkout@v2
