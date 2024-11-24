@@ -43,8 +43,6 @@ jobs:
             automake \
             build-essential \
             libtool \
-            python-dev \
-            wget \
             gcc \
             # Additional dependencies for document handling
             libmagic-dev \
