@@ -68,8 +68,8 @@ jobs:
             --port 4222 \
             --auth "$NATS_TOKEN" \
             --tls \
-            --tlscert "./libs/megaparse_sdk/tests/cert/client-cert.pem" \
-            --tlskey "./libs/megaparse_sdk/tests/cert/client-key.pem" \
+            --tlscert "./libs/megaparse_sdk/tests/certs/client-cert.pem" \
+            --tlskey "./libs/megaparse_sdk/tests/certs/client-key.pem" \
             --tlsverify \
             --max_payload 20MB \
             --max_pending 200MB \
