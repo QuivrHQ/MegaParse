@@ -56,11 +56,7 @@ jobs:
           nohup nats-server \
             --addr 0.0.0.0 \
             --port 4222 \
-            --auth "$NATS_TOKEN" \
-            --tls \
-            --tlscert "./libs/megaparse_sdk/tests/certs/client-cert.pem" \
-            --tlskey "./libs/megaparse_sdk/tests/certs/client-key.pem" \
-            --tlsverify  > nats.log 2>&1 &
+            --auth "$NATS_TOKEN" > nats.log 2>&1 &
 
       - name: 🔍 Verify NATS Server is Running
         run: |

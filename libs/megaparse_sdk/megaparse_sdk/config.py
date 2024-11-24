@@ -17,9 +17,9 @@ class MegaParseConfig(BaseSettings):
 
 
 class SSLConfig(BaseModel):
-    ca_cert_file: FilePath
     ssl_key_file: FilePath
     ssl_cert_file: FilePath
+    ca_cert_file: FilePath | None = None
 
 
 class ClientNATSConfig(BaseSettings):
