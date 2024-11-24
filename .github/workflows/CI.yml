@@ -25,7 +25,9 @@ jobs:
 
       - name: 😭 Install system dependencies
         run: |
-          sudo apt-get update && sudo apt-get install -y \
+          apt-get update && apt-get install -y \
+            netcat \
+            unzip \
             libgeos-dev \
             libcurl4-openssl-dev \
             libssl-dev \
@@ -47,7 +49,7 @@ jobs:
       - name: 🔽 Download and Install NATS Server
         run: |
           curl -L https://github.com/nats-io/nats-server/releases/download/v2.10.22/nats-server-v2.10.22-linux-amd64.zip -o nats-server.zip
-          unzip nats-server.zip -d nats-server && sudo cp nats-server/nats-server-v2.10.22-linux-amd64/nats-server /usr/bin
+          unzip nats-server.zip -d nats-server && cp nats-server/nats-server-v2.10.22-linux-amd64/nats-server /usr/bin
 
       - name: 🛠️ Set up NATS arguments
         run: |
@@ -76,7 +78,7 @@ jobs:
       - name: 🔍 Verify NATS Server is Running
         run: |
           sleep 1 # Give the server some time to start
-          if nc -zv 127.0.0.1 4222; then
+          if nc -zv localhost 4222; then
             echo "✅ NATS Server is running on port 4222."
           else
             echo "❌ Failed to start NATS Server."

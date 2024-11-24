@@ -92,7 +92,13 @@ class MegaParseNATSClient:
 
     async def _get_nc(self):
         if self._nc is None:
-            self._nc = await nats.connect(self.nc_config.endpoint, tls=self.ssl_ctx)
+            self._nc = await nats.connect(
+                self.nc_config.endpoint,
+                tls=self.ssl_ctx,
+                connect_timeout=self.nc_config.connect_timeout,
+                reconnect_time_wait=self.nc_config.reconnect_time_wait,
+                max_reconnect_attempts=self.nc_config.max_reconnect_attempts,
+            )
             return self._nc
         return self._nc
 

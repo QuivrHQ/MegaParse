@@ -31,4 +31,7 @@ class ClientNATSConfig(BaseSettings):
     timeout: float = 600
     max_retries: int = 5
     backoff: float = 3
+    connect_timeout: int = 5
+    reconnect_time_wait: int = 1
+    max_reconnect_attempts: int = 20
     ssl_config: SSLConfig | None = None

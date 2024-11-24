@@ -48,9 +48,12 @@ def nc_config(ssl_config: SSLConfig) -> ClientNATSConfig:
         subject=NATS_SUBJECT,
         endpoint=NATS_URL,
         ssl_config=ssl_config,
-        timeout=1,
+        timeout=0.5,
         max_retries=1,
-        backoff=1,
+        backoff=-1,
+        connect_timeout=1,
+        reconnect_time_wait=1,
+        max_reconnect_attempts=1,
     )
     return config
 
@@ -58,7 +61,13 @@ def nc_config(ssl_config: SSLConfig) -> ClientNATSConfig:
 @pytest_asyncio.fixture(scope="function")
 async def nats_service(nc_config: ClientNATSConfig):
     ssl_config = load_ssl_cxt(nc_config.ssl_config)
-    nc = await nats.connect(nc_config.endpoint, tls=ssl_config)
+    nc = await nats.connect(
+        nc_config.endpoint,
+        tls=ssl_config,
+        connect_timeout=nc_config.connect_timeout,
+        reconnect_time_wait=nc_config.reconnect_time_wait,
+        max_reconnect_attempts=nc_config.max_reconnect_attempts,
+    )
     yield nc
     await nc.drain()
 
