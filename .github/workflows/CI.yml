@@ -44,23 +44,11 @@ jobs:
             libpq-dev \
             pandoc
 
-      - name: 🔨 Install the latest version of rye
-        uses: eifinger/setup-rye@v4
-        with:
-          enable-cache: true
-
-      - name: 🎯 Cache hit!
-        if: steps.setup-rye.outputs.cache-hit == 'true'
-        run: echo "Rye cache was restored"
-
-      - name: 🔄 Sync dependencies
-        run: |
-          UV_INDEX_STRATEGY=unsafe-first-match rye sync --no-lock
-
       - name: 🔽 Download and Install NATS Server
         run: |
-          curl -L https://github.com/nats-io/nats-server/releases/download/v2.10.22/nats-server-v2.10.22-linux-arm64.zip -o nats-server.zip
+          curl -L https://github.com/nats-io/nats-server/releases/download/v2.10.22/nats-server-v2.10.22-linux-amd64.zip -o nats-server.zip
           unzip nats-server.zip -d nats-server && sudo cp nats-server/nats-server-v2.10.22-linux-amd64/nats-server /usr/bin
+          nats-server/nats-server-v2.10.22-linux-amd64/nats-server
 
       - name: 🛠️ Set up NATS arguments
         run: |
@@ -75,6 +63,19 @@ jobs:
             --max_payload 20MB \
             --max_pending 200MB \
             --http_port 8222 > nats.log 2>&1 &
+
+      - name: 🔨 Install the latest version of rye
+        uses: eifinger/setup-rye@v4
+        with:
+          enable-cache: true
+
+      - name: 🎯 Cache hit!
+        if: steps.setup-rye.outputs.cache-hit == 'true'
+        run: echo "Rye cache was restored"
+
+      - name: 🔄 Sync dependencies
+        run: |
+          UV_INDEX_STRATEGY=unsafe-first-match rye sync --no-lock
 
       - name: 🔍 Verify NATS Server is Running
         run: |
