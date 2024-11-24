@@ -17,18 +17,11 @@ jobs:
         with:
           submodules: true
 
-      - name: 🔨 Install the latest version of rye
-        uses: eifinger/setup-rye@v4
+      - name: Setup apt cache
+        uses: actions/cache@v2
         with:
-          enable-cache: true
-
-      - name: 🎯 Cache hit!
-        if: steps.setup-rye.outputs.cache-hit == 'true'
-        run: echo "Rye cache was restored"
-
-      - name: 🔄 Sync dependencies
-        run: |
-          UV_INDEX_STRATEGY=unsafe-first-match rye sync --no-lock
+          path: /var/cache/apt/archives
+          key: ${{ runner.os }}-apt-${{ hashFiles('/etc/apt/sources.list') }}
 
       - name: 😭 Install system dependencies
         run: |
@@ -50,6 +43,19 @@ jobs:
             libreoffice \
             libpq-dev \
             pandoc
+
+      - name: 🔨 Install the latest version of rye
+        uses: eifinger/setup-rye@v4
+        with:
+          enable-cache: true
+
+      - name: 🎯 Cache hit!
+        if: steps.setup-rye.outputs.cache-hit == 'true'
+        run: echo "Rye cache was restored"
+
+      - name: 🔄 Sync dependencies
+        run: |
+          UV_INDEX_STRATEGY=unsafe-first-match rye sync --no-lock
 
       - name: 🔽 Download and Install NATS Server
         run: |
