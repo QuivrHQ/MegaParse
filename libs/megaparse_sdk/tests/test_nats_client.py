@@ -26,7 +26,7 @@ from nats.aio.client import Client
 
 logger = logging.getLogger(__name__)
 
-NATS_URL = "nats://test@localhost:4222"
+NATS_URL = "nats://test@127.0.0.1:4222"
 NATS_SUBJECT = "parsing"
 SSL_CERT_FILE = "./tests/certs/client-cert.pem"
 SSL_KEY_FILE = "./tests/certs/client-key.pem"

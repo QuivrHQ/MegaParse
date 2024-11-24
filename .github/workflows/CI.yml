@@ -62,6 +62,17 @@ jobs:
             --tlskey "./libs/megaparse_sdk/tests/certs/client-key.pem" \
             --tlsverify  > nats.log 2>&1 &
 
+      - name: 🔍 Verify NATS Server is Running
+        run: |
+          sleep 1 # Give the server some time to start
+          if nc -zv localhost 4222; then
+            echo "✅ NATS Server is running on port 4222."
+          else
+            echo "❌ Failed to start NATS Server."
+            cat nats.log
+            exit 1
+          fi
+
       - name: 🔨 Install the latest version of rye
         uses: eifinger/setup-rye@v4
         with:
@@ -74,17 +85,6 @@ jobs:
       - name: 🔄 Sync dependencies
         run: |
           UV_INDEX_STRATEGY=unsafe-first-match rye sync --no-lock
-
-      - name: 🔍 Verify NATS Server is Running
-        run: |
-          sleep 1 # Give the server some time to start
-          if nc -zv localhost 4222; then
-            echo "✅ NATS Server is running on port 4222."
-          else
-            echo "❌ Failed to start NATS Server."
-            cat nats.log
-            exit 1
-          fi
 
       - name: 🚀 Run tests
         run: |
