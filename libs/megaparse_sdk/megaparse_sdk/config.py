@@ -28,7 +28,7 @@ class ClientNATSConfig(BaseSettings):
     )
     subject: Literal["parsing"] = "parsing"
     endpoint: str = "https://tests@nats.tooling.quivr.app:4222"
-    timeout: int = 600
+    timeout: float = 600
     max_retries: int = 5
-    backoff: int = 3
+    backoff: float = 3
     ssl_config: SSLConfig | None = None

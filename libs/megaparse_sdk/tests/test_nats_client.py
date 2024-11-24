@@ -1,3 +1,4 @@
+import asyncio
 import logging
 from pathlib import Path
 
@@ -6,6 +7,7 @@ import pytest
 import pytest_asyncio
 from megaparse_sdk.client import ClientState, MegaParseNATSClient
 from megaparse_sdk.config import ClientNATSConfig, SSLConfig
+from megaparse_sdk.schema.mp_exceptions import ParsingException
 from megaparse_sdk.schema.mp_inputs import MPInput, ParseFileInput, ParseUrlInput
 from megaparse_sdk.schema.mp_outputs import MPOutput, MPOutputType
 from megaparse_sdk.utils.load_ssl import load_ssl_cxt
@@ -21,24 +23,28 @@ CA_CERT_FILE = "./tests/certs/rootCA.pem"
 
 
 @pytest.fixture(scope="session")
-def nc_config() -> ClientNATSConfig:
-    ssl_config = SSLConfig(
+def ssl_config() -> SSLConfig:
+    return SSLConfig(
         ca_cert_file=CA_CERT_FILE,
         ssl_key_file=SSL_KEY_FILE,
         ssl_cert_file=SSL_CERT_FILE,
     )
+
+
+@pytest.fixture(scope="session")
+def nc_config(ssl_config: SSLConfig) -> ClientNATSConfig:
     config = ClientNATSConfig(
         subject=NATS_SUBJECT,
         endpoint=NATS_URL,
         ssl_config=ssl_config,
-        timeout=10,
+        timeout=1,
         max_retries=1,
         backoff=1,
     )
     return config
 
 
-@pytest_asyncio.fixture(scope="session")
+@pytest_asyncio.fixture(scope="function")
 async def nats_service(nc_config: ClientNATSConfig):
     ssl_config = load_ssl_cxt(nc_config.ssl_config)
     nc = await nats.connect(nc_config.endpoint, tls=ssl_config)
@@ -80,7 +86,6 @@ async def test_client_parse_url(nats_service: Client, nc_config: ClientNATSConfi
     async def message_handler(msg):
         parsed_input = MPInput.model_validate_json(msg.data.decode("utf-8")).input
         assert isinstance(parsed_input, ParseUrlInput)
-
         output = MPOutput(output_type=MPOutputType.PARSE_OK, result="url")
         await nats_service.publish(msg.reply, output.model_dump_json().encode("utf-8"))
 
@@ -89,3 +94,51 @@ async def test_client_parse_url(nats_service: Client, nc_config: ClientNATSConfi
     async with MegaParseNATSClient(nc_config) as mp_client:
         resp = await mp_client.parse_url(url="this://this")
         assert resp == "url"
+
+
+@pytest.mark.asyncio(loop_scope="session")
+async def test_client_parse_timeout(nats_service: Client, ssl_config: SSLConfig):
+    nc_config = ClientNATSConfig(
+        subject=NATS_SUBJECT,
+        endpoint=NATS_URL,
+        ssl_config=ssl_config,
+        timeout=0.1,
+        max_retries=1,
+        backoff=1,
+    )
+
+    async def service(msg):
+        await asyncio.sleep(2 * nc_config.timeout)
+
+    await nats_service.subscribe(NATS_SUBJECT, "worker", cb=service)
+
+    file_path = Path("./tests/pdf/sample_table.pdf")
+    with pytest.raises(ParsingException):
+        async with MegaParseNATSClient(nc_config) as mp_client:
+            await mp_client.parse_file(file=file_path)
+
+
+@pytest.mark.asyncio(loop_scope="session")
+async def test_client_parse_timeout_retry(nats_service: Client, ssl_config: SSLConfig):
+    nc_config = ClientNATSConfig(
+        subject=NATS_SUBJECT,
+        endpoint=NATS_URL,
+        ssl_config=ssl_config,
+        timeout=0.1,
+        max_retries=2,
+        backoff=-5,
+    )
+
+    msgs = []
+
+    async def service(msg):
+        msgs.append(msg)
+        await asyncio.sleep(2 * nc_config.timeout)
+
+    await nats_service.subscribe(NATS_SUBJECT, "worker", cb=service)
+
+    file_path = Path("./tests/pdf/sample_table.pdf")
+    with pytest.raises(ParsingException):
+        async with MegaParseNATSClient(nc_config) as mp_client:
+            await mp_client.parse_file(file=file_path)
+    assert len(msgs) == 2
