@@ -26,7 +26,7 @@ https://github.com/QuivrHQ/MegaParse/assets/19614572/1b4cdb73-8dc2-44ef-b8b4-a75
 ## Installation
 
 ```bash
-pip install megaparse 
+pip install megaparse
 ```
 
 ## Usage
@@ -110,7 +110,7 @@ See localhost:8000/docs for more info on the different endpoints !
 
 _Higher the better_
 
-Note: Want to evaluate and compare your Megaparse module with ours ? Please add your config in ```evaluations/script.py``` and then run ```python evaluations/script.py```. If it is better, do a PR, I mean, let's go higher together 🚀.
+Note: Want to evaluate and compare your Megaparse module with ours ? Please add your config in ```evaluations/script.py``` and then run ```python evaluations/script.py```. If it is better, do a PR, I mean, let's go higher together .
 
 ## In Construction 🚧
 - Improve table checker
