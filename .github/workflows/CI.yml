@@ -74,10 +74,6 @@ jobs:
         with:
           enable-cache: true
 
-      - name: 🎯 Cache hit!
-        if: steps.setup-rye.outputs.cache-hit == 'true'
-        run: echo "Rye cache was restored"
-
       - name: 🔄 Sync dependencies
         run: |
           UV_INDEX_STRATEGY=unsafe-first-match rye sync --no-lock
