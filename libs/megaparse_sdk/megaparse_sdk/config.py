@@ -17,9 +17,9 @@ class MegaParseConfig(BaseSettings):
 
 
 class SSLConfig(BaseModel):
-    ca_cert_file: FilePath
     ssl_key_file: FilePath
     ssl_cert_file: FilePath
+    ca_cert_file: FilePath | None = None
 
 
 class ClientNATSConfig(BaseSettings):
@@ -28,7 +28,10 @@ class ClientNATSConfig(BaseSettings):
     )
     subject: Literal["parsing"] = "parsing"
     endpoint: str = "https://tests@nats.tooling.quivr.app:4222"
-    timeout: int = 600
+    timeout: float = 600
     max_retries: int = 5
-    backoff: int = 3
+    backoff: float = 3
+    connect_timeout: int = 5
+    reconnect_time_wait: int = 1
+    max_reconnect_attempts: int = 20
     ssl_config: SSLConfig | None = None
