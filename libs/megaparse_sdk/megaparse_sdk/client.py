@@ -1,6 +1,7 @@
 import asyncio
 import enum
 import logging
+import os
 from io import BytesIO
 from pathlib import Path
 from types import TracebackType
@@ -132,15 +133,21 @@ class MegaParseNATSClient:
         url_inp = ParseUrlInput(url=url)
         return await self._send_req(MPInput(input=url_inp))
 
-    async def parse_file(self, file: Path | BytesIO) -> str:
+    async def parse_file(
+        self, file: Path | BytesIO, file_name: str | None = None
+    ) -> str:
         if isinstance(file, Path):
             with open(file, "rb") as f:
                 data = f.read()
+            file_name = os.path.basename(file)
         else:
             file.seek(0)
             data = file.read()
+            if file_name is None:
+                raise ValueError("please provide file_name if passing ByteIO stream")
+
         file_input = ParseFileInput(
-            file_input=FileInput(file_name="test.pdf", file_size=len(data), data=data),
+            file_input=FileInput(file_name=file_name, file_size=len(data), data=data),
             parse_config=ParseFileConfig(),
         )
 
