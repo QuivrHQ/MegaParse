@@ -86,6 +86,8 @@ class MegaParseNATSClient:
         self.backoff = self.nc_config.backoff
         if self.nc_config.ssl_config:
             self.ssl_ctx = load_ssl_cxt(self.nc_config.ssl_config)
+        else:
+            self.ssl_ctx = None
         # Client connection
         self._state = ClientState.UNOPENED
         self._nc = None

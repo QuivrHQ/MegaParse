@@ -1,4 +1,4 @@
-name: Run Tests API and Worker
+name: Run tests
 
 on:
   pull_request:
