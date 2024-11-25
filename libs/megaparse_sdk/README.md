@@ -2,7 +2,7 @@
 
 Welcome to the MegaParse SDK! This SDK allows you to easily interact with the MegaParse API to upload URLs and files for processing.
 
-### Installation.
+### Installation
 
 To install the MegaParse SDK, use pip:
 
