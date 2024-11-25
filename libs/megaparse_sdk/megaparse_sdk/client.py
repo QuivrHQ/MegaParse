@@ -1,17 +1,20 @@
 import asyncio
+import enum
 import logging
 from io import BytesIO
 from pathlib import Path
-from typing import Any
+from types import TracebackType
+from typing import Any, Self
 
 import httpx
 import nats
-from nats.errors import TimeoutError
+from nats.errors import NoRespondersError, TimeoutError
 
 from megaparse_sdk.config import ClientNATSConfig, MegaParseConfig
 from megaparse_sdk.schema.mp_exceptions import (
     DownloadError,
     InternalServiceError,
+    MemoryLimitExceeded,
     ModelNotSupported,
     ParsingException,
 )
@@ -67,25 +70,65 @@ class MegaParseClient:
         await self.session.aclose()
 
 
+class ClientState(enum.Enum):
+    # First state of the client
+    UNOPENED = 1
+    #   Client has either sent a request, or is within a `with` block.
+    OPENED = 2
+    #   Client has either exited the `with` block, or `close()` called.
+    CLOSED = 3
+
+
 class MegaParseNATSClient:
-    def __init__(self, config: ClientNATSConfig = ClientNATSConfig()):
+    def __init__(self, config: ClientNATSConfig):
         self.nc_config = config
         self.max_retries = self.nc_config.max_retries
         self.backoff = self.nc_config.backoff
         if self.nc_config.ssl_config:
             self.ssl_ctx = load_ssl_cxt(self.nc_config.ssl_config)
+        # Client connection
+        self._state = ClientState.UNOPENED
+        self._nc = None
 
     async def _get_nc(self):
         if self._nc is None:
             self._nc = await nats.connect(
-                self.nc_config.nats_endpoint, tls=self.ssl_ctx
+                self.nc_config.endpoint,
+                tls=self.ssl_ctx,
+                connect_timeout=self.nc_config.connect_timeout,
+                reconnect_time_wait=self.nc_config.reconnect_time_wait,
+                max_reconnect_attempts=self.nc_config.max_reconnect_attempts,
             )
             return self._nc
         return self._nc
 
+    async def __aenter__(self: Self) -> Self:
+        if self._state != ClientState.UNOPENED:
+            msg = {
+                ClientState.OPENED: "Cannot open a client instance more than once.",
+                ClientState.CLOSED: (
+                    "Cannot reopen a client instance, client was closed."
+                ),
+            }[self._state]
+            raise RuntimeError(msg)
+
+        self._state = ClientState.OPENED
+
+        await self._get_nc()
+        return self
+
+    async def __aexit__(
+        self,
+        exc_type: type[BaseException] | None = None,
+        exc_value: BaseException | None = None,
+        traceback: TracebackType | None = None,
+    ) -> None:
+        self._state = ClientState.CLOSED
+        await self.aclose()
+
     async def parse_url(self, url: str):
         url_inp = ParseUrlInput(url=url)
-        await self._send_req(MPInput(input=url_inp))
+        return await self._send_req(MPInput(input=url_inp))
 
     async def parse_file(self, file: Path | BytesIO) -> str:
         if isinstance(file, Path):
@@ -108,9 +151,10 @@ class MegaParseNATSClient:
         for attempt in range(self.max_retries):
             try:
                 return await self._send_req_inner(inp)
-            except TimeoutError:
-                logger.error(f"Timeout error parsing. Retrying {attempt} time")
+            except (TimeoutError, NoRespondersError) as e:
+                logger.error(f"Sending req error: {e}. Retrying for {attempt} time")
                 if attempt < self.max_retries - 1:
+                    logger.debug(f"Backoff for {2**self.backoff}s")
                     await asyncio.sleep(2**self.backoff)
         raise ParsingException
 
@@ -122,15 +166,17 @@ class MegaParseNATSClient:
             timeout=self.nc_config.timeout,
         )
         response = MPOutput.model_validate_json(raw_response.data.decode("utf-8"))
+        return self._handle_mp_output(response)
+
+    def _handle_mp_output(self, response: MPOutput) -> str:
         if response.output_type == MPOutputType.PARSE_OK:
             assert response.result, "Parsing OK but response is None"
             return response.result
         elif response.output_type == MPOutputType.PARSE_ERR:
             assert response.err, "Parsing OK but response is None"
-
             match response.err.mp_err_code:
                 case MPErrorType.MEMORY_LIMIT:
-                    raise ModelNotSupported
+                    raise MemoryLimitExceeded
                 case MPErrorType.INTERNAL_SERVER_ERROR:
                     raise InternalServiceError
                 case MPErrorType.MODEL_NOT_SUPPORTED:
@@ -139,9 +185,8 @@ class MegaParseNATSClient:
                     raise DownloadError
                 case MPErrorType.PARSING_ERROR:
                     raise ParsingException
-        else:
-            raise ValueError(f"unknown service response type: {response}")
+        raise ValueError(f"unknown service response type: {response}")
 
-    async def close(self):
+    async def aclose(self):
         nc = await self._get_nc()
         await nc.close()

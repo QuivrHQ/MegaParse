@@ -1,0 +1,87 @@
+name: Run Tests API and Worker
+
+on:
+  pull_request:
+  workflow_dispatch:
+
+env:
+  NATS_TOKEN: test
+
+jobs:
+  test:
+    name: Run tests
+    runs-on: ubuntu-latest
+    steps:
+      - name: 👀 Checkout code
+        uses: actions/checkout@v2
+        with:
+          submodules: true
+
+      - name: Setup apt cache
+        uses: actions/cache@v2
+        with:
+          path: /var/cache/apt/archives
+          key: ${{ runner.os }}-apt-${{ hashFiles('/etc/apt/sources.list') }}
+
+      - name: 😭 Install system dependencies
+        run: |
+          sudo apt-get update && sudo apt-get install -y \
+            netcat \
+            unzip \
+            libgeos-dev \
+            libcurl4-openssl-dev \
+            libssl-dev \
+            binutils \
+            curl \
+            git \
+            autoconf \
+            automake \
+            build-essential \
+            libtool \
+            gcc \
+            libmagic-dev \
+            poppler-utils \
+            tesseract-ocr \
+            libreoffice \
+            libpq-dev \
+            pandoc
+
+      - name: 🔽 Download and Install NATS Server
+        run: |
+          curl -L https://github.com/nats-io/nats-server/releases/download/v2.10.22/nats-server-v2.10.22-linux-amd64.zip -o nats-server.zip
+          unzip nats-server.zip -d nats-server && sudo cp nats-server/nats-server-v2.10.22-linux-amd64/nats-server /usr/bin
+
+      - name: 🛠️ Set up NATS arguments
+        run: |
+          nohup nats-server \
+            --addr 0.0.0.0 \
+            --port 4222 \
+            --auth "$NATS_TOKEN" > nats.log 2>&1 &
+
+      - name: 🔍 Verify NATS Server is Running
+        run: |
+          sleep 1 # Give the server some time to start
+          if nc -zv localhost 4222; then
+            echo "✅ NATS Server is running on port 4222."
+          else
+            echo "❌ Failed to start NATS Server."
+            cat nats.log
+            exit 1
+          fi
+
+      - name: 🔨 Install the latest version of rye
+        uses: eifinger/setup-rye@v4
+        with:
+          enable-cache: true
+
+      - name: 🎯 Cache hit!
+        if: steps.setup-rye.outputs.cache-hit == 'true'
+        run: echo "Rye cache was restored"
+
+      - name: 🔄 Sync dependencies
+        run: |
+          UV_INDEX_STRATEGY=unsafe-first-match rye sync --no-lock
+
+      - name: 🚀 Run tests
+        run: |
+          rye test -p megaparse-sdk
