@@ -1,5 +1,12 @@
 # Changelog
 
+## [0.1.7](https://github.com/QuivrHQ/MegaParse/compare/megaparse-sdk-v0.1.6...megaparse-sdk-v0.1.7) (2024-11-25)
+
+
+### Bug Fixes
+
+* Update README.md ([#154](https://github.com/QuivrHQ/MegaParse/issues/154)) ([a103393](https://github.com/QuivrHQ/MegaParse/commit/a1033938184e20c24b0e54ee0db088b28075fd14))
+
 ## [0.1.6](https://github.com/QuivrHQ/MegaParse/compare/megaparse-sdk-v0.1.5...megaparse-sdk-v0.1.6) (2024-11-25)
 
 
