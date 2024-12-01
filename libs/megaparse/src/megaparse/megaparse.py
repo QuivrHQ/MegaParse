@@ -1,12 +1,13 @@
 import asyncio
 import os
 from pathlib import Path
-from typing import IO
+from typing import IO, List
 
 from megaparse_sdk.schema.extensions import FileExtension
+from unstructured.documents.elements import Element
 
-from megaparse.checker.format_checker import FormatChecker
 from megaparse.exceptions.base import ParsingException
+from megaparse.formatter.base import BaseFormatter
 from megaparse.parser.base import BaseParser
 from megaparse.parser.unstructured_parser import UnstructuredParser
 
@@ -15,11 +16,10 @@ class MegaParse:
     def __init__(
         self,
         parser: BaseParser = UnstructuredParser(),
-        format_checker: FormatChecker | None = None,
+        formatters: List[BaseFormatter] | None = None,
     ) -> None:
         self.parser = parser
-        self.format_checker = format_checker
-        self.last_parsed_document: str = ""
+        self.formatters = formatters
 
     async def aload(
         self,
@@ -48,8 +48,9 @@ class MegaParse:
         except ValueError:
             raise ValueError(f"Unsupported file extension: {file_extension}")
 
+        # FIXME: Parsers and formatters should have their own supported file extensions
         if file_extension != ".pdf":
-            if self.format_checker:
+            if self.formatters:
                 raise ValueError(
                     f"Format Checker : Unsupported file extension: {file_extension}"
                 )
@@ -59,17 +60,16 @@ class MegaParse:
                 )
 
         try:
-            parsed_document: str = await self.parser.convert(
-                file_path=file_path, file=file
-            )
+            parsed_document = await self.parser.convert(file_path=file_path, file=file)
             # @chloe FIXME: format_checker needs unstructured Elements as input which is to change
-            # if self.format_checker:
-            #     parsed_document: str = await self.format_checker.check(parsed_document)
+            if self.formatters:
+                for formatter in self.formatters:
+                    parsed_document = await formatter.format(parsed_document)
 
         except Exception as e:
             raise ParsingException(f"Error while parsing {file_path}: {e}")
-
-        self.last_parsed_document = parsed_document
+        if not isinstance(parsed_document, str):
+            raise ValueError("The parser or the last formatter should return a string")
         return parsed_document
 
     def load(self, file_path: Path | str) -> str:
@@ -78,7 +78,7 @@ class MegaParse:
         file_extension: str = file_path.suffix
 
         if file_extension != ".pdf":
-            if self.format_checker:
+            if self.formatters:
                 raise ValueError(
                     f"Format Checker : Unsupported file extension: {file_extension}"
                 )
@@ -89,22 +89,17 @@ class MegaParse:
 
         try:
             loop = asyncio.get_event_loop()
-            parsed_document: str = loop.run_until_complete(
-                self.parser.convert(file_path)
-            )
+            parsed_document = loop.run_until_complete(self.parser.convert(file_path))
             # @chloe FIXME: format_checker needs unstructured Elements as input which is to change
-            # if self.format_checker:
-            #     parsed_document: str = loop.run_until_complete(
-            #         self.format_checker.check(parsed_document)
-            #     )
+            if self.formatters:
+                for formatter in self.formatters:
+                    parsed_document = loop.run_until_complete(
+                        formatter.format(parsed_document)
+                    )
 
         except Exception as e:
             raise ValueError(f"Error while parsing {file_path}: {e}")
 
-        self.last_parsed_document = parsed_document
+        if not isinstance(parsed_document, str):
+            raise ValueError("The parser or the last formatter should return a string")
         return parsed_document
-
-    def save(self, file_path: Path | str) -> None:
-        os.makedirs(os.path.dirname(file_path), exist_ok=True)
-        with open(file_path, "w+") as f:
-            f.write(self.last_parsed_document)
