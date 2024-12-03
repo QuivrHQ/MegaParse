@@ -1,5 +1,12 @@
 # Changelog
 
+## [0.0.48](https://github.com/QuivrHQ/MegaParse/compare/megaparse-v0.0.47...megaparse-v0.0.48) (2024-12-03)
+
+
+### Features
+
+* Update imports and parsers in README.md ([#156](https://github.com/QuivrHQ/MegaParse/issues/156)) ([33e0303](https://github.com/QuivrHQ/MegaParse/commit/33e0303821691c4b1fc821e6b33b874bd332d430))
+
 ## [0.0.47](https://github.com/QuivrHQ/MegaParse/compare/megaparse-v0.0.46...megaparse-v0.0.47) (2024-11-21)
 
 
