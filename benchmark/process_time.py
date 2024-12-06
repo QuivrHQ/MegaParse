@@ -17,7 +17,7 @@ async def process_file(megaparse: MegaParseSDK, file_path):
         total = time.perf_counter() - t0
         return total
     except Exception as e:
-        print(f"Exception occured: {e}")
+        print(f"Exception occurred: {e}")
         return None
 
 
