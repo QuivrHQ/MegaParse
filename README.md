@@ -41,16 +41,15 @@ pip install megaparse
 
 
 ```python
-from megaparse.core.megaparse import MegaParse
+from megaparse import MegaParse
 from langchain_openai import ChatOpenAI
-from megaparse.core.parser.unstructured_parser import UnstructuredParser
+from megaparse.parser.unstructured_parser import UnstructuredParser
 
-model = ChatOpenAI(model="gpt-4o", api_key=os.getenv("OPENAI_API_KEY"))  # or any langchain compatible Chat Models
-parser = UnstructuredParser(model=model)
+parser = UnstructuredParser()
 megaparse = MegaParse(parser)
 response = megaparse.load("./test.pdf")
 print(response)
-megaparse.save("./test.md") #saves the last processed doc in md format
+megaparse.save("./test.md")
 ```
 
 ### Use MegaParse Vision
@@ -58,9 +57,9 @@ megaparse.save("./test.md") #saves the last processed doc in md format
 * Change the parser to MegaParseVision
 
 ```python
-from megaparse.core.megaparse import MegaParse
+from megaparse import MegaParse
 from langchain_openai import ChatOpenAI
-from megaparse.core.parser.megaparse_vision import MegaParseVision
+from megaparse.parser.megaparse_vision import MegaParseVision
 
 model = ChatOpenAI(model="gpt-4o", api_key=os.getenv("OPENAI_API_KEY"))  # type: ignore
 parser = MegaParseVision(model=model)
@@ -79,9 +78,9 @@ megaparse.save("./test.md")
 2. Change the parser to LlamaParser
 
 ```python
-from megaparse.core.megaparse import MegaParse
+from megaparse import MegaParse
 from langchain_openai import ChatOpenAI
-from megaparse.core.parser.llama import LlamaParser
+from megaparse.parser.llama_parser import LlamaParser
 
 parser = LlamaParser(api_key = os.getenv("LLAMA_CLOUD_API_KEY"))
 megaparse = MegaParse(parser)
@@ -100,12 +99,12 @@ See localhost:8000/docs for more info on the different endpoints !
 ## BenchMark
 
 <!---BENCHMARK-->
-| Parser | similarity_ratio |
-|---|---|
-| megaparse_vision | 0.87 |
-| unstructured_with_check_table | 0.77 |
-| unstructured | 0.59 |
-| llama_parser | 0.33 |
+| Parser                        | similarity_ratio |
+| ----------------------------- | ---------------- |
+| megaparse_vision              | 0.87             |
+| unstructured_with_check_table | 0.77             |
+| unstructured                  | 0.59             |
+| llama_parser                  | 0.33             |
 <!---END_BENCHMARK-->
 
 _Higher the better_

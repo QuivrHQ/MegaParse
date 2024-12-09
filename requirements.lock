@@ -471,7 +471,7 @@ safetensors==0.4.5
     # via transformers
 scipy==1.14.1
     # via layoutparser
-setuptools==75.5.0 ; python_full_version >= '3.12'
+setuptools==75.5.0
     # via torch
 six==1.16.0
     # via langdetect
