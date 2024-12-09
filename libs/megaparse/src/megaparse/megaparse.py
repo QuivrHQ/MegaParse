@@ -61,7 +61,7 @@ class MegaParse:
 
         try:
             parsed_document = await self.parser.convert(file_path=file_path, file=file)
-            # @chloe FIXME: format_checker needs unstructured Elements as input which is to change
+            # @chloe FIXME: format_checker needs unstructured Elements as input which is to change to a megaparse element
             if self.formatters:
                 for formatter in self.formatters:
                     parsed_document = await formatter.format(parsed_document)

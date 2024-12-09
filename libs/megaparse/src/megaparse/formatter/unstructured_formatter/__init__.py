@@ -1,8 +1,7 @@
 from typing import List
 
-from unstructured.documents.elements import Element
-
 from megaparse.formatter.base import BaseFormatter
+from unstructured.documents.elements import Element
 
 
 class UnstructuredFormatter(BaseFormatter):

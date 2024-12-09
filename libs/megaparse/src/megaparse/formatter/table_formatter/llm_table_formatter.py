@@ -3,9 +3,8 @@ from typing import List, Optional
 
 from langchain_core.language_models.chat_models import BaseChatModel
 from langchain_core.prompts import ChatPromptTemplate
-from unstructured.documents.elements import Element
-
 from megaparse.formatter.table_formatter import TableFormatter
+from unstructured.documents.elements import Element
 
 
 class SimpleMDTableFormatter(TableFormatter):

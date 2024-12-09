@@ -4,11 +4,10 @@ from typing import List, Optional
 
 from langchain_core.language_models.chat_models import BaseChatModel
 from langchain_core.messages import HumanMessage
+from megaparse.formatter.table_formatter import TableFormatter
 from pdf2image import convert_from_path
 from PIL import Image
 from unstructured.documents.elements import Element
-
-from megaparse.formatter.table_formatter import TableFormatter
 
 TABLE_OCR_PROMPT = """
 You are tasked with transcribing the content of a table into markdown format. Your goal is to create a well-structured, readable markdown table that accurately represents the original content while adding appropriate formatting.
