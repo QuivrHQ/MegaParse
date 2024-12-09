@@ -1,6 +1,6 @@
 [project]
 name = "megaparse"
-version = "0.0.47"
+version = "0.0.48"
 authors = [
     { name = "Stan Girard", email = "stan@quivr.app" },
     { name = "Chloé Daems", email = "chloe@quivr.app" },
@@ -28,6 +28,7 @@ dependencies = [
     "langchain-openai>=0.1.21",
     "langchain-core>=0.2.38",
     "llama-parse>=0.4.0",
+    "pydantic-settings>=2.6.1",
 ]
 
 [project.optional-dependencies]

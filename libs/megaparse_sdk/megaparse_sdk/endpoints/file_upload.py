@@ -1,6 +1,5 @@
 from typing import Optional
 
-from dotenv import load_dotenv
 from httpx import Response
 from pydantic import BaseModel
 
@@ -16,9 +15,6 @@ class UploadFileConfig(BaseModel):
     language: Language
     parsing_instruction: str | None = None
     model_name: str = "gpt-4o"
-
-
-load_dotenv()
 
 
 class FileUpload:
