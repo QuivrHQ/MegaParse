@@ -1,17 +1,15 @@
-import copy
 import re
-import time
-from io import IOBase
 from pathlib import Path
 from typing import IO
 
+import numpy as np
+import pypdfium2 as pdfium
 from dotenv import load_dotenv
 from langchain_core.language_models.chat_models import BaseChatModel
 from langchain_core.prompts import ChatPromptTemplate
 from megaparse_sdk.schema.parser_config import StrategyEnum
-from pdfminer.high_level import extract_pages
-from pdfminer.layout import LTFigure, LTImage, LTPage
-from pdfminer.utils import FileOrName
+from pypdfium2._helpers.page import PdfPage
+from pypdfium2._helpers.pageobjects import PdfImage
 from unstructured.partition.auto import partition
 
 from megaparse.parser import BaseParser
@@ -106,60 +104,30 @@ class UnstructuredParser(BaseParser):
 
     def get_strategy(
         self,
-        file_path_: str | Path | None = None,
-        file_: IO[bytes] | None = None,
+        page: PdfPage,
         threshold=0.5,
-        page_threshold=0.8,
-        dpi=72,
     ) -> StrategyEnum:
-        t0 = time.perf_counter()
-        file = copy.deepcopy(file_)
-        file_path = copy.deepcopy(file_path_)
-
-        source_pdf: FileOrName = file_path if file_path else file  # type: ignore
-
         if self.strategy != StrategyEnum.AUTO:
             raise ValueError("Strategy must be AUTO to use get_strategy")
-        image_proportion_per_pages = []
-        num_pages = 0
 
-        for page_layout in extract_pages(source_pdf):
-            if isinstance(page_layout, LTPage):
-                page_width = page_layout.width
-                page_height = page_layout.height
-                page_area = page_width * page_height
+        # Get the dim of the page
+        total_page_area = page.get_width() * page.get_height()
+        total_image_area = 0
+        images_coords = []
+        # Get all the images in the page
+        for obj in page.get_objects():
+            if isinstance(obj, PdfImage):
+                images_coords.append(obj.get_pos())
 
-                total_image_area = 0
+        canva = np.zeros((int(page.get_height()), int(page.get_width())))
+        for coords in images_coords:
+            canva[int(coords[1]) : int(coords[3]), int(coords[0]) : int(coords[2])] = 1
 
-                for element in page_layout:
-                    if isinstance(element, LTImage) or isinstance(element, LTFigure):
-                        bbox = element.bbox  # (x0, y0, x1, y1)
-                        if bbox:
-                            image_width = bbox[2] - bbox[0]  # x1 - x0
-                            image_height = bbox[3] - bbox[1]  # y1 - y0
-                            image_area = image_width * image_height
-                            total_image_area += image_area
+        # Get the total area of the images
+        total_image_area = np.sum(canva)
 
-                coverage = total_image_area / page_area if page_area > 0 else 0
-                image_proportion_per_pages.append(coverage)
-                num_pages += 1
-
-        total_proportion = (
-            sum(1 for prop in image_proportion_per_pages if prop > page_threshold)
-            / num_pages
-            if num_pages > 0
-            else 0
-        )
-
-        print(f"Time taken to get strategy: {time.perf_counter() - t0}")
-        print(f"Total proportion of images: {total_proportion}")
-        print(
-            f"Mean Image proportion per page: {sum(image_proportion_per_pages) / len(image_proportion_per_pages)}"
-        )
-
-        if total_proportion > threshold:
+        if total_image_area / total_page_area > threshold:
             return StrategyEnum.HI_RES
-
         return StrategyEnum.FAST
 
     async def convert(
@@ -169,8 +137,28 @@ class UnstructuredParser(BaseParser):
         file_extensions: str = "",
         **kwargs,
     ) -> str:
+        strategies = {}
         if file_extensions == ".pdf" and self.strategy == StrategyEnum.AUTO:
-            self.strategy = self.get_strategy(file_path_=file_path, file_=file)
+            print("Determining strategy...")
+            document = (
+                pdfium.PdfDocument(file_path) if file_path else pdfium.PdfDocument(file)
+            )
+            for i, page in enumerate(document):
+                strategies[i] = self.get_strategy(page)
+
+            # count number of pages needing HI_RES
+            num_hi_res = len(
+                [
+                    strategies[i]
+                    for i in strategies
+                    if strategies[i] == StrategyEnum.HI_RES
+                ]
+            )
+            if num_hi_res / len(strategies) > 0.2:
+                self.strategy = StrategyEnum.HI_RES
+            else:
+                self.strategy = StrategyEnum.FAST
+
         # Partition the PDF
         elements = partition(
             filename=str(file_path) if file_path else None,

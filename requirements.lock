@@ -336,7 +336,6 @@ pillow==11.0.0
     # via pdfplumber
     # via pikepdf
     # via pillow-heif
-    # via pypdf
     # via pytesseract
     # via python-pptx
     # via torchvision
@@ -402,6 +401,7 @@ pypdf==5.1.0
     # via unstructured
     # via unstructured-client
 pypdfium2==4.30.0
+    # via megaparse-monorepo
     # via pdfplumber
 pyreadline3==3.5.4 ; sys_platform == 'win32'
     # via humanfriendly
@@ -472,7 +472,7 @@ safetensors==0.4.5
     # via transformers
 scipy==1.14.1
     # via layoutparser
-setuptools==75.5.0 ; python_full_version >= '3.12'
+setuptools==75.5.0
     # via torch
 six==1.16.0
     # via langdetect
