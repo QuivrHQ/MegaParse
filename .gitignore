@@ -20,3 +20,5 @@ megaparse/sdk/examples/only_pdfs/*
 **/profile/
 **/prof/
 .ropeproject/
+benchmark/hi_res/*
+benchmark/auto/*

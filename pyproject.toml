@@ -10,7 +10,9 @@ authors = [
 ]
 readme = "README.md"
 requires-python = ">= 3.11"
-dependencies = ["packaging>=22.0"]
+dependencies = [
+    "packaging>=22.0",
+]
 
 [build-system]
 requires = ["hatchling"]

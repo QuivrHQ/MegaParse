@@ -2,6 +2,7 @@ from pathlib import Path
 from typing import IO, BinaryIO, List
 
 import onnxruntime as rt
+from megaparse_sdk.schema.extensions import FileExtension
 from onnxtr.io import DocumentFile
 from onnxtr.models import EngineConfig, ocr_predictor
 
@@ -57,6 +58,7 @@ class DoctrParser(BaseParser):
         self,
         file_path: str | Path | None = None,
         file: IO[bytes] | BinaryIO | None = None,
+        file_extension: str | FileExtension = "",
         **kwargs,
     ) -> str:
         if file:
