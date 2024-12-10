@@ -401,6 +401,7 @@ pypdf==5.1.0
     # via unstructured
     # via unstructured-client
 pypdfium2==4.30.0
+    # via megaparse
     # via pdfplumber
 pyreadline3==3.5.4 ; sys_platform == 'win32'
     # via humanfriendly

@@ -29,6 +29,8 @@ dependencies = [
     "langchain-core>=0.2.38",
     "llama-parse>=0.4.0",
     "pydantic-settings>=2.6.1",
+    "pypdfium2>=4.30.0",
+
 ]
 
 [project.optional-dependencies]
