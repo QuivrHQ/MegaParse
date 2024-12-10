@@ -8,6 +8,7 @@ from megaparse_sdk.schema.extensions import FileExtension
 from megaparse.checker.format_checker import FormatChecker
 from megaparse.exceptions.base import ParsingException
 from megaparse.parser.base import BaseParser
+from megaparse.parser.doctr_parser import DoctrParser
 from megaparse.parser.unstructured_parser import UnstructuredParser
 
 
@@ -15,9 +16,11 @@ class MegaParse:
     def __init__(
         self,
         parser: BaseParser = UnstructuredParser(),
+        ocr_parser: BaseParser = DoctrParser(),
         format_checker: FormatChecker | None = None,
     ) -> None:
         self.parser = parser
+        self.ocr_parse = ocr_parser
         self.format_checker = format_checker
         self.last_parsed_document: str = ""
 
@@ -59,6 +62,10 @@ class MegaParse:
                 )
 
         try:
+            # detect doc native/ sccanned
+            #  -> unstructued
+            #  ->
+
             parsed_document: str = await self.parser.convert(
                 file_path=file_path, file=file
             )

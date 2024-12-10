@@ -6,7 +6,7 @@ dist/**
 megaparse.egg-info/
 *.pyc
 build/*
-ENV 
+ENV
 venv
 */evaluations/*
 */cdp/*
@@ -16,3 +16,7 @@ venv
 *.DS_Store
 .tool-versions
 megaparse/sdk/examples/only_pdfs/*
+
+**/profile/
+**/prof/
+.ropeproject/

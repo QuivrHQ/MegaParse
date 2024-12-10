@@ -11,17 +11,23 @@ from langchain_anthropic import ChatAnthropic
 from langchain_community.document_loaders import PlaywrightURLLoader
 from langchain_openai import ChatOpenAI
 from llama_parse.utils import Language
-from megaparse import MegaParse
-from megaparse.parser.builder import ParserBuilder
-from megaparse.parser.unstructured_parser import UnstructuredParser
+from megaparse_sdk.schema.parser_config import (
+    ParseFileConfig,
+    ParserType,
+    StrategyEnum,
+)
+from megaparse_sdk.schema.supported_models import SupportedModel
 
-from api.exceptions.base import (
+from megaparse import MegaParse
+from megaparse.api.exceptions.megaparse_exceptions import (
     HTTPDownloadError,
     HTTPFileNotFound,
     HTTPModelNotSupported,
     HTTPParsingException,
     ParsingException,
 )
+from megaparse.parser.builder import ParserBuilder
+from megaparse.parser.unstructured_parser import UnstructuredParser
 
 app = FastAPI()
 
@@ -53,7 +59,6 @@ def _check_free_memory() -> bool:
 
 @app.post(
     "/v1/file",
-    response_model=APIOutputType,
 )
 async def parse_file(
     file: UploadFile = File(...),
@@ -84,7 +89,7 @@ async def parse_file(
         else:
             raise HTTPModelNotSupported()
 
-    parser_config = ParserConfig(
+    parser_config = ParseFileConfig(
         method=method,
         strategy=strategy,
         model=model if model and check_table else None,
@@ -114,7 +119,6 @@ async def parse_file(
 
 @app.post(
     "/v1/url",
-    response_model=APIOutputType,
 )
 async def upload_url(
     url: str, playwright_loader=Depends(get_playwright_loader)

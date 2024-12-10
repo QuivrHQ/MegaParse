@@ -21,8 +21,8 @@ class FileInput(BaseModel):
                 raise ValueError("Invalid Base64 encoding for the 'data' field.")
         return value
 
-    # TODO: this is sloww !!! Move to reading bytes directly from bucket storage
-    # OR append bytes with CRC32
+    # TODO: this is slow !!! Move to reading bytes directly from bucket storage
+    # append bytes with CRC32
     @field_serializer("data", return_type=str)
     def serialize_data(self, data: bytes, _info):
         return base64.b64encode(data).decode("utf-8")
