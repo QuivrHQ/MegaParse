@@ -7,6 +7,7 @@ from langchain_community.document_loaders import PlaywrightURLLoader
 from langchain_core.documents import Document
 from megaparse.api.app import app, get_playwright_loader, parser_builder_dep
 from megaparse.parser.base import BaseParser
+from megaparse_sdk.schema.extensions import FileExtension
 
 
 class FakeParserBuilder:
@@ -26,6 +27,7 @@ class FakeParserBuilder:
                 self,
                 file_path: str | Path | None = None,
                 file: IO[bytes] | None = None,
+                file_extension: str | FileExtension = "",
                 **kwargs,
             ) -> str:
                 print("Fake parser is converting the file")
