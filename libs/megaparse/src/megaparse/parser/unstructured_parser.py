@@ -121,8 +121,12 @@ class UnstructuredParser(BaseParser):
 
         canva = np.zeros((int(page.get_height()), int(page.get_width())))
         for coords in images_coords:
-            canva[int(coords[1]) : int(coords[3]), int(coords[0]) : int(coords[2])] = 1
-
+            p_width, p_height = int(page.get_width()), int(page.get_height())
+            x1 = max(0, min(p_width, int(coords[0])))
+            y1 = max(0, min(p_height, int(coords[1])))
+            x2 = max(0, min(p_width, int(coords[2])))
+            y2 = max(0, min(p_height, int(coords[3])))
+            canva[y1:y2, x1:x2] = 1
         # Get the total area of the images
         total_image_area = np.sum(canva)
 
@@ -155,8 +159,10 @@ class UnstructuredParser(BaseParser):
                 ]
             )
             if num_hi_res / len(strategies) > 0.2:
+                print("Using HI_RES strategy")
                 self.strategy = StrategyEnum.HI_RES
             else:
+                print("Using FAST strategy")
                 self.strategy = StrategyEnum.FAST
 
         # Partition the PDF

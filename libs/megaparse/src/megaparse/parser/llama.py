@@ -6,6 +6,7 @@ from llama_parse import LlamaParse as _LlamaParse
 from llama_parse.utils import Language, ResultType
 
 from megaparse.parser import BaseParser
+from megaparse_sdk.schema.extensions import FileExtension
 
 
 class LlamaParser(BaseParser):
@@ -30,7 +31,7 @@ class LlamaParser(BaseParser):
         self,
         file_path: str | Path | None = None,
         file: IO[bytes] | None = None,
-        file_extensions: str = "",
+        file_extensions: str | FileExtension = "",
         **kwargs,
     ) -> str:
         if not file_path:

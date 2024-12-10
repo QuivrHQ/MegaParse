@@ -2,6 +2,8 @@ from abc import ABC, abstractmethod
 from pathlib import Path
 from typing import IO
 
+from megaparse_sdk.schema.extensions import FileExtension
+
 
 class BaseParser(ABC):
     """Mother Class for all the parsers [Unstructured, LlamaParse, MegaParseVision]"""
@@ -11,7 +13,7 @@ class BaseParser(ABC):
         self,
         file_path: str | Path | None = None,
         file: IO[bytes] | None = None,
-        file_extensions: str = "",
+        file_extensions: str | FileExtension = "",
         **kwargs,
     ) -> str:
         """
