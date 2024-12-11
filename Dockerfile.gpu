@@ -19,7 +19,6 @@ RUN apt-get update && apt-get upgrade && apt-get install -y \
     automake \
     build-essential \
     libtool \
-    python-dev \
     python3-pip \
     build-essential \
     wget \
@@ -33,12 +32,20 @@ RUN apt-get update && apt-get upgrade && apt-get install -y \
     pandoc && \
     rm -rf /var/lib/apt/lists/* && apt-get clean
 
+RUN apt-get install -y software-properties-common && \
+       add-apt-repository ppa:deadsnakes/ppa && \
+       apt-get update
+
+RUN apt-get install -y  python3.11  python3.11-dev
+RUN  update-alternatives --install /usr/bin/python3 python3 /usr/bin/python3.11 1 && \
+       update-alternatives --set python3 /usr/bin/python3.11
+
+
 COPY requirements.lock  pyproject.toml README.md ./
 COPY libs/megaparse/pyproject.toml libs/megaparse/README.md libs/megaparse/
 COPY libs/megaparse_sdk/pyproject.toml libs/megaparse_sdk/README.md libs/megaparse_sdk/
 
 RUN pip install uv
-RUN uv python install 3.11 && uv python pin 4.11
 RUN uv pip install --no-cache --system -r requirements.lock
 
 RUN playwright install --with-deps && \
