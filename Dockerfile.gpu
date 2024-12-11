@@ -37,13 +37,6 @@ RUN apt-get update && apt-get upgrade && apt-get install -y software-properties-
 RUN  update-alternatives --install /usr/bin/python3 python3 /usr/bin/python3.11 1 && \
        update-alternatives --set python3 /usr/bin/python3.11
 
-
-RUN wget https://www.python.org/ftp/python/3.11.1/Python-3.11.1.tar.xz && \
-    sudo tar -xf Python-3.11.1.tar.xz && \
-    cd Python-3.11.1 && \
-    ./configure --enable-optimizations && \
-    make altinstall && cd /app
-
 COPY requirements.lock  pyproject.toml README.md ./
 COPY libs/megaparse/pyproject.toml libs/megaparse/README.md libs/megaparse/
 COPY libs/megaparse_sdk/pyproject.toml libs/megaparse_sdk/README.md libs/megaparse_sdk/
