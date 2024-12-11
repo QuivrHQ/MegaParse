@@ -1,0 +1,44 @@
+FROM nvidia/cuda:12.6.3-cudnn-devel-ubuntu20.04
+
+WORKDIR /app
+
+# Install runtime dependencies
+RUN apt-get update && apt-get upgrade && apt-get install -y \
+    libgeos-dev \
+    libcurl4-openssl-dev \
+    libssl-dev \
+    binutils \
+    curl \
+    git \
+    autoconf \
+    automake \
+    build-essential \
+    libtool \
+    python-dev \
+    build-essential \
+    wget \
+    gcc \
+    # Additional dependencies for document handling
+    libmagic-dev \
+    poppler-utils \
+    tesseract-ocr \
+    libreoffice \
+    libpq-dev \
+    pandoc && \
+    rm -rf /var/lib/apt/lists/* && apt-get clean
+
+COPY requirements.lock  pyproject.toml README.md ./
+COPY libs/megaparse/pyproject.toml libs/megaparse/README.md libs/megaparse/
+COPY libs/megaparse_sdk/pyproject.toml libs/megaparse_sdk/README.md libs/megaparse_sdk/
+
+RUN pip install uv
+RUN uv pip install --no-cache --system -r requirements.lock
+
+RUN playwright install --with-deps && \
+    python -c "from unstructured.nlp.tokenize import download_nltk_packages; download_nltk_packages()" && \
+    python -c "import nltk;nltk.download('punkt_tab'); nltk.download('averaged_perceptron_tagger_eng')" && \
+    python -c "from unstructured.partition.model_init import initialize; initialize()"
+
+COPY . .
+
+RUN uv pip install --no-cache --system /app/libs/megaparse /app/libs/megaparse_sdk
