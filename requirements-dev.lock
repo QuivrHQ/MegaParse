@@ -359,13 +359,13 @@ omegaconf==2.3.0
 onnx==1.17.0
     # via unstructured
     # via unstructured-inference
-onnxruntime==1.18.0 ; platform_machine == 'x86_64'
-    # via megaparse
-    # via unstructured-inference
-onnxruntime==1.20.0 ; platform_machine != 'x86_64'
+onnxruntime==1.18.0 ; platform_machine != 'x86_64'
     # via onnxtr
     # via unstructured-inference
-onnxruntime-gpu==1.18.0 ; platform_machine == 'x86_64'
+onnxruntime==1.20.0 ; platform_machine == 'x86_64'
+    # via megaparse
+    # via unstructured-inference
+onnxruntime-gpu==1.20.0 ; platform_machine == 'x86_64'
     # via megaparse
     # via onnxtr
 onnxtr==0.6.0
