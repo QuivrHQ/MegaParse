@@ -362,7 +362,8 @@ onnx==1.17.0
 onnxruntime==1.20.0
     # via onnxtr
     # via unstructured-inference
-onnxruntime-gpu==1.20.1 ; platform_machine == 'x86_64'
+onnxruntime-gpu==1.18.1 ; platform_machine == 'x86_64'
+    # via megaparse
     # via onnxtr
 onnxtr==0.6.0
     # via megaparse
