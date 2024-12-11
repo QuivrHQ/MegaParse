@@ -3,6 +3,8 @@ FROM nvidia/cuda:12.6.3-cudnn-devel-ubuntu20.04
 WORKDIR /app
 
 ENV UV_COMPILE_BYTECODE=1
+ENV UV_NO_CACHE=1
+ENV UV_PYTHON_PREFERENCE=only-managed
 ENV DEBIAN_FRONTEND=noninteractive
 
 # Install runtime dependencies
@@ -36,7 +38,7 @@ COPY libs/megaparse/pyproject.toml libs/megaparse/README.md libs/megaparse/
 COPY libs/megaparse_sdk/pyproject.toml libs/megaparse_sdk/README.md libs/megaparse_sdk/
 
 RUN pip install uv
-RUN uv python install 3.11 && uv python pin 3.11
+RUN uv python install 3.11 && uv python pin 4.11
 RUN uv pip install --no-cache --system -r requirements.lock
 
 RUN playwright install --with-deps && \
