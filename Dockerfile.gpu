@@ -1,10 +1,9 @@
-FROM nvidia/cuda:12.2.2-cudnn8-runtime-ubuntu20.04
+FROM nvidia/cuda:12.6.3-cudnn-devel-ubuntu20.04
 
 WORKDIR /app
 
 ENV UV_COMPILE_BYTECODE=1
 ENV UV_NO_CACHE=1
-ENV UV_PYTHON_PREFERENCE=only-managed
 ENV DEBIAN_FRONTEND=noninteractive
 
 # Install runtime dependencies
