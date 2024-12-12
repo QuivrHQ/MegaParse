@@ -1,5 +1,13 @@
 # Changelog
 
+## [0.0.49](https://github.com/QuivrHQ/MegaParse/compare/megaparse-v0.0.48...megaparse-v0.0.49) (2024-12-12)
+
+
+### Features
+
+* custom auto ([#131](https://github.com/QuivrHQ/MegaParse/issues/131)) ([3cb5be4](https://github.com/QuivrHQ/MegaParse/commit/3cb5be4a8c8eeb6dd6e9b87d7bbca24491db4c29))
+* faster ocr ([#180](https://github.com/QuivrHQ/MegaParse/issues/180)) ([5661cb2](https://github.com/QuivrHQ/MegaParse/commit/5661cb2d52d959cbca0f41339791129cd35d4036))
+
 ## [0.0.48](https://github.com/QuivrHQ/MegaParse/compare/megaparse-v0.0.47...megaparse-v0.0.48) (2024-12-03)
 
 
