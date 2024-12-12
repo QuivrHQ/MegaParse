@@ -1,4 +1,5 @@
 import asyncio
+import logging
 import os
 from pathlib import Path
 from typing import IO, BinaryIO
@@ -12,6 +13,8 @@ from megaparse.parser.base import BaseParser
 from megaparse.parser.doctr_parser import DoctrParser
 from megaparse.parser.strategy import determine_strategy
 from megaparse.parser.unstructured_parser import UnstructuredParser
+
+logger = logging.getLogger("megaparse")
 
 
 class MegaParse:
@@ -82,6 +85,7 @@ class MegaParse:
         )
         try:
             parser = self._select_parser(file_path, file, file_extension)
+            logger.info(f"Parsing using {parser.__class__.__name__} parser.")
             parsed_document = await parser.convert(
                 file_path=file_path, file=file, file_extension=file_extension
             )
