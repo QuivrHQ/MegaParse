@@ -21,7 +21,6 @@ def get_strategy_page(
     # Get all the images in the page
     for obj in page.get_objects():
         if isinstance(obj, PdfImage):
-            # obj.get_bitmap(render=True).to_pil().show()
             images_coords.append(obj.get_pos())
 
     canva = np.zeros((int(page.get_height()), int(page.get_width())))
@@ -40,7 +39,6 @@ def get_strategy_page(
         y0 = max(0, min(p_width, int(y0)))
         x1 = max(0, min(p_height, int(x1)))
         y1 = max(0, min(p_width, int(y1)))
-        # print(f"({x0},{y0}) ({x1},{y1})")
         canva[x0:x1, y0:y1] = 1
         # Get the total area of the images
     total_image_area = np.sum(canva)
@@ -58,7 +56,6 @@ def determine_strategy(file: str | Path | bytes | BinaryIO) -> StrategyEnum:
         strategy = get_strategy_page(page)
         need_ocr += strategy == StrategyEnum.HI_RES
 
-    breakpoint()
     doc_need_ocr = (need_ocr / len(document)) > 0.2
     document.close()
 
