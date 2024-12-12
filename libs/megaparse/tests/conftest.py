@@ -6,17 +6,14 @@ from httpx import ASGITransport, AsyncClient
 from langchain_community.document_loaders import PlaywrightURLLoader
 from langchain_core.documents import Document
 from megaparse.api.app import app, get_playwright_loader, parser_builder_dep
-from megaparse.core.parser.type import ParserConfig
 from megaparse.parser.base import BaseParser
+from megaparse_sdk.schema.extensions import FileExtension
 
 
 class FakeParserBuilder:
-    def build(self, config: ParserConfig) -> BaseParser:
+    def build(self, *args, **kwargs) -> BaseParser:
         """
         Build a fake parser based on the given configuration.
-
-        Args:
-            config (ParserDict): The configuration to be used for building the parser.
 
         Returns:
             BaseParser: The built fake parser.
@@ -30,6 +27,7 @@ class FakeParserBuilder:
                 self,
                 file_path: str | Path | None = None,
                 file: IO[bytes] | None = None,
+                file_extension: str | FileExtension = "",
                 **kwargs,
             ) -> str:
                 print("Fake parser is converting the file")
