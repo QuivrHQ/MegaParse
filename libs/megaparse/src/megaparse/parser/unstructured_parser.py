@@ -103,7 +103,7 @@ class UnstructuredParser(BaseParser):
         self,
         file_path: str | Path | None = None,
         file: IO[bytes] | None = None,
-        file_extension: str | FileExtension | None = None,
+        file_extension: FileExtension | None = None,
         **kwargs,
     ) -> str:
         # Partition the PDF
@@ -111,6 +111,7 @@ class UnstructuredParser(BaseParser):
             filename=str(file_path) if file_path else None,
             file=file,
             strategy=self.strategy,
+            content_type=file_extension.mimetype if file_extension else None,
         )
         elements_dict = [el.to_dict() for el in elements]
         markdown_content = self.convert_to_markdown(elements_dict)

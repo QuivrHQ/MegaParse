@@ -4,6 +4,7 @@ import pytest
 from megaparse.megaparse import MegaParse
 from megaparse.parser.strategy import determine_strategy
 from megaparse.parser.unstructured_parser import UnstructuredParser
+from megaparse_sdk.schema.extensions import FileExtension
 from megaparse_sdk.schema.parser_config import StrategyEnum
 
 
@@ -25,10 +26,22 @@ def test_get_default_processors_megaparse():
 
 
 @pytest.mark.asyncio
-async def test_megaparse_pdf_processor(scanned_pdf):
+@pytest.mark.parametrize("pdf_name", ["scanned_pdf", "native_pdf"])
+async def test_megaparse_pdf_processor_file_path(pdf_name, request):
+    pdf = request.getfixturevalue(pdf_name)
     processor = MegaParse()
-    result = await processor.aload(file_path=scanned_pdf)
+    result = await processor.aload(file_path=pdf)
     assert len(result) > 0
+
+
+@pytest.mark.asyncio
+@pytest.mark.parametrize("pdf_name", ["scanned_pdf", "native_pdf"])
+async def test_megaparse_pdf_processor_file(pdf_name, request):
+    pdf = request.getfixturevalue(pdf_name)
+    processor = MegaParse()
+    with open(pdf, "rb") as f:
+        result = await processor.aload(file=f, file_extension=FileExtension.PDF)
+        assert len(result) > 0
 
 
 def test_strategy(scanned_pdf, native_pdf):

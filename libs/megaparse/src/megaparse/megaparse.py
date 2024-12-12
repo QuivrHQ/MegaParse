@@ -17,7 +17,7 @@ from megaparse.parser.unstructured_parser import UnstructuredParser
 class MegaParse:
     def __init__(
         self,
-        parser: BaseParser = UnstructuredParser(),
+        parser: BaseParser = UnstructuredParser(strategy=StrategyEnum.FAST),
         ocr_parser: BaseParser = DoctrParser(),
         strategy: StrategyEnum = StrategyEnum.AUTO,
         format_checker: FormatChecker | None = None,
@@ -36,6 +36,7 @@ class MegaParse:
     ) -> FileExtension:
         if not (file_path or file):
             raise ValueError("Either file_path or file should be provided")
+
         if file_path and file:
             raise ValueError("Only one of file_path or file should be provided")
 
@@ -49,15 +50,14 @@ class MegaParse:
                     "file_extension should be provided when given file argument"
                 )
             file.seek(0)
-        elif file and file_path:
-            raise ValueError("Can't have both a file_path and file")
         else:
             raise ValueError("Either provider a file_path or file")
-        try:
-            file_extension = FileExtension(file_extension)
 
-        except ValueError:
-            raise ValueError(f"Unsupported file extension: {file_extension}")
+        if isinstance(file_extension, str):
+            try:
+                file_extension = FileExtension(file_extension)
+            except ValueError:
+                raise ValueError(f"Unsupported file extension: {file_extension}")
 
         if file_extension != FileExtension.PDF:
             if self.format_checker:
@@ -83,7 +83,7 @@ class MegaParse:
         try:
             parser = self._select_parser(file_path, file, file_extension)
             parsed_document = await parser.convert(
-                file_path=file_path, file=file, file_extension=str(file_extension)
+                file_path=file_path, file=file, file_extension=file_extension
             )
             # @chloe FIXME: format_checker needs unstructured Elements as input which is to change
             # if self.format_checker:

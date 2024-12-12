@@ -21,7 +21,7 @@ class DoctrParser(BaseParser):
         reco_bs: int = 512,
         assume_straight_pages: bool = True,
         straighten_pages: bool = False,
-        use_gpu: bool = True,
+        use_gpu: bool = False,
         **kwargs,
     ):
         self.use_gpu = use_gpu

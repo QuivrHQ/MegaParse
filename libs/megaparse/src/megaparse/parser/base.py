@@ -13,7 +13,7 @@ class BaseParser(ABC):
         self,
         file_path: str | Path | None = None,
         file: IO[bytes] | None = None,
-        file_extension: str | FileExtension = "",
+        file_extension: FileExtension | None = None,
         **kwargs,
     ) -> str:
         """
