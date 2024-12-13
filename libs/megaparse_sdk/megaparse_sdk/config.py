@@ -29,7 +29,7 @@ class ClientNATSConfig(BaseSettings):
     )
     subject: str = "parsing"
     endpoint: str = "https://tests@nats.tooling.quivr.app:4222"
-    timeout: float = 600
+    timeout: float = 20
     max_retries: int = 5
     backoff: float = 3
     connect_timeout: int = 5
