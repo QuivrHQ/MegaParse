@@ -1,5 +1,3 @@
-from typing import Literal
-
 from pydantic import BaseModel, FilePath
 from pydantic_settings import BaseSettings, SettingsConfigDict
 
@@ -24,11 +22,14 @@ class SSLConfig(BaseModel):
 
 class ClientNATSConfig(BaseSettings):
     model_config = SettingsConfigDict(
-        env_prefix="megaparse_nats_", env_file=".env.local", env_nested_delimiter="__"
+        env_prefix="MEGAPARSE_NATS_",
+        env_file=(".env.local", ".env"),
+        env_nested_delimiter="__",
+        extra="ignore",
     )
-    subject: Literal["parsing"] = "parsing"
+    subject: str = "parsing"
     endpoint: str = "https://tests@nats.tooling.quivr.app:4222"
-    timeout: float = 600
+    timeout: float = 20
     max_retries: int = 5
     backoff: float = 3
     connect_timeout: int = 5
