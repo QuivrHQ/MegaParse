@@ -1,3 +1,4 @@
+import asyncio
 from pathlib import Path
 from typing import IO, List
 
@@ -27,11 +28,11 @@ class LlamaParser(BaseParser):
             self.parsing_instruction = """Do not take into account the page breaks (no --- between pages),
             do not repeat the header and the footer so the tables are merged if needed. Keep the same format for similar tables."""
 
-    async def convert(
+    async def aconvert(
         self,
         file_path: str | Path | None = None,
         file: IO[bytes] | None = None,
-        file_extension: str | FileExtension = "",
+        file_extension: None | FileExtension = None,
         **kwargs,
     ) -> str:
         if not file_path:
@@ -47,6 +48,33 @@ class LlamaParser(BaseParser):
         )
 
         documents: List[LlamaDocument] = await llama_parser.aload_data(str(file_path))
+        parsed_md = ""
+        for document in documents:
+            text_content = document.text
+            parsed_md = parsed_md + text_content
+
+        return parsed_md
+
+    def convert(
+        self,
+        file_path: str | Path | None = None,
+        file: IO[bytes] | None = None,
+        file_extension: None | FileExtension = None,
+        **kwargs,
+    ) -> str:
+        if not file_path:
+            raise ValueError("File_path should be provided to run LlamaParser")
+
+        llama_parser = _LlamaParse(
+            api_key=self.api_key,
+            result_type=ResultType.MD,
+            gpt4o_mode=True,
+            verbose=self.verbose,
+            language=self.language,
+            parsing_instruction=self.parsing_instruction,
+        )
+
+        documents: List[LlamaDocument] = llama_parser.load_data(str(file_path))
         parsed_md = ""
         for document in documents:
             text_content = document.text

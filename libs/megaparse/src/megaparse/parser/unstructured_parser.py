@@ -1,4 +1,5 @@
 import re
+import warnings
 from pathlib import Path
 from typing import IO
 
@@ -99,14 +100,26 @@ class UnstructuredParser(BaseParser):
 
         return markdown_line
 
-    async def convert(
+    async def aconvert(
         self,
         file_path: str | Path | None = None,
         file: IO[bytes] | None = None,
         file_extension: FileExtension | None = None,
         **kwargs,
     ) -> str:
-        # Partition the PDF
+        warnings.warn(
+            "The UnstructuredParser is a sync parser, please use the sync convert method",
+            UserWarning,
+        )
+        return self.convert(file_path, file, file_extension, **kwargs)
+
+    def convert(
+        self,
+        file_path: str | Path | None = None,
+        file: IO[bytes] | None = None,
+        file_extension: FileExtension | None = None,
+        **kwargs,
+    ) -> str:
         elements = partition(
             filename=str(file_path) if file_path else None,
             file=file,

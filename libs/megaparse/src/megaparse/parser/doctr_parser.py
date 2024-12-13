@@ -1,6 +1,8 @@
+import asyncio
 import logging
 from pathlib import Path
 from typing import IO, BinaryIO, List
+import warnings
 
 import onnxruntime as rt
 from megaparse_sdk.schema.extensions import FileExtension
@@ -59,11 +61,11 @@ class DoctrParser(BaseParser):
         else:
             return ["CPUExecutionProvider"]
 
-    async def convert(
+    def convert(
         self,
         file_path: str | Path | None = None,
         file: IO[bytes] | BinaryIO | None = None,
-        file_extension: str | FileExtension = "",
+        file_extension: None | FileExtension = None,
         **kwargs,
     ) -> str:
         if file:
@@ -77,3 +79,16 @@ class DoctrParser(BaseParser):
         # Analyze
         result = self.predictor(doc)
         return result.render()
+
+    async def aconvert(
+        self,
+        file_path: str | Path | None = None,
+        file: IO[bytes] | BinaryIO | None = None,
+        file_extension: None | FileExtension = None,
+        **kwargs,
+    ) -> str:
+        warnings.warn(
+            "The UnstructuredParser is a sync parser, please use the sync convert method",
+            UserWarning,
+        )
+        return self.convert(file_path, file, file_extension, **kwargs)
