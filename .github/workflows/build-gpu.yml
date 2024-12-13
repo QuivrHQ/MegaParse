@@ -2,6 +2,9 @@ name: Build docker GPU and push ECR
 
 on:
   push:
+    tags:
+      - "v*"
+    branches: [main]
 
 env:
   AWS_REGION: eu-west-1

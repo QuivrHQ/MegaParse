@@ -11,10 +11,7 @@ from pypdfium2._helpers.pageobjects import PdfImage
 logger = logging.getLogger("megaparse")
 
 
-def get_strategy_page(
-    page: PdfPage,
-    threshold=0.2,
-) -> StrategyEnum:
+def get_strategy_page(page: PdfPage, threshold_image_page: float) -> StrategyEnum:
     total_page_area = page.get_width() * page.get_height()
     total_image_area = 0
     images_coords = []
@@ -43,20 +40,24 @@ def get_strategy_page(
         # Get the total area of the images
     total_image_area = np.sum(canva)
 
-    if total_image_area / total_page_area > threshold:
+    if total_image_area / total_page_area > threshold_image_page:
         return StrategyEnum.HI_RES
     return StrategyEnum.FAST
 
 
-def determine_strategy(file: str | Path | bytes | BinaryIO) -> StrategyEnum:
+def determine_strategy(
+    file: str | Path | bytes | BinaryIO,
+    threshold_pages_ocr: float = 0.2,
+    threshold_image_page: float = 0.4,
+) -> StrategyEnum:
     logger.info("Determining strategy...")
     need_ocr = 0
     document = pdfium.PdfDocument(file)
     for page in document:
-        strategy = get_strategy_page(page)
+        strategy = get_strategy_page(page, threshold_image_page=threshold_image_page)
         need_ocr += strategy == StrategyEnum.HI_RES
 
-    doc_need_ocr = (need_ocr / len(document)) > 0.2
+    doc_need_ocr = (need_ocr / len(document)) > threshold_pages_ocr
     document.close()
 
     if doc_need_ocr:
