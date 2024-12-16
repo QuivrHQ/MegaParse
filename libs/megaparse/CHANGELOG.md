@@ -1,5 +1,12 @@
 # Changelog
 
+## [0.0.53](https://github.com/QuivrHQ/MegaParse/compare/megaparse-v0.0.52...megaparse-v0.0.53) (2024-12-16)
+
+
+### Bug Fixes
+
+* sync convert to parsers ([#186](https://github.com/QuivrHQ/MegaParse/issues/186)) ([fbb7d36](https://github.com/QuivrHQ/MegaParse/commit/fbb7d365fbaf710a687fdc6becacd6d301c09707))
+
 ## [0.0.52](https://github.com/QuivrHQ/MegaParse/compare/megaparse-v0.0.51...megaparse-v0.0.52) (2024-12-16)
 
 
