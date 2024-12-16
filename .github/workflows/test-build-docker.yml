@@ -3,6 +3,7 @@ on:
     branches:
       - main
 
+name: Test build docker
 jobs:
   build-docker:
     runs-on: ubuntu-latest
