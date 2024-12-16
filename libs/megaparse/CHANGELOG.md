@@ -1,5 +1,12 @@
 # Changelog
 
+## [0.0.51](https://github.com/QuivrHQ/MegaParse/compare/megaparse-v0.0.50...megaparse-v0.0.51) (2024-12-16)
+
+
+### Features
+
+* updating langchain version ([#187](https://github.com/QuivrHQ/MegaParse/issues/187)) ([0f1f597](https://github.com/QuivrHQ/MegaParse/commit/0f1f5977df147e6b8c65d55445ccd86ef6f1a862))
+
 ## [0.0.50](https://github.com/QuivrHQ/MegaParse/compare/megaparse-v0.0.49...megaparse-v0.0.50) (2024-12-13)
 
 
