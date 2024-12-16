@@ -86,7 +86,7 @@ class MegaParse:
         try:
             parser = self._select_parser(file_path, file, file_extension)
             logger.info(f"Parsing using {parser.__class__.__name__} parser.")
-            parsed_document = await parser.convert(
+            parsed_document = await parser.aconvert(
                 file_path=file_path, file=file, file_extension=file_extension
             )
             # @chloe FIXME: format_checker needs unstructured Elements as input which is to change
