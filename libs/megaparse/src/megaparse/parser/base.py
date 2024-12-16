@@ -15,14 +15,14 @@ class BaseParser(ABC):
     ):
         if not file_extension and not file_path:
             raise ValueError(
-                "Either file_path or file_extension must be provided for UnstructuredParser"
+                "Either file_path or file_extension must be provided for {self.__class__.__name__}"
             )
         if file_path and not file_extension:
             file_path = Path(file_path) if isinstance(file_path, str) else file_path
             file_extension = FileExtension(file_path.suffix)
         if file_extension not in self.supported_extensions:
             raise ValueError(
-                f"Unsupported file extension {file_extension.value} for UnstructuredParser"
+                f"Unsupported file extension {file_extension.value} for {self.__class__.__name__}"
             )
 
     @abstractmethod
