@@ -15,6 +15,21 @@ from megaparse.parser import BaseParser
 
 class UnstructuredParser(BaseParser):
     load_dotenv()
+    supported_extensions = [
+        FileExtension.PDF,
+        FileExtension.DOCX,
+        FileExtension.TXT,
+        FileExtension.OTF,
+        FileExtension.EPUB,
+        FileExtension.HTML,
+        FileExtension.XML,
+        FileExtension.CSV,
+        FileExtension.XLSX,
+        FileExtension.XLS,
+        FileExtension.PPTX,
+        FileExtension.MD,
+        FileExtension.MARKDOWN,
+    ]
 
     def __init__(
         self, strategy=StrategyEnum.AUTO, model: BaseChatModel | None = None, **kwargs
@@ -107,6 +122,7 @@ class UnstructuredParser(BaseParser):
         file_extension: FileExtension | None = None,
         **kwargs,
     ) -> str:
+        self.check_supported_extension(file_extension, file_path)
         warnings.warn(
             "The UnstructuredParser is a sync parser, please use the sync convert method",
             UserWarning,
@@ -121,6 +137,8 @@ class UnstructuredParser(BaseParser):
         file_extension: FileExtension | None = None,
         **kwargs,
     ) -> str:
+        self.check_supported_extension(file_extension, file_path)
+
         elements = partition(
             filename=str(file_path) if file_path else None,
             file=file,
