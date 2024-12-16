@@ -1,5 +1,12 @@
 # Changelog
 
+## [0.1.10](https://github.com/QuivrHQ/MegaParse/compare/megaparse-sdk-v0.1.9...megaparse-sdk-v0.1.10) (2024-12-16)
+
+
+### Bug Fixes
+
+* hatchling version ([#193](https://github.com/QuivrHQ/MegaParse/issues/193)) ([f6070a5](https://github.com/QuivrHQ/MegaParse/commit/f6070a5483a20eeb83751a2dcfc01b7f0fb14473))
+
 ## [0.1.9](https://github.com/QuivrHQ/MegaParse/compare/megaparse-sdk-v0.1.8...megaparse-sdk-v0.1.9) (2024-12-13)
 
 
