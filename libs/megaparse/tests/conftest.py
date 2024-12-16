@@ -23,11 +23,21 @@ class FakeParserBuilder:
         """
 
         class FakeParser(BaseParser):
-            async def convert(
+            def convert(
                 self,
                 file_path: str | Path | None = None,
                 file: IO[bytes] | None = None,
-                file_extension: str | FileExtension = "",
+                file_extension: None | FileExtension = None,
+                **kwargs,
+            ) -> str:
+                print("Fake parser is converting the file")
+                return "Fake conversion result"
+
+            async def aconvert(
+                self,
+                file_path: str | Path | None = None,
+                file: IO[bytes] | None = None,
+                file_extension: None | FileExtension = None,
                 **kwargs,
             ) -> str:
                 print("Fake parser is converting the file")

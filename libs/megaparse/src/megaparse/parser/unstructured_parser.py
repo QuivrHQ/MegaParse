@@ -110,6 +110,7 @@ class UnstructuredParser(BaseParser):
         warnings.warn(
             "The UnstructuredParser is a sync parser, please use the sync convert method",
             UserWarning,
+            stacklevel=2,
         )
         return self.convert(file_path, file, file_extension, **kwargs)
 
