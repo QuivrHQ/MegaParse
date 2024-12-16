@@ -9,8 +9,11 @@ env:
 
 jobs:
   test:
-    name: Run tests
+    name: Run tests on Python ${{ matrix.python-version }}
     runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        python-version: [3.10, 3.11, 3.12]
     steps:
       - name: 👀 Checkout code
         uses: actions/checkout@v2
@@ -46,6 +49,14 @@ jobs:
             libpq-dev \
             pandoc
 
+      - name: 🔽 Install the latest version of rye
+        uses: eifinger/setup-rye@v4
+        with:
+          enable-cache: true
+
+      - name: 📌 Pin Python version
+        run: rye pin ${{ matrix.python-version }}
+
       - name: 🔽 Download and Install NATS Server
         run: |
           curl -L https://github.com/nats-io/nats-server/releases/download/v2.10.22/nats-server-v2.10.22-linux-amd64.zip -o nats-server.zip
@@ -69,12 +80,7 @@ jobs:
             exit 1
           fi
 
-      - name: 🔨 Install the latest version of rye
-        uses: eifinger/setup-rye@v4
-        with:
-          enable-cache: true
-
-      - name: 🔄 Sync dependencies
+      - name: 🔨 Sync dependencies
         run: |
           UV_INDEX_STRATEGY=unsafe-first-match rye sync --no-lock
 
