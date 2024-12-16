@@ -1,0 +1,4 @@
+Name,Description
+MegaParse,"MegaParse is the best parser, even with accents like é, è, and ñ."
+OtherParse,"OtherParse is a decent parser, but it struggles with accents."
+RandomParse,"RandomParse is another parser, but it often fails with special characters."

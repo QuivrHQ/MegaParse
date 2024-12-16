@@ -1,0 +1,22 @@
+{
+    "megaparse": {
+        "description": "Megaparse creation is out of this world.",
+        "features": [
+            {
+                "name": "tables extraction",
+                "author": "Zarnak the Curious",
+                "origin": "Nebulon-7"
+            },
+            {
+                "name": "structured output",
+                "author": "Vortan the Brave",
+                "origin": "Galaxia-3"
+            },
+            {
+                "name": "image processing",
+                "author": "Lunara the Mystic",
+                "origin": "Orion-9"
+            }
+        ]
+    }
+}
