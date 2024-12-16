@@ -1,6 +1,6 @@
 [project]
 name = "megaparse"
-version = "0.0.50"
+version = "0.0.52"
 authors = [
     { name = "Stan Girard", email = "stan@quivr.app" },
     { name = "Chloé Daems", email = "chloe@quivr.app" },
@@ -49,7 +49,7 @@ api = [
 
 
 [build-system]
-requires = ["hatchling"]
+requires = ["hatchling==1.26.3"]
 build-backend = "hatchling.build"
 
 [tool.rye]
