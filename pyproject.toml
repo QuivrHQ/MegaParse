@@ -9,7 +9,7 @@ authors = [
     { name = "Jacopo Chevallard", email = "jacopo@quivr.app" },
 ]
 readme = "README.md"
-requires-python = ">= 3.11"
+requires-python = ">= 3.10"
 dependencies = [
     "packaging>=22.0",
 ]
