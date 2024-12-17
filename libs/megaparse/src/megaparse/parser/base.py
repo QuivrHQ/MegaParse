@@ -8,6 +8,23 @@ from megaparse_sdk.schema.extensions import FileExtension
 class BaseParser(ABC):
     """Mother Class for all the parsers [Unstructured, LlamaParse, MegaParseVision]"""
 
+    supported_extensions = []
+
+    def check_supported_extension(
+        self, file_extension: FileExtension | None, file_path: str | Path | None = None
+    ):
+        if not file_extension and not file_path:
+            raise ValueError(
+                "Either file_path or file_extension must be provided for {self.__class__.__name__}"
+            )
+        if file_path and not file_extension:
+            file_path = Path(file_path) if isinstance(file_path, str) else file_path
+            file_extension = FileExtension(file_path.suffix)
+        if file_extension not in self.supported_extensions:
+            raise ValueError(
+                f"Unsupported file extension {file_extension.value} for {self.__class__.__name__}"
+            )
+
     @abstractmethod
     async def aconvert(
         self,
