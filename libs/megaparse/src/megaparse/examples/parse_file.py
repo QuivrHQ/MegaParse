@@ -6,7 +6,7 @@ def main():
     parser = UnstructuredParser()
     megaparse = MegaParse(parser=parser)
 
-    file_path = "somewhere/only_pdfs/4 The Language of Medicine  2024.07.21.pdf"
+    file_path = "./tests/pdf/ocr/0168123.pdf"
     parsed_file = megaparse.load(file_path)
     print(f"\n----- File Response : {file_path} -----\n")
     print(parsed_file)
