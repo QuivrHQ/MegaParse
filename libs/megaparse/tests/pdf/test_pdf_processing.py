@@ -27,10 +27,18 @@ def test_get_default_processors_megaparse():
 
 @pytest.mark.asyncio
 @pytest.mark.parametrize("pdf_name", ["scanned_pdf", "native_pdf"])
-async def test_megaparse_pdf_processor_file_path(pdf_name, request):
+async def test_async_megaparse_pdf_processor_file_path(pdf_name, request):
     pdf = request.getfixturevalue(pdf_name)
     processor = MegaParse()
     result = await processor.aload(file_path=pdf)
+    assert len(result) > 0
+
+
+@pytest.mark.parametrize("pdf_name", ["scanned_pdf", "native_pdf"])
+def test_sync_megaparse_pdf_processor_file_path(pdf_name, request):
+    pdf = request.getfixturevalue(pdf_name)
+    processor = MegaParse()
+    result = processor.load(file_path=pdf)
     assert len(result) > 0
 
 
