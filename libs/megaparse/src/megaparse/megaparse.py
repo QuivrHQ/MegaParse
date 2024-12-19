@@ -100,10 +100,24 @@ class MegaParse:
         file: BinaryIO | None = None,
         file_extension: str | FileExtension = "",
     ) -> str:
-        loop = asyncio.get_event_loop()
-        return loop.run_until_complete(
-            self.aload(file_path=file_path, file=file, file_extension=file_extension)
+        file_extension = self.validate_input(
+            file=file, file_path=file_path, file_extension=file_extension
         )
+        try:
+            parser = self._select_parser(file_path, file, file_extension)
+            logger.info(f"Parsing using {parser.__class__.__name__} parser.")
+            parsed_document = parser.convert(
+                file_path=file_path, file=file, file_extension=file_extension
+            )
+            # @chloe FIXME: format_checker needs unstructured Elements as input which is to change
+            # if self.format_checker:
+            #     parsed_document: str = await self.format_checker.check(parsed_document
+            self.last_parsed_document = parsed_document
+            return parsed_document
+        except Exception as e:
+            raise ParsingException(
+                f"Error while parsing file {file_path or file}, file_extension: {file_extension}: {e}"
+            )
 
     def _select_parser(
         self,
