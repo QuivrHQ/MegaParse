@@ -7,6 +7,7 @@ import pypdfium2 as pdfium
 from megaparse_sdk.schema.parser_config import StrategyEnum
 from pypdfium2._helpers.page import PdfPage
 from pypdfium2._helpers.pageobjects import PdfImage
+from pypdfium2._helpers.textpage import PdfTextPage
 
 logger = logging.getLogger("megaparse")
 
@@ -18,6 +19,8 @@ def get_strategy_page(page: PdfPage, threshold_image_page: float) -> StrategyEnu
     # Get all the images in the page
     for obj in page.get_objects():
         if isinstance(obj, PdfImage):
+            images_coords.append(obj.get_pos())
+        elif obj.type == 2:
             images_coords.append(obj.get_pos())
 
     canva = np.zeros((int(page.get_height()), int(page.get_width())))

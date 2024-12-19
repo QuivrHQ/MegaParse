@@ -14,6 +14,8 @@ logger = logging.getLogger("megaparse")
 
 
 class DoctrParser(BaseParser):
+    supported_extensions = [FileExtension.PDF]
+
     def __init__(
         self,
         det_predictor_model: str = "db_resnet50",
@@ -74,6 +76,9 @@ class DoctrParser(BaseParser):
             pdf = file_path  # type: ignore
         else:
             raise ValueError("Can't convert if file and file_path are None")
+
+        self.check_supported_extension(file_extension, file_path)
+
         doc = DocumentFile.from_pdf(pdf)
         # Analyze
         result = self.predictor(doc)
