@@ -25,6 +25,8 @@ https://github.com/QuivrHQ/MegaParse/assets/19614572/1b4cdb73-8dc2-44ef-b8b4-a75
 
 ## Installation
 
+required python version >= 3.11
+
 ```bash
 pip install megaparse
 ```
