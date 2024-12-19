@@ -1,5 +1,6 @@
 from megaparse import MegaParse
 from megaparse.parser.unstructured_parser import UnstructuredParser
+import pypdfium2 as pdfium
 
 
 def main():
@@ -7,6 +8,7 @@ def main():
     megaparse = MegaParse(parser=parser)
 
     file_path = "./tests/pdf/ocr/0168123.pdf"
+
     parsed_file = megaparse.load(file_path)
     print(f"\n----- File Response : {file_path} -----\n")
     print(parsed_file)

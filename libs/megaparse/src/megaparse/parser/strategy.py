@@ -18,9 +18,9 @@ def get_strategy_page(page: PdfPage, threshold_image_page: float) -> StrategyEnu
     images_coords = []
     # Get all the images in the page
     for obj in page.get_objects():
-        if isinstance(obj, PdfTextPage):
-            breakpoint()
         if isinstance(obj, PdfImage):
+            images_coords.append(obj.get_pos())
+        elif obj.type == 2:
             images_coords.append(obj.get_pos())
 
     canva = np.zeros((int(page.get_height()), int(page.get_width())))
