@@ -13,7 +13,6 @@ class FileExtension(str, Enum):
         return obj
 
     PDF = (".pdf", "application/pdf")
-    DOC = (".doc", "application/msword")
     DOCX = (
         ".docx",
         "application/vnd.openxmlformats-officedocument.wordprocessingml.document",
@@ -29,12 +28,10 @@ class FileExtension(str, Enum):
         "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
     )
     XLS = (".xls", "application/vnd.ms-excel")
-    PPT = (".ppt", "application/vnd.ms-powerpoint")
     PPTX = (
         ".pptx",
         "application/vnd.openxmlformats-officedocument.presentationml.presentation",
     )
-    JSON = (".json", "application/json")
     MD = (".md", "text/markdown")
     MARKDOWN = (".markdown", "text/markdown")
 

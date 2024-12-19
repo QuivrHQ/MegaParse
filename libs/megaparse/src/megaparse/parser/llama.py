@@ -11,6 +11,8 @@ from megaparse.parser import BaseParser
 
 
 class LlamaParser(BaseParser):
+    supported_extensions = [FileExtension.PDF]
+
     def __init__(
         self,
         api_key: str,
@@ -37,6 +39,7 @@ class LlamaParser(BaseParser):
     ) -> str:
         if not file_path:
             raise ValueError("File_path should be provided to run LlamaParser")
+        self.check_supported_extension(file_extension, file_path)
 
         llama_parser = _LlamaParse(
             api_key=self.api_key,
@@ -64,6 +67,7 @@ class LlamaParser(BaseParser):
     ) -> str:
         if not file_path:
             raise ValueError("File_path should be provided to run LlamaParser")
+        self.check_supported_extension(file_extension, file_path)
 
         llama_parser = _LlamaParse(
             api_key=self.api_key,
