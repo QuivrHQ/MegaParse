@@ -53,6 +53,8 @@ Follow these instructions to complete the task:
 
 
 class MegaParseVision(BaseParser):
+    supported_extensions = [FileExtension.PDF]
+
     def __init__(self, model: BaseChatModel, **kwargs):
         if hasattr(model, "model_name"):
             if not SupportedModel.is_supported(model.model_name):
@@ -158,6 +160,9 @@ class MegaParseVision(BaseParser):
 
         if isinstance(file_path, Path):
             file_path = str(file_path)
+
+        self.check_supported_extension(file_extension, file_path)
+
         pdf_base64 = self.process_file(file_path)
         tasks = [
             self.asend_to_mlm(pdf_base64[i : i + batch_size])
@@ -187,6 +192,9 @@ class MegaParseVision(BaseParser):
 
         if isinstance(file_path, Path):
             file_path = str(file_path)
+
+        self.check_supported_extension(file_extension, file_path)
+
         pdf_base64 = self.process_file(file_path)
         chunks = [
             pdf_base64[i : i + batch_size]
