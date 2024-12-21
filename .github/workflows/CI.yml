@@ -84,6 +84,11 @@ jobs:
         run: |
           UV_INDEX_STRATEGY=unsafe-first-match rye sync --no-lock
 
+      - name: 📥 Download NLTK Data
+        run: |
+          # Download required NLTK resources
+          rye run python libs/megaparse/scripts/download_nltk_data.py
+
       - name: 🚀 Run tests
         run: |
           # Run both API (megaparse) and SDK tests
