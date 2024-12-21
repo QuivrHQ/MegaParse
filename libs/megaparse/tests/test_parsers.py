@@ -2,6 +2,7 @@ import os
 
 import pytest
 from megaparse.parser.doctr_parser import DoctrParser
+
 # Parsers will be imported when needed for specific tests
 from megaparse.parser.unstructured_parser import UnstructuredParser
 from megaparse_sdk.schema.extensions import FileExtension

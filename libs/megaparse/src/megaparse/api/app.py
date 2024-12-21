@@ -13,6 +13,13 @@ from langchain_anthropic import ChatAnthropic
 from langchain_community.document_loaders import PlaywrightURLLoader
 from langchain_openai import ChatOpenAI
 from llama_parse.utils import Language
+from megaparse_sdk.schema.parser_config import (
+    ParseFileConfig,
+    ParserType,
+    StrategyEnum,
+)
+from megaparse_sdk.schema.supported_models import SupportedModel
+
 from megaparse import MegaParse
 from megaparse.api.exceptions.megaparse_exceptions import (
     HTTPDownloadError,
@@ -23,12 +30,6 @@ from megaparse.api.exceptions.megaparse_exceptions import (
 )
 from megaparse.parser.builder import ParserBuilder
 from megaparse.parser.unstructured_parser import UnstructuredParser
-from megaparse_sdk.schema.parser_config import (
-    ParseFileConfig,
-    ParserType,
-    StrategyEnum,
-)
-from megaparse_sdk.schema.supported_models import SupportedModel
 
 app = FastAPI()
 

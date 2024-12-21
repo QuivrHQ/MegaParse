@@ -1,8 +1,6 @@
 import pytest
 from megaparse import MegaParse
 from megaparse.parser.doctr_parser import DoctrParser
-from megaparse.parser.llama import LlamaParser
-from megaparse.parser.megaparse_vision import MegaParseVision
 from megaparse.parser.unstructured_parser import UnstructuredParser
 
 PARSER_LIST = [
