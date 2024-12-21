@@ -1,6 +1,9 @@
+import asyncio
+import platform
 from pathlib import Path
 from typing import IO
 
+import pytest
 import pytest_asyncio
 from httpx import ASGITransport, AsyncClient
 from langchain_community.document_loaders import PlaywrightURLLoader
@@ -41,30 +44,64 @@ class FakeParserBuilder:
                 **kwargs,
             ) -> str:
                 print("Fake parser is converting the file")
+                # Simulate some async work without actually blocking
+                await asyncio.sleep(0)
                 return "Fake conversion result"
 
         return FakeParser()
 
 
+@pytest.fixture(scope="session", autouse=True)
+def event_loop():
+    """Create an instance of the default event loop for each test case."""
+    if platform.system() == "Windows":
+        asyncio.set_event_loop_policy(asyncio.WindowsSelectorEventLoopPolicy())
+    loop = asyncio.get_event_loop_policy().new_event_loop()
+    yield loop
+    loop.close()
+
+
 @pytest_asyncio.fixture(scope="function")
 async def test_client():
-    print("Setting up test_client fixture")
+    """Async test client fixture with proper resource cleanup and debugging."""
+    print("Setting up test_client fixture - initializing")
+    original_overrides = app.dependency_overrides.copy()
+    client = None
 
-    def fake_parser_builder():
-        return FakeParserBuilder()
+    try:
 
-    def fake_playwright_loader():
-        class FakePlaywrightLoader(PlaywrightURLLoader):
-            async def aload(self):
-                return [Document(page_content="Fake website content")]
+        def fake_parser_builder():
+            return FakeParserBuilder()
 
-        return FakePlaywrightLoader(urls=[], remove_selectors=["header", "footer"])
+        def fake_playwright_loader():
+            class FakePlaywrightLoader(PlaywrightURLLoader):
+                async def aload(self):
+                    return [Document(page_content="Fake website content")]
 
-    app.dependency_overrides[parser_builder_dep] = fake_parser_builder
-    app.dependency_overrides[get_playwright_loader] = fake_playwright_loader
-    async with AsyncClient(
-        transport=ASGITransport(app=app),  # type: ignore
-        base_url="http://test",
-    ) as ac:
-        yield ac
-    app.dependency_overrides = {}
+            return FakePlaywrightLoader(urls=[], remove_selectors=["header", "footer"])
+
+        print("Setting up test_client fixture - configuring dependencies")
+        app.dependency_overrides[parser_builder_dep] = fake_parser_builder
+        app.dependency_overrides[get_playwright_loader] = fake_playwright_loader
+
+        print("Setting up test_client fixture - creating client")
+        client = AsyncClient(
+            transport=ASGITransport(app=app),  # type: ignore
+            base_url="http://test",
+        )
+        await client.__aenter__()
+        print("Setting up test_client fixture - client ready")
+        yield client
+
+    except Exception as e:
+        print(f"Error in test_client fixture: {str(e)}")
+        raise
+    finally:
+        print("Cleaning up test_client fixture")
+        if client:
+            try:
+                await client.__aexit__(None, None, None)
+            except Exception as e:
+                print(f"Error during client cleanup: {str(e)}")
+        app.dependency_overrides = original_overrides
+        print("Test client cleanup complete")

@@ -3,7 +3,7 @@ import base64
 import re
 from io import BytesIO
 from pathlib import Path
-from typing import IO, List, Union
+from typing import IO, List
 
 from langchain_core.language_models.chat_models import BaseChatModel
 from langchain_core.messages import HumanMessage
