@@ -11,6 +11,7 @@ from fastapi import Depends, FastAPI, File, Form, HTTPException, UploadFile
 from langchain_anthropic import ChatAnthropic
 from langchain_community.document_loaders import PlaywrightURLLoader
 from langchain_openai import ChatOpenAI
+from urllib.parse import urlparse
 from llama_parse.utils import Language
 from megaparse_sdk.schema.parser_config import (
     ParseFileConfig,
@@ -89,7 +90,7 @@ async def parse_file(
             )
 
         else:
-            raise HTTPModelNotSupported()
+            raise HTTPException(status_code=501, detail="Model not supported")
 
     parser_config = ParseFileConfig(
         method=method,
@@ -128,6 +129,11 @@ async def upload_url(
     if not _check_free_memory():
         raise HTTPMemoryError()
 
+    # Validate URL format
+    result = urlparse(url)
+    if not all([result.scheme, result.netloc]):
+        raise HTTPException(status_code=400, detail="Failed to load website content: Invalid URL format")
+
     playwright_loader.urls = [url]
 
     if url.endswith(".pdf"):
@@ -139,12 +145,15 @@ async def upload_url(
                     response = await client.get(url)
                     response.raise_for_status()
                     break
-            except (httpx.RequestError, httpx.HTTPStatusError) as e:
-                if isinstance(e, httpx.TimeoutException):
+            except (httpx.RequestError, httpx.HTTPStatusError, TimeoutError, ConnectionError) as e:
+                if isinstance(e, (httpx.TimeoutException, TimeoutError)):
                     if attempt == max_retries - 1:
-                        raise HTTPTimeoutError(url, message=f"Request timed out after {max_retries} attempts")
+                        raise HTTPException(status_code=504, detail=f"Request timed out after {max_retries} attempts")
+                elif isinstance(e, ConnectionError):
+                    if attempt == max_retries - 1:
+                        raise HTTPException(status_code=429, detail=f"Failed after {max_retries} attempts: {str(e)}")
                 elif attempt == max_retries - 1:
-                    raise HTTPTooManyRequestsError(url, message=f"Failed after {max_retries} attempts: {str(e)}")
+                    raise HTTPException(status_code=400, detail=f"Failed to load website content: {str(e)}")
                 await asyncio.sleep(2 ** attempt)  # Exponential backoff
 
         with tempfile.NamedTemporaryFile(delete=False, suffix="pdf") as temp_file:

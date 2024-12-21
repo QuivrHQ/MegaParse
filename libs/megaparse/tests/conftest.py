@@ -1,6 +1,9 @@
+import asyncio
+import platform
 from pathlib import Path
 from typing import IO
 
+import pytest
 import pytest_asyncio
 from httpx import ASGITransport, AsyncClient
 from langchain_community.document_loaders import PlaywrightURLLoader
@@ -41,13 +44,25 @@ class FakeParserBuilder:
                 **kwargs,
             ) -> str:
                 print("Fake parser is converting the file")
+                # Simulate some async work without actually blocking
+                await asyncio.sleep(0)
                 return "Fake conversion result"
 
         return FakeParser()
 
 
+@pytest.fixture(scope="session", autouse=True)
+def event_loop():
+    """Create an instance of the default event loop for each test case."""
+    if platform.system() == "Windows":
+        asyncio.set_event_loop_policy(asyncio.WindowsSelectorEventLoopPolicy())
+    loop = asyncio.get_event_loop_policy().new_event_loop()
+    yield loop
+    loop.close()
+
 @pytest_asyncio.fixture(scope="function")
 async def test_client():
+    """Async test client fixture with proper resource cleanup."""
     print("Setting up test_client fixture")
 
     def fake_parser_builder():
