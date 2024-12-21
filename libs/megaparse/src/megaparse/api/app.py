@@ -1,6 +1,7 @@
 import io
 import os
 import tempfile
+import asyncio
 from typing import Optional
 
 import httpx
@@ -22,8 +23,11 @@ from megaparse import MegaParse
 from megaparse.api.exceptions.megaparse_exceptions import (
     HTTPDownloadError,
     HTTPFileNotFound,
+    HTTPMemoryError,
     HTTPModelNotSupported,
     HTTPParsingException,
+    HTTPTimeoutError,
+    HTTPTooManyRequestsError,
     ParsingException,
 )
 from megaparse.parser.builder import ParserBuilder
@@ -71,9 +75,7 @@ async def parse_file(
     parser_builder=Depends(parser_builder_dep),
 ) -> dict[str, str]:
     if not _check_free_memory():
-        raise HTTPException(
-            status_code=503, detail="Service unavailable due to low memory"
-        )
+        raise HTTPMemoryError()
     model = None
     if model_name and check_table:
         if model_name.startswith("gpt"):
@@ -123,15 +125,27 @@ async def parse_file(
 async def upload_url(
     url: str, playwright_loader=Depends(get_playwright_loader)
 ) -> dict[str, str]:
+    if not _check_free_memory():
+        raise HTTPMemoryError()
+
     playwright_loader.urls = [url]
 
     if url.endswith(".pdf"):
-        ## Download the file
-
-        async with httpx.AsyncClient() as client:
-            response = await client.get(url)
-        if response.status_code != 200:
-            raise HTTPDownloadError(url)
+        ## Download the file with retry logic
+        max_retries = 3
+        for attempt in range(max_retries):
+            try:
+                async with httpx.AsyncClient(timeout=30.0) as client:
+                    response = await client.get(url)
+                    response.raise_for_status()
+                    break
+            except (httpx.RequestError, httpx.HTTPStatusError) as e:
+                if isinstance(e, httpx.TimeoutException):
+                    if attempt == max_retries - 1:
+                        raise HTTPTimeoutError(url, message=f"Request timed out after {max_retries} attempts")
+                elif attempt == max_retries - 1:
+                    raise HTTPTooManyRequestsError(url, message=f"Failed after {max_retries} attempts: {str(e)}")
+                await asyncio.sleep(2 ** attempt)  # Exponential backoff
 
         with tempfile.NamedTemporaryFile(delete=False, suffix="pdf") as temp_file:
             temp_file.write(response.content)
@@ -141,23 +155,35 @@ async def upload_url(
                 )
                 result = await megaparse.aload(temp_file.name)
                 return {"message": "File parsed successfully", "result": result}
-            except ParsingException:
-                raise HTTPParsingException(url)
+            except ParsingException as e:
+                raise HTTPParsingException(url, message=str(e))
+            except Exception as e:
+                raise HTTPException(
+                    status_code=500,
+                    detail=f"Internal server error while parsing PDF: {str(e)}"
+                )
     else:
-        data = await playwright_loader.aload()
-        # Now turn the data into a string
-        extracted_content = ""
-        for page in data:
-            extracted_content += page.page_content
-        if not extracted_content:
-            raise HTTPDownloadError(
-                url,
-                message="Failed to extract content from the website. Valid URL example : https://www.quivr.com",
+        try:
+            data = await playwright_loader.aload()
+            # Now turn the data into a string
+            extracted_content = ""
+            for page in data:
+                extracted_content += page.page_content
+            if not extracted_content:
+                raise HTTPDownloadError(
+                    url,
+                    message="Failed to extract content from the website. Valid URL example : https://www.quivr.com",
+                )
+            return {
+                "message": "Website content parsed successfully",
+                "result": extracted_content,
+            }
+        except Exception as e:
+            # Handle Playwright-specific errors
+            raise HTTPException(
+                status_code=400,
+                detail=f"Failed to load website content: {str(e)}. Make sure the URL is valid and accessible."
             )
-        return {
-            "message": "Website content parsed successfully",
-            "result": extracted_content,
-        }
 
 
 if __name__ == "__main__":

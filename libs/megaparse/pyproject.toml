@@ -54,8 +54,17 @@ build-backend = "hatchling.build"
 
 [tool.rye]
 managed = true
-dev-dependencies = []
+dev-dependencies = [
+    "pytest>=7.4.0",
+    "pytest-asyncio>=0.23.0",
+    "pytest-timeout>=2.1.0",
+    "httpx>=0.24.1"
+]
 universal = true
+
+[tool.pytest.ini_options]
+asyncio_mode = "auto"
+timeout = 30
 
 [tool.hatch.metadata]
 allow-direct-references = true

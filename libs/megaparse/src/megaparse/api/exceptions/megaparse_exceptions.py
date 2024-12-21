@@ -1,6 +1,37 @@
 from fastapi import HTTPException
 
 
+class HTTPTimeoutError(HTTPException):
+    def __init__(
+        self,
+        url: str,
+        message: str = "Request timed out",
+        headers: dict | None = None,
+    ):
+        detail = f"{url}: {message}"
+        super().__init__(status_code=504, detail=detail, headers=headers)
+
+
+class HTTPMemoryError(HTTPException):
+    def __init__(
+        self,
+        message: str = "Service unavailable due to low memory",
+        headers: dict | None = None,
+    ):
+        super().__init__(status_code=503, detail=message, headers=headers)
+
+
+class HTTPTooManyRequestsError(HTTPException):
+    def __init__(
+        self,
+        url: str,
+        message: str = "Too many retry attempts",
+        headers: dict | None = None,
+    ):
+        detail = f"{url}: {message}"
+        super().__init__(status_code=429, detail=detail, headers=headers)
+
+
 class HTTPModelNotSupported(HTTPException):
     def __init__(
         self,
