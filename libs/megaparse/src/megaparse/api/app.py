@@ -69,25 +69,31 @@ async def parse_file(
     check_table: bool = Form(False),
     language: Language = Form(Language.ENGLISH),
     parsing_instruction: Optional[str] = Form(None),
-    model_name: Optional[SupportedModel] = Form(SupportedModel.GPT_4O),
+    model_name: Optional[str] = Form(SupportedModel.GPT_4O.value),
     parser_builder=Depends(parser_builder_dep),
 ) -> dict[str, str]:
     if not _check_free_memory():
         raise HTTPMemoryError()
     model = None
     if model_name and check_table:
-        if model_name.startswith("gpt"):
-            model = ChatOpenAI(model=model_name, api_key=os.getenv("OPENAI_API_KEY"))  # type: ignore
-        elif model_name.startswith("claude"):
+        supported_models = [model.value for model in SupportedModel]
+        if model_name not in supported_models:
+            raise HTTPException(
+                status_code=501,
+                detail=f"Model {model_name} is not supported. Please use one of {supported_models}",
+            )
+        model_name_str = model_name
+        if model_name_str.startswith("gpt"):
+            model = ChatOpenAI(
+                model=model_name_str, api_key=os.getenv("OPENAI_API_KEY")
+            )  # type: ignore
+        elif model_name_str.startswith("claude"):
             model = ChatAnthropic(
-                model_name=model_name,
+                model_name=model_name_str,
                 api_key=os.getenv("ANTHROPIC_API_KEY"),  # type: ignore
                 timeout=60,
                 stop=None,
             )
-
-        else:
-            raise HTTPException(status_code=501, detail="Model not supported")
 
     parser_config = ParseFileConfig(
         method=method,
@@ -129,7 +135,9 @@ async def upload_url(
     # Validate URL format
     result = urlparse(url)
     if not all([result.scheme, result.netloc]):
-        raise HTTPException(status_code=400, detail="Failed to load website content: Invalid URL format")
+        raise HTTPException(
+            status_code=400, detail="Failed to load website content: Invalid URL format"
+        )
 
     playwright_loader.urls = [url]
 
@@ -142,16 +150,30 @@ async def upload_url(
                     response = await client.get(url)
                     response.raise_for_status()
                     break
-            except (httpx.RequestError, httpx.HTTPStatusError, TimeoutError, ConnectionError) as e:
+            except (
+                httpx.RequestError,
+                httpx.HTTPStatusError,
+                TimeoutError,
+                ConnectionError,
+            ) as e:
                 if isinstance(e, (httpx.TimeoutException, TimeoutError)):
                     if attempt == max_retries - 1:
-                        raise HTTPException(status_code=504, detail=f"Request timed out after {max_retries} attempts")
+                        raise HTTPException(
+                            status_code=504,
+                            detail=f"Request timed out after {max_retries} attempts",
+                        )
                 elif isinstance(e, ConnectionError):
                     if attempt == max_retries - 1:
-                        raise HTTPException(status_code=429, detail=f"Failed after {max_retries} attempts: {str(e)}")
+                        raise HTTPException(
+                            status_code=429,
+                            detail=f"Failed after {max_retries} attempts: {str(e)}",
+                        )
                 elif attempt == max_retries - 1:
-                    raise HTTPException(status_code=400, detail=f"Failed to load website content: {str(e)}")
-                await asyncio.sleep(2 ** attempt)  # Exponential backoff
+                    raise HTTPException(
+                        status_code=400,
+                        detail=f"Failed to load website content: {str(e)}",
+                    )
+                await asyncio.sleep(2**attempt)  # Exponential backoff
 
         with tempfile.NamedTemporaryFile(delete=False, suffix="pdf") as temp_file:
             temp_file.write(response.content)
@@ -166,7 +188,7 @@ async def upload_url(
             except Exception as e:
                 raise HTTPException(
                     status_code=500,
-                    detail=f"Internal server error while parsing PDF: {str(e)}"
+                    detail=f"Internal server error while parsing PDF: {str(e)}",
                 )
     else:
         try:
@@ -188,7 +210,7 @@ async def upload_url(
             # Handle Playwright-specific errors
             raise HTTPException(
                 status_code=400,
-                detail=f"Failed to load website content: {str(e)}. Make sure the URL is valid and accessible."
+                detail=f"Failed to load website content: {str(e)}. Make sure the URL is valid and accessible.",
             )
 
 

@@ -60,6 +60,7 @@ def event_loop():
     yield loop
     loop.close()
 
+
 @pytest_asyncio.fixture(scope="function")
 async def test_client():
     """Async test client fixture with proper resource cleanup and debugging."""
@@ -68,6 +69,7 @@ async def test_client():
     client = None
 
     try:
+
         def fake_parser_builder():
             return FakeParserBuilder()
 
