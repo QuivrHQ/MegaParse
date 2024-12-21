@@ -1,14 +1,5 @@
 import pytest
 from unittest.mock import patch
-from megaparse.api.exceptions.megaparse_exceptions import (
-    HTTPDownloadError,
-    HTTPFileNotFound,
-    HTTPMemoryError,
-    HTTPModelNotSupported,
-    HTTPParsingException,
-    HTTPTimeoutError,
-    HTTPTooManyRequestsError,
-)
 
 
 @pytest.mark.asyncio

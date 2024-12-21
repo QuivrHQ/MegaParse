@@ -1,8 +1,9 @@
+import asyncio
 import io
 import os
 import tempfile
-import asyncio
 from typing import Optional
+from urllib.parse import urlparse
 
 import httpx
 import psutil
@@ -11,28 +12,23 @@ from fastapi import Depends, FastAPI, File, Form, HTTPException, UploadFile
 from langchain_anthropic import ChatAnthropic
 from langchain_community.document_loaders import PlaywrightURLLoader
 from langchain_openai import ChatOpenAI
-from urllib.parse import urlparse
 from llama_parse.utils import Language
+from megaparse import MegaParse
+from megaparse.api.exceptions.megaparse_exceptions import (
+    HTTPDownloadError,
+    HTTPFileNotFound,
+    HTTPMemoryError,
+    HTTPParsingException,
+    ParsingException,
+)
+from megaparse.parser.builder import ParserBuilder
+from megaparse.parser.unstructured_parser import UnstructuredParser
 from megaparse_sdk.schema.parser_config import (
     ParseFileConfig,
     ParserType,
     StrategyEnum,
 )
 from megaparse_sdk.schema.supported_models import SupportedModel
-
-from megaparse import MegaParse
-from megaparse.api.exceptions.megaparse_exceptions import (
-    HTTPDownloadError,
-    HTTPFileNotFound,
-    HTTPMemoryError,
-    HTTPModelNotSupported,
-    HTTPParsingException,
-    HTTPTimeoutError,
-    HTTPTooManyRequestsError,
-    ParsingException,
-)
-from megaparse.parser.builder import ParserBuilder
-from megaparse.parser.unstructured_parser import UnstructuredParser
 
 app = FastAPI()
 

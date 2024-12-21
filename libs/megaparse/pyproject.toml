@@ -59,13 +59,18 @@ dev-dependencies = [
     "pytest>=7.4.0",
     "pytest-asyncio>=0.23.0",
     "pytest-timeout>=2.1.0",
+    "pytest-xdist>=3.6.1",
     "httpx>=0.24.1"
 ]
 universal = true
 
 [tool.pytest.ini_options]
-asyncio_mode = "auto"
+asyncio_mode = "strict"
+asyncio_default_fixture_loop_scope = "function"
 timeout = 30
+testpaths = ["tests"]
+python_files = ["test_*.py"]
+addopts = "-v --tb=short"
 
 [tool.hatch.metadata]
 allow-direct-references = true

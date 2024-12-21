@@ -89,7 +89,6 @@ async def test_client():
         )
         await client.__aenter__()
         print("Setting up test_client fixture - client ready")
-        
         yield client
 
     except Exception as e:
