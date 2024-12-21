@@ -86,4 +86,6 @@ jobs:
 
       - name: 🚀 Run tests
         run: |
+          # Run both API (megaparse) and SDK tests
+          rye test -p megaparse
           rye test -p megaparse-sdk
