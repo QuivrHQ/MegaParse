@@ -62,24 +62,45 @@ def event_loop():
 
 @pytest_asyncio.fixture(scope="function")
 async def test_client():
-    """Async test client fixture with proper resource cleanup."""
-    print("Setting up test_client fixture")
+    """Async test client fixture with proper resource cleanup and debugging."""
+    print("Setting up test_client fixture - initializing")
+    original_overrides = app.dependency_overrides.copy()
+    client = None
 
-    def fake_parser_builder():
-        return FakeParserBuilder()
+    try:
+        def fake_parser_builder():
+            return FakeParserBuilder()
 
-    def fake_playwright_loader():
-        class FakePlaywrightLoader(PlaywrightURLLoader):
-            async def aload(self):
-                return [Document(page_content="Fake website content")]
+        def fake_playwright_loader():
+            class FakePlaywrightLoader(PlaywrightURLLoader):
+                async def aload(self):
+                    return [Document(page_content="Fake website content")]
 
-        return FakePlaywrightLoader(urls=[], remove_selectors=["header", "footer"])
+            return FakePlaywrightLoader(urls=[], remove_selectors=["header", "footer"])
 
-    app.dependency_overrides[parser_builder_dep] = fake_parser_builder
-    app.dependency_overrides[get_playwright_loader] = fake_playwright_loader
-    async with AsyncClient(
-        transport=ASGITransport(app=app),  # type: ignore
-        base_url="http://test",
-    ) as ac:
-        yield ac
-    app.dependency_overrides = {}
+        print("Setting up test_client fixture - configuring dependencies")
+        app.dependency_overrides[parser_builder_dep] = fake_parser_builder
+        app.dependency_overrides[get_playwright_loader] = fake_playwright_loader
+
+        print("Setting up test_client fixture - creating client")
+        client = AsyncClient(
+            transport=ASGITransport(app=app),  # type: ignore
+            base_url="http://test",
+        )
+        await client.__aenter__()
+        print("Setting up test_client fixture - client ready")
+        
+        yield client
+
+    except Exception as e:
+        print(f"Error in test_client fixture: {str(e)}")
+        raise
+    finally:
+        print("Cleaning up test_client fixture")
+        if client:
+            try:
+                await client.__aexit__(None, None, None)
+            except Exception as e:
+                print(f"Error during client cleanup: {str(e)}")
+        app.dependency_overrides = original_overrides
+        print("Test client cleanup complete")
