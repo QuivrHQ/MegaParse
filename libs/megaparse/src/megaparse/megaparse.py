@@ -125,6 +125,7 @@ class MegaParse:
         file: BinaryIO | None = None,
         file_extension: str | FileExtension = "",
     ) -> BaseParser:
+        local_strategy = None
         if self.strategy != StrategyEnum.AUTO or file_extension != FileExtension.PDF:
             return self.parser
         if file:
