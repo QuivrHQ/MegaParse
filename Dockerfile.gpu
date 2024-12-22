@@ -37,13 +37,12 @@ RUN apt-get update && apt-get install -y software-properties-common && \
 RUN  update-alternatives --install /usr/bin/python3 python3 /usr/bin/python3.11 1 && \
        update-alternatives --set python3 /usr/bin/python3.11
 
-COPY pyproject.toml README.md ./
-COPY libs/megaparse/pyproject.toml libs/megaparse/README.md libs/megaparse/
-COPY libs/megaparse_sdk/pyproject.toml libs/megaparse_sdk/README.md libs/megaparse_sdk/
+COPY . .
 
 RUN curl -LsSf https://astral.sh/uv/install.sh | sh
 ENV PATH="/root/.local/bin:$PATH"
-RUN UV_INDEX_STRATEGY=unsafe-first-match uv pip install --no-cache --system -e .
+RUN UV_INDEX_STRATEGY=unsafe-first-match uv pip install --no-cache --system -e ./libs/megaparse
+RUN UV_INDEX_STRATEGY=unsafe-first-match uv pip install --no-cache --system -e ./libs/megaparse_sdk
 
 RUN playwright install --with-deps
 RUN python3 - -m nltk.downloader all
@@ -51,7 +50,3 @@ RUN python3 - -m nltk.downloader all
 # FIXME: causes runtime link issues with onnxruntime_pybind_state.cc:507 unstructured
 # RUN python3 -c "from unstructured.nlp.tokenize import download_nltk_packages; download_nltk_packages()" && \
 # RUN python3 -c "import nltk; nltk.download('punkt_tab'); nltk.download('averaged_perceptron_tagger_eng')"
-
-COPY . .
-
-RUN uv pip install --no-cache --system /app/libs/megaparse /app/libs/megaparse_sdk

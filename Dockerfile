@@ -27,19 +27,14 @@ RUN apt-get update && apt-get upgrade && apt-get install -y \
     pandoc && \
     rm -rf /var/lib/apt/lists/* && apt-get clean
 
-COPY pyproject.toml README.md ./
-COPY libs/megaparse/pyproject.toml libs/megaparse/README.md libs/megaparse/
-COPY libs/megaparse_sdk/pyproject.toml libs/megaparse_sdk/README.md libs/megaparse_sdk/
+COPY . .
 
 RUN pip install uv
-RUN UV_INDEX_STRATEGY=unsafe-first-match uv pip install --no-cache --system -e .
+RUN UV_INDEX_STRATEGY=unsafe-first-match uv pip install --no-cache --system -e ./libs/megaparse
+RUN UV_INDEX_STRATEGY=unsafe-first-match uv pip install --no-cache --system -e ./libs/megaparse_sdk
 
 RUN playwright install --with-deps
 RUN python3 - -m nltk.downloader all
-
-COPY . .
-
-RUN uv pip install --no-cache --system /app/libs/megaparse /app/libs/megaparse_sdk
 
 EXPOSE 8000
 CMD ["uvicorn", "megaparse.api.app:app", "--host", "0.0.0.0", "--port", "8000"]
