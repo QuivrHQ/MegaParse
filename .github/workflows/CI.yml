@@ -84,6 +84,8 @@ jobs:
 
       - name: 🔨 Install dependencies with uv
         run: |
+          uv venv
+          source .venv/bin/activate
           UV_INDEX_STRATEGY=unsafe-first-match uv pip install -e .
 
       - name: 🚀 Run tests

@@ -27,12 +27,12 @@ RUN apt-get update && apt-get upgrade && apt-get install -y \
     pandoc && \
     rm -rf /var/lib/apt/lists/* && apt-get clean
 
-COPY requirements.lock  pyproject.toml README.md ./
+COPY pyproject.toml README.md ./
 COPY libs/megaparse/pyproject.toml libs/megaparse/README.md libs/megaparse/
 COPY libs/megaparse_sdk/pyproject.toml libs/megaparse_sdk/README.md libs/megaparse_sdk/
 
 RUN pip install uv
-RUN uv pip install --no-cache --system -r requirements.lock
+RUN UV_INDEX_STRATEGY=unsafe-first-match uv pip install --no-cache --system -e .
 
 RUN playwright install --with-deps
 RUN python3 - -m nltk.downloader all
