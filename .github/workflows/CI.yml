@@ -89,34 +89,31 @@ jobs:
       - name: 🔨 Create and setup virtual environment
         run: |
           python -m venv .venv
-          source .venv/bin/activate
+          echo "VIRTUAL_ENV=$GITHUB_WORKSPACE/.venv" >> $GITHUB_ENV
+          echo "$GITHUB_WORKSPACE/.venv/bin" >> $GITHUB_PATH
           curl -LsSf https://astral.sh/uv/install.sh | sh
-          uv pip install --upgrade pip setuptools wheel
+          .venv/bin/python -m pip install --upgrade pip setuptools wheel
 
       - name: 🔨 Install core dependencies
         timeout-minutes: 5
         run: |
-          source .venv/bin/activate
-          UV_INDEX_STRATEGY=unsafe-first-match UV_LOG=debug uv pip install -v pytest pytest-cov
+          UV_INDEX_STRATEGY=unsafe-first-match UV_LOG=debug .venv/bin/uv pip install -v pytest pytest-cov
 
       - name: 🔨 Install megaparse dependencies
         timeout-minutes: 5
         run: |
-          source .venv/bin/activate
-          UV_INDEX_STRATEGY=unsafe-first-match UV_LOG=debug uv pip install -v -e ./libs/megaparse[test]
+          UV_INDEX_STRATEGY=unsafe-first-match UV_LOG=debug .venv/bin/uv pip install -v -e ./libs/megaparse[test]
 
       - name: 🔨 Install megaparse_sdk dependencies
         timeout-minutes: 5
         run: |
-          source .venv/bin/activate
-          UV_INDEX_STRATEGY=unsafe-first-match UV_LOG=debug uv pip install -v -e ./libs/megaparse_sdk[test]
+          UV_INDEX_STRATEGY=unsafe-first-match UV_LOG=debug .venv/bin/uv pip install -v -e ./libs/megaparse_sdk[test]
 
       - name: 🔨 Verify installation
         run: |
-          source .venv/bin/activate
-          python -m pip list
-          python -c "import pytest; import megaparse; import megaparse_sdk; print('✅ All packages imported successfully')"
+          .venv/bin/python -m pip list
+          .venv/bin/python -c "import pytest; import megaparse; import megaparse_sdk; print('✅ All packages imported successfully')"
 
       - name: 🚀 Run tests
         run: |
-          python -m pytest libs/megaparse_sdk/tests/
+          .venv/bin/python -m pytest libs/megaparse_sdk/tests/
