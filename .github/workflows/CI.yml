@@ -86,10 +86,12 @@ jobs:
         run: |
           mkdir -p ~/.cache/uv
 
-      - name: 🔨 Create virtual environment
+      - name: 🔨 Create and setup virtual environment
         run: |
-          uv venv
+          python -m venv .venv
           source .venv/bin/activate
+          curl -LsSf https://astral.sh/uv/install.sh | sh
+          uv pip install --upgrade pip setuptools wheel
 
       - name: 🔨 Install core dependencies
         timeout-minutes: 5
