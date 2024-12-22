@@ -86,8 +86,9 @@ jobs:
         run: |
           uv venv
           source .venv/bin/activate
-          UV_INDEX_STRATEGY=unsafe-first-match uv pip install -e ./libs/megaparse
-          UV_INDEX_STRATEGY=unsafe-first-match uv pip install -e ./libs/megaparse_sdk
+          UV_INDEX_STRATEGY=unsafe-first-match uv pip install -e ./libs/megaparse[test]
+          UV_INDEX_STRATEGY=unsafe-first-match uv pip install -e ./libs/megaparse_sdk[test]
+          UV_INDEX_STRATEGY=unsafe-first-match uv pip install pytest pytest-cov
 
       - name: 🚀 Run tests
         run: |
