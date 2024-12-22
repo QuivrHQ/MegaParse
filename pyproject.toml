@@ -18,11 +18,9 @@ dependencies = [
 requires = ["hatchling==1.26.3"]
 build-backend = "hatchling.build"
 
-[tool.rye]
-python = ">= 3.11"
-managed = true
-universal = true
-dev-dependencies = [
+# Development dependencies moved to regular dependencies since we're migrating from rye
+dependencies = [
+    "packaging>=22.0",
     "mypy>=1.11.1",
     "pre-commit>=3.8.0",
     "ipykernel>=6.29.5",
@@ -35,9 +33,6 @@ dev-dependencies = [
     "pytest-cov>=5.0.0",
     "pytest-profiling>=1.8.1",
 ]
-
-[tool.rye.workspace]
-members = ["libs/*"]
 
 [tool.hatch.metadata]
 allow-direct-references = true

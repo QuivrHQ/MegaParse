@@ -52,8 +52,7 @@ api = [
 requires = ["hatchling==1.26.3"]
 build-backend = "hatchling.build"
 
-[tool.rye]
-managed = true
+# Removed rye configuration
 dev-dependencies = []
 universal = true
 

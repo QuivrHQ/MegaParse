@@ -49,13 +49,15 @@ jobs:
             libpq-dev \
             pandoc
 
-      - name: 🔽 Install the latest version of rye
-        uses: eifinger/setup-rye@v4
+      - name: 🐍 Set up Python ${{ matrix.python-version }}
+        uses: actions/setup-python@v4
         with:
-          enable-cache: true
+          python-version: ${{ matrix.python-version }}
+          cache: 'pip'
 
-      - name: 📌 Pin Python version
-        run: rye pin ${{ matrix.python-version }}
+      - name: 🔽 Install uv
+        run: |
+          pip install uv
 
       - name: 🔽 Download and Install NATS Server
         run: |
@@ -80,10 +82,10 @@ jobs:
             exit 1
           fi
 
-      - name: 🔨 Sync dependencies
+      - name: 🔨 Install dependencies with uv
         run: |
-          UV_INDEX_STRATEGY=unsafe-first-match rye sync --no-lock
+          UV_INDEX_STRATEGY=unsafe-first-match uv pip install -e .
 
       - name: 🚀 Run tests
         run: |
-          rye test -p megaparse-sdk
+          cd libs/megaparse-sdk && python -m pytest
