@@ -98,7 +98,7 @@ jobs:
         timeout-minutes: 5
         run: |
           source .venv/bin/activate
-          UV_INDEX_STRATEGY=unsafe-first-match UV_LOG=debug python -m uv pip install -v pytest pytest-cov
+          UV_INDEX_STRATEGY=unsafe-first-match UV_LOG=debug python -m uv pip install -v pytest pytest-cov pytest-asyncio
 
       - name: 🔨 Install megaparse dependencies
         timeout-minutes: 5
