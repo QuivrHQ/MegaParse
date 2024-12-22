@@ -82,25 +82,26 @@ jobs:
             exit 1
           fi
 
+      - name: 🔨 Set up uv cache
+        run: |
+          mkdir -p ~/.cache/uv
+
       - name: 🔨 Create virtual environment
         run: |
           uv venv
           source .venv/bin/activate
 
-      - name: 🔨 Install megaparse dependencies
+      - name: 🔨 Install dependencies with verbose output
         run: |
           source .venv/bin/activate
-          UV_INDEX_STRATEGY=unsafe-first-match uv pip install -e ./libs/megaparse[test]
+          UV_INDEX_STRATEGY=unsafe-first-match UV_LOG=debug uv pip install -v -e ./libs/megaparse[test]
+          UV_INDEX_STRATEGY=unsafe-first-match UV_LOG=debug uv pip install -v -e ./libs/megaparse_sdk[test]
+          UV_INDEX_STRATEGY=unsafe-first-match UV_LOG=debug uv pip install -v pytest pytest-cov
 
-      - name: 🔨 Install megaparse_sdk dependencies
+      - name: 🔨 Verify installation
         run: |
           source .venv/bin/activate
-          UV_INDEX_STRATEGY=unsafe-first-match uv pip install -e ./libs/megaparse_sdk[test]
-
-      - name: 🔨 Install test dependencies
-        run: |
-          source .venv/bin/activate
-          UV_INDEX_STRATEGY=unsafe-first-match uv pip install pytest pytest-cov
+          python -m pip list
 
       - name: 🚀 Run tests
         run: |
