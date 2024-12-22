@@ -11,6 +11,30 @@ from megaparse.parser import BaseParser
 
 
 class LlamaParser(BaseParser):
+    """LlamaParse-based document parser with advanced PDF parsing capabilities.
+
+    This parser leverages the LlamaParse API for high-quality PDF parsing with
+    support for multiple languages and custom parsing instructions. It's particularly
+    effective for documents with complex layouts and tables that span multiple pages.
+
+    Attributes:
+        supported_extensions (List[FileExtension]): Currently supports PDF files only.
+
+    Args:
+        api_key (str): LlamaParse API key for authentication
+        verbose (bool): Enable detailed logging output (default: True)
+        language (Language): Target language for parsing (default: Language.FRENCH)
+        parsing_instruction (str, optional): Custom instructions for the parser
+            If not provided, uses default instructions for handling headers, footers,
+            and table merging across pages.
+        **kwargs: Additional arguments passed to LlamaParse
+
+    Note:
+        - Requires valid LlamaParse API key for operation
+        - Both sync and async interfaces make API calls
+        - Default parsing instruction optimizes for table continuity across pages
+        - Memory usage scales with document size and complexity
+    """
     supported_extensions = [FileExtension.PDF]
 
     def __init__(
