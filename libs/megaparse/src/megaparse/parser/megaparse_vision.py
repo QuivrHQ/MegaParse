@@ -53,6 +53,34 @@ Follow these instructions to complete the task:
 
 
 class MegaParseVision(BaseParser):
+    """Vision-based document parser using multimodal language models.
+
+    This parser converts documents to images and uses vision-capable language models
+    (like GPT-4V) to extract and format content. It excels at handling complex
+    layouts, tables, and documents with mixed text and visual elements.
+
+    Attributes:
+        supported_extensions (List[FileExtension]): Currently supports PDF files only.
+        parsed_chunks (List[str] | None): Stores intermediate parsing results
+
+    Args:
+        model (BaseChatModel): Language model instance with vision capabilities
+            Must be one of the supported models (GPT-4V, Claude 3, etc.)
+        **kwargs: Additional arguments passed to the model
+
+    Features:
+        - Batch processing of document pages
+        - Automatic table and header detection
+        - Structure preservation in markdown output
+        - Support for concurrent page processing
+        - Special handling of repeating headers
+
+    Note:
+        - Requires significant compute resources for vision models
+        - Processing time scales with document length
+        - Memory usage depends on batch_size and document complexity
+        - Some models may have rate limits or token constraints
+    """
     supported_extensions = [FileExtension.PDF]
 
     def __init__(self, model: BaseChatModel, **kwargs):

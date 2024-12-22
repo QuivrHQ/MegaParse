@@ -14,6 +14,30 @@ logger = logging.getLogger("megaparse")
 
 
 class DoctrParser(BaseParser):
+    """OCR-based document parser using the doctr library for text extraction.
+
+    This parser uses ONNX-based models for text detection and recognition, supporting
+    both CPU and GPU acceleration. It's particularly effective for documents with
+    complex layouts or when OCR is required for text extraction.
+
+    Attributes:
+        supported_extensions (List[FileExtension]): Currently supports PDF files only.
+
+    Args:
+        det_predictor_model (str): Detection model architecture (default: 'db_resnet50')
+        reco_predictor_model (str): Recognition model architecture (default: 'crnn_vgg16_bn')
+        det_bs (int): Detection batch size (default: 2)
+        reco_bs (int): Recognition batch size (default: 512)
+        assume_straight_pages (bool): Whether to assume pages are not rotated (default: True)
+        straighten_pages (bool): Whether to attempt page rotation correction (default: False)
+        use_gpu (bool): Whether to use CUDA acceleration if available (default: False)
+        **kwargs: Additional arguments passed to the doctr predictor
+
+    Note:
+        - GPU support requires CUDA and appropriate ONNX runtime providers
+        - The async interface (aconvert) is not truly asynchronous, it calls the sync version
+        - Large documents may require significant memory, especially with GPU acceleration
+    """
     supported_extensions = [FileExtension.PDF]
 
     def __init__(
