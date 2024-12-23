@@ -1,5 +1,15 @@
 # Changelog
 
+## [0.0.53](https://github.com/QuivrHQ/MegaParse/compare/megaparse-v0.0.52...megaparse-v0.0.53) (2024-12-23)
+
+
+### Bug Fixes
+
+* add parse tests for every supported extensions ([#198](https://github.com/QuivrHQ/MegaParse/issues/198)) ([9dff0de](https://github.com/QuivrHQ/MegaParse/commit/9dff0de0c1de848151fe9a6519b658f0924c1228))
+* megaparse.load & add tests ([#202](https://github.com/QuivrHQ/MegaParse/issues/202)) ([13c2677](https://github.com/QuivrHQ/MegaParse/commit/13c2677bdadb4ba985a1abf9bafeb70548ab59f9))
+* Strategy heuristic test & fix ([#203](https://github.com/QuivrHQ/MegaParse/issues/203)) ([7b7fb40](https://github.com/QuivrHQ/MegaParse/commit/7b7fb40cae4ed380a5f0ca0035a7bd2bcc9147c3))
+* sync convert to parsers ([#186](https://github.com/QuivrHQ/MegaParse/issues/186)) ([fbb7d36](https://github.com/QuivrHQ/MegaParse/commit/fbb7d365fbaf710a687fdc6becacd6d301c09707))
+
 ## [0.0.52](https://github.com/QuivrHQ/MegaParse/compare/megaparse-v0.0.51...megaparse-v0.0.52) (2024-12-16)
 
 
