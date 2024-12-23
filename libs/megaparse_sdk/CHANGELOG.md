@@ -1,5 +1,13 @@
 # Changelog
 
+## [0.1.11](https://github.com/QuivrHQ/MegaParse/compare/megaparse-sdk-v0.1.10...megaparse-sdk-v0.1.11) (2024-12-23)
+
+
+### Bug Fixes
+
+* add parse tests for every supported extensions ([#198](https://github.com/QuivrHQ/MegaParse/issues/198)) ([9dff0de](https://github.com/QuivrHQ/MegaParse/commit/9dff0de0c1de848151fe9a6519b658f0924c1228))
+* Strategy heuristic test & fix ([#203](https://github.com/QuivrHQ/MegaParse/issues/203)) ([7b7fb40](https://github.com/QuivrHQ/MegaParse/commit/7b7fb40cae4ed380a5f0ca0035a7bd2bcc9147c3))
+
 ## [0.1.10](https://github.com/QuivrHQ/MegaParse/compare/megaparse-sdk-v0.1.9...megaparse-sdk-v0.1.10) (2024-12-16)
 
 
