@@ -13,6 +13,7 @@ from pypdfium2._helpers.pageobjects import PdfImage
 from pypdfium2._helpers.textpage import PdfTextPage
 
 from megaparse.predictor.doctr_layout_detector import LayoutPredictor
+import random
 
 logger = logging.getLogger("megaparse")
 
@@ -28,8 +29,6 @@ def get_strategy_page(
     # Get all the images in the page
     for obj in pdfium_page.get_objects():
         if isinstance(obj, PdfImage) or obj.type == 2:
-            images_coords.append(obj.get_pos())
-        elif obj.type == 2:
             images_coords.append(obj.get_pos())
 
     p_width, p_height = int(pdfium_page.get_width()), int(pdfium_page.get_height())
@@ -74,7 +73,8 @@ def determine_strategy(
     | Path
     | bytes,  # FIXME : Careful here on removing BinaryIO (not handled by onnxtr)
     threshold_pages_ocr: float = 0.2,
-    threshold_per_page: float = 0.8,
+    threshold_per_page: float = 0.5,
+    max_page_sample: int = 5,
 ) -> StrategyEnum:
     logger.info("Determining strategy...")
     need_ocr = 0
@@ -82,9 +82,17 @@ def determine_strategy(
     onnxtr_document = DocumentFile.from_pdf(file)
     det_predictor = detection_predictor()
     layout_predictor = LayoutPredictor(det_predictor)
-    onnxtr_document_layout = layout_predictor(onnxtr_document)
 
     pdfium_document = pdfium.PdfDocument(file)
+
+    if len(onnxtr_document) > max_page_sample:
+        sampled_pages = random.sample(range(len(onnxtr_document)), max_page_sample)
+        # print("Sampled pages: ", sampled_pages)
+        onnxtr_document = [onnxtr_document[i] for i in sampled_pages]
+        pdfium_document = [pdfium_document.get_page(i) for i in sampled_pages]
+
+    onnxtr_document_layout = layout_predictor(onnxtr_document)
+
     for pdfium_page, onnxtr_page in zip(
         pdfium_document, onnxtr_document_layout, strict=True
     ):
@@ -95,7 +103,8 @@ def determine_strategy(
 
     print(f"NEED OCR : {need_ocr} out of {len(pdfium_document)}")
     doc_need_ocr = (need_ocr / len(pdfium_document)) > threshold_pages_ocr
-    pdfium_document.close()
+    if isinstance(pdfium_document, pdfium.PdfDocument):
+        pdfium_document.close()
 
     if doc_need_ocr:
         print("Using HI_RES strategy")
