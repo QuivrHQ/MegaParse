@@ -111,8 +111,6 @@ class LayoutPredictor(NestedObject, _OCRPredictor):
         ):
             block_layouts = []
             for bbox, score in zip(loc_pred, objectness_score, strict=True):
-                print(bbox)
-                print(score)
                 block_layouts.append(
                     BlockLayout(
                         bbox=(bbox[:2], bbox[2:]),
