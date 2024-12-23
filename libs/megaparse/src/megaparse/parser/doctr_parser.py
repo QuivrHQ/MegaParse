@@ -6,7 +6,8 @@ from typing import IO, BinaryIO, List
 import onnxruntime as rt
 from megaparse_sdk.schema.extensions import FileExtension
 from onnxtr.io import DocumentFile
-from onnxtr.models import EngineConfig, ocr_predictor
+from onnxtr.models import ocr_predictor
+from onnxtr.models.engine import EngineConfig
 
 from megaparse.parser.base import BaseParser
 
