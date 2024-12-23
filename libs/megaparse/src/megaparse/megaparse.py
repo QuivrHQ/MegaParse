@@ -67,11 +67,6 @@ class MegaParse:
                 raise ValueError(
                     f"Format Checker : Unsupported file extension: {file_extension}"
                 )
-            # TODO(@chloedia): each parser should have a list of supported extensions
-            if not isinstance(self.parser, UnstructuredParser):
-                raise ValueError(
-                    f" Unsupported file extension : Parser {self.parser} do not support {file_extension}"
-                )
         return file_extension
 
     async def aload(
@@ -130,6 +125,7 @@ class MegaParse:
         file: BinaryIO | None = None,
         file_extension: str | FileExtension = "",
     ) -> BaseParser:
+        local_strategy = None
         if self.strategy != StrategyEnum.AUTO or file_extension != FileExtension.PDF:
             return self.parser
         if file:

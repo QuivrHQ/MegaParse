@@ -10,6 +10,7 @@ from onnxtr.io import DocumentFile
 from onnxtr.models import detection_predictor
 from pypdfium2._helpers.page import PdfPage
 from pypdfium2._helpers.pageobjects import PdfImage
+from pypdfium2._helpers.textpage import PdfTextPage
 
 from megaparse.predictor.doctr_layout_detector import LayoutPredictor
 
@@ -27,6 +28,8 @@ def get_strategy_page(
     # Get all the images in the page
     for obj in pdfium_page.get_objects():
         if isinstance(obj, PdfImage) or obj.type == 2:
+            images_coords.append(obj.get_pos())
+        elif obj.type == 2:
             images_coords.append(obj.get_pos())
 
     p_width, p_height = int(pdfium_page.get_width()), int(pdfium_page.get_height())
