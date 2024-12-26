@@ -3,10 +3,11 @@ import base64
 import re
 from io import BytesIO
 from pathlib import Path
-from typing import IO, List
+from typing import IO, List, Union
 
 from langchain_core.language_models.chat_models import BaseChatModel
 from langchain_core.messages import HumanMessage
+from megaparse_sdk.schema.extensions import FileExtension
 from pdf2image import convert_from_path
 
 from megaparse.parser import BaseParser
@@ -52,6 +53,8 @@ Follow these instructions to complete the task:
 
 
 class MegaParseVision(BaseParser):
+    supported_extensions = [FileExtension.PDF]
+
     def __init__(self, model: BaseChatModel, **kwargs):
         if hasattr(model, "model_name"):
             if not SupportedModel.is_supported(model.model_name):
@@ -91,7 +94,7 @@ class MegaParseVision(BaseParser):
             return []
         return [elmt.strip() for elmt in all_elmts]
 
-    async def send_to_mlm(self, images_data: List[str]) -> str:
+    async def asend_to_mlm(self, images_data: List[str]) -> str:
         """
         Send images to the language model for processing.
 
@@ -114,10 +117,34 @@ class MegaParseVision(BaseParser):
         response = await self.model.ainvoke([message])
         return str(response.content)
 
-    async def convert(
+    def send_to_mlm(self, images_data: List[str]) -> str:
+        """
+        Send images to the language model for processing.
+
+        :param images_data: List of base64 encoded images
+        :return: Processed content as a string
+        """
+        images_prompt = [
+            {
+                "type": "image_url",
+                "image_url": {"url": f"data:image/jpeg;base64,{image_data}"},
+            }
+            for image_data in images_data
+        ]
+        message = HumanMessage(
+            content=[
+                {"type": "text", "text": BASE_OCR_PROMPT},
+                *images_prompt,
+            ],
+        )
+        response = self.model.invoke([message])
+        return str(response.content)
+
+    async def aconvert(
         self,
         file_path: str | Path | None = None,
         file: IO[bytes] | None = None,
+        file_extension: FileExtension | None = None,
         batch_size: int = 3,
         **kwargs,
     ) -> str:
@@ -133,12 +160,50 @@ class MegaParseVision(BaseParser):
 
         if isinstance(file_path, Path):
             file_path = str(file_path)
+
+        self.check_supported_extension(file_extension, file_path)
+
         pdf_base64 = self.process_file(file_path)
         tasks = [
-            self.send_to_mlm(pdf_base64[i : i + batch_size])
+            self.asend_to_mlm(pdf_base64[i : i + batch_size])
             for i in range(0, len(pdf_base64), batch_size)
         ]
         self.parsed_chunks = await asyncio.gather(*tasks)
+        responses = self.get_cleaned_content("\n".join(self.parsed_chunks))
+        return responses
+
+    def convert(
+        self,
+        file_path: str | Path | None = None,
+        file: IO[bytes] | None = None,
+        file_extension: FileExtension | None = None,
+        batch_size: int = 3,
+        **kwargs,
+    ) -> str:
+        """
+        Parse a PDF file and process its content using the language model.
+
+        :param file_path: Path to the PDF file
+        :param batch_size: Number of pages to process at a time
+        :return: List of processed content strings
+        """
+        if not file_path:
+            raise ValueError("File_path should be provided to run MegaParseVision")
+
+        if isinstance(file_path, Path):
+            file_path = str(file_path)
+
+        self.check_supported_extension(file_extension, file_path)
+
+        pdf_base64 = self.process_file(file_path)
+        chunks = [
+            pdf_base64[i : i + batch_size]
+            for i in range(0, len(pdf_base64), batch_size)
+        ]
+        self.parsed_chunks = []
+        for chunk in chunks:
+            response = self.send_to_mlm(chunk)
+            self.parsed_chunks.append(response)
         responses = self.get_cleaned_content("\n".join(self.parsed_chunks))
         return responses
 

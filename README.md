@@ -25,6 +25,8 @@ https://github.com/QuivrHQ/MegaParse/assets/19614572/1b4cdb73-8dc2-44ef-b8b4-a75
 
 ## Installation
 
+required python version >= 3.11
+
 ```bash
 pip install megaparse
 ```
@@ -70,24 +72,6 @@ megaparse.save("./test.md")
 
 ```
 **Note**: The model supported by MegaParse Vision are the multimodal ones such as claude 3.5, claude 4, gpt-4o and gpt-4.
-
-### (Optional) Use LlamaParse for Improved Results
-
-1. Create an account on [Llama Cloud](https://cloud.llamaindex.ai/) and get your API key.
-
-2. Change the parser to LlamaParser
-
-```python
-from megaparse import MegaParse
-from langchain_openai import ChatOpenAI
-from megaparse.parser.llama_parser import LlamaParser
-
-parser = LlamaParser(api_key = os.getenv("LLAMA_CLOUD_API_KEY"))
-megaparse = MegaParse(parser)
-response = megaparse.load("./test.pdf")
-print(response)
-megaparse.save("./test.md") #saves the last processed doc in md format
-```
 
 ## Use as an API
 There is a MakeFile for you, simply use :

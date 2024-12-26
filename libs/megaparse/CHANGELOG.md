@@ -1,5 +1,34 @@
 # Changelog
 
+## [0.0.52](https://github.com/QuivrHQ/MegaParse/compare/megaparse-v0.0.51...megaparse-v0.0.52) (2024-12-16)
+
+
+### Bug Fixes
+
+* hatchling version ([#193](https://github.com/QuivrHQ/MegaParse/issues/193)) ([f6070a5](https://github.com/QuivrHQ/MegaParse/commit/f6070a5483a20eeb83751a2dcfc01b7f0fb14473))
+
+## [0.0.51](https://github.com/QuivrHQ/MegaParse/compare/megaparse-v0.0.50...megaparse-v0.0.51) (2024-12-16)
+
+
+### Features
+
+* updating langchain version ([#187](https://github.com/QuivrHQ/MegaParse/issues/187)) ([0f1f597](https://github.com/QuivrHQ/MegaParse/commit/0f1f5977df147e6b8c65d55445ccd86ef6f1a862))
+
+## [0.0.50](https://github.com/QuivrHQ/MegaParse/compare/megaparse-v0.0.49...megaparse-v0.0.50) (2024-12-13)
+
+
+### Features
+
+* small fixes ([#181](https://github.com/QuivrHQ/MegaParse/issues/181)) ([004afe2](https://github.com/QuivrHQ/MegaParse/commit/004afe2f170570075bbebcd32dec5d15ddba4609))
+
+## [0.0.49](https://github.com/QuivrHQ/MegaParse/compare/megaparse-v0.0.48...megaparse-v0.0.49) (2024-12-12)
+
+
+### Features
+
+* custom auto ([#131](https://github.com/QuivrHQ/MegaParse/issues/131)) ([3cb5be4](https://github.com/QuivrHQ/MegaParse/commit/3cb5be4a8c8eeb6dd6e9b87d7bbca24491db4c29))
+* faster ocr ([#180](https://github.com/QuivrHQ/MegaParse/issues/180)) ([5661cb2](https://github.com/QuivrHQ/MegaParse/commit/5661cb2d52d959cbca0f41339791129cd35d4036))
+
 ## [0.0.48](https://github.com/QuivrHQ/MegaParse/compare/megaparse-v0.0.47...megaparse-v0.0.48) (2024-12-03)
 
 

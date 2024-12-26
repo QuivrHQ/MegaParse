@@ -1,6 +1,6 @@
 [project]
 name = "megaparse"
-version = "0.0.48"
+version = "0.0.52"
 authors = [
     { name = "Stan Girard", email = "stan@quivr.app" },
     { name = "Chloé Daems", email = "chloe@quivr.app" },
@@ -23,12 +23,17 @@ dependencies = [
     "langchain-anthropic>=0.1.23",
     "python-magic>=0.4.27",
     "unstructured[all-docs]==0.15.0",
-    "langchain>=0.2.14,<0.3.0",
-    "langchain-community>=0.2.0",
+    "langchain>=0.3,<0.4",
+    "langchain-community>=0.3,<0.4",
     "langchain-openai>=0.1.21",
-    "langchain-core>=0.2.38",
+    "langchain-core>=0.3,<0.4",
     "llama-parse>=0.4.0",
     "pydantic-settings>=2.6.1",
+    "onnxruntime==1.20.0; platform_machine == 'x86_64'",
+    "onnxruntime-gpu==1.20.0; platform_machine == 'x86_64'",
+    "onnxtr[gpu-headless]>=0.6.0; platform_machine == 'x86_64'",
+    "onnxtr[cpu]>=0.6.0; platform_machine != 'x86_64'",
+    "pypdfium2>=4.30.0",
 ]
 
 [project.optional-dependencies]
@@ -39,12 +44,12 @@ api = [
     "uvicorn>=0.32.0",
     "fastapi>=0.115.2",
     "ratelimit>=2.2.1",
-    "nats-py>=2.9.0",
+
 ]
 
 
 [build-system]
-requires = ["hatchling"]
+requires = ["hatchling==1.26.3"]
 build-backend = "hatchling.build"
 
 [tool.rye]

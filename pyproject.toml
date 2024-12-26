@@ -10,10 +10,12 @@ authors = [
 ]
 readme = "README.md"
 requires-python = ">= 3.11"
-dependencies = ["packaging>=22.0"]
+dependencies = [
+    "packaging>=22.0",
+]
 
 [build-system]
-requires = ["hatchling"]
+requires = ["hatchling==1.26.3"]
 build-backend = "hatchling.build"
 
 [tool.rye]
@@ -31,6 +33,7 @@ dev-dependencies = [
     "pytest>=8.3.3",
     "pytest-xdist>=3.6.1",
     "pytest-cov>=5.0.0",
+    "pytest-profiling>=1.8.1",
 ]
 
 [tool.rye.workspace]

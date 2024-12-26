@@ -9,8 +9,11 @@ env:
 
 jobs:
   test:
-    name: Run tests
+    name: Run tests on Python ${{ matrix.python-version }}
     runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        python-version: ["3.11", "3.12"]
     steps:
       - name: 👀 Checkout code
         uses: actions/checkout@v2
@@ -26,7 +29,7 @@ jobs:
       - name: 😭 Install system dependencies
         run: |
           sudo apt-get update && sudo apt-get install -y \
-            netcat \
+            netcat-traditional \
             unzip \
             libgeos-dev \
             libcurl4-openssl-dev \
@@ -45,6 +48,14 @@ jobs:
             libreoffice \
             libpq-dev \
             pandoc
+
+      - name: 🔽 Install the latest version of rye
+        uses: eifinger/setup-rye@v4
+        with:
+          enable-cache: true
+
+      - name: 📌 Pin Python version
+        run: rye pin ${{ matrix.python-version }}
 
       - name: 🔽 Download and Install NATS Server
         run: |
@@ -69,12 +80,7 @@ jobs:
             exit 1
           fi
 
-      - name: 🔨 Install the latest version of rye
-        uses: eifinger/setup-rye@v4
-        with:
-          enable-cache: true
-
-      - name: 🔄 Sync dependencies
+      - name: 🔨 Sync dependencies
         run: |
           UV_INDEX_STRATEGY=unsafe-first-match rye sync --no-lock
 
