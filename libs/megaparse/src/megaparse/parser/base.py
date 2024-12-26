@@ -1,6 +1,8 @@
 from abc import ABC, abstractmethod
 from pathlib import Path
-from typing import IO
+from typing import IO, List
+
+from unstructured.documents.elements import Element
 
 from megaparse_sdk.schema.extensions import FileExtension
 
@@ -55,9 +57,9 @@ class BaseParser(ABC):
         file: IO[bytes] | None = None,
         file_extension: FileExtension | None = None,
         **kwargs,
-    ) -> str:
+    ) -> List[Element] | str:
         """
-        Convert the given file to a specific format.
+        Convert the given file to the unstructured format.
 
         Args:
             file_path (str | Path): The path to the file to be converted.

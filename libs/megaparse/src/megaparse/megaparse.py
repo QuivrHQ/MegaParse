@@ -2,13 +2,17 @@ import asyncio
 import logging
 import os
 from pathlib import Path
+from typing import IO, List
+
+from megaparse_sdk.schema.extensions import FileExtension
+from unstructured.documents.elements import Element
 from typing import IO, BinaryIO
 
 from megaparse_sdk.schema.extensions import FileExtension
 from megaparse_sdk.schema.parser_config import StrategyEnum
 
-from megaparse.checker.format_checker import FormatChecker
 from megaparse.exceptions.base import ParsingException
+from megaparse.formatter.base import BaseFormatter
 from megaparse.parser.base import BaseParser
 from megaparse.parser.doctr_parser import DoctrParser
 from megaparse.parser.strategy import determine_strategy
@@ -20,13 +24,15 @@ logger = logging.getLogger("megaparse")
 class MegaParse:
     def __init__(
         self,
-        parser: BaseParser = UnstructuredParser(strategy=StrategyEnum.FAST),
+        parser: BaseParser = UnstructuredParser(),
+        formatters: List[BaseFormatter] | None = None,
         ocr_parser: BaseParser = DoctrParser(),
         strategy: StrategyEnum = StrategyEnum.AUTO,
         format_checker: FormatChecker | None = None,
     ) -> None:
         self.strategy = strategy
         self.parser = parser
+        self.formatters = formatters
         self.ocr_parser = ocr_parser
         self.format_checker = format_checker
         self.last_parsed_document: str = ""
@@ -79,20 +85,32 @@ class MegaParse:
             file=file, file_path=file_path, file_extension=file_extension
         )
         try:
-            parser = self._select_parser(file_path, file, file_extension)
-            logger.info(f"Parsing using {parser.__class__.__name__} parser.")
-            parsed_document = await parser.aconvert(
-                file_path=file_path, file=file, file_extension=file_extension
-            )
-            # @chloe FIXME: format_checker needs unstructured Elements as input which is to change
-            # if self.format_checker:
-            #     parsed_document: str = await self.format_checker.check(parsed_document
-            self.last_parsed_document = parsed_document
-            return parsed_document
+            parsed_document = await self.parser.aconvert(file_path=file_path, file=file)
+            # @chloe FIXME: format_checker needs unstructured Elements as input which is to change to a megaparse element
+            if self.formatters:
+                for formatter in self.formatters:
+                    parsed_document = await formatter.format(parsed_document)
+
         except Exception as e:
-            raise ParsingException(
-                f"Error while parsing file {file_path or file}, file_extension: {file_extension}: {e}"
-            )
+            raise ParsingException(f"Error while parsing {file_path}: {e}")
+        if not isinstance(parsed_document, str):
+            raise ValueError("The parser or the last formatter should return a string")
+        return parsed_document
+
+    def load(self, file_path: Path | str) -> str:
+        if isinstance(file_path, str):
+            file_path = Path(file_path)
+        file_extension: str = file_path.suffix
+
+        if file_extension != ".pdf":
+            if self.formatters:
+                raise ValueError(
+                    f"Format Checker : Unsupported file extension: {file_extension}"
+                )
+            if not isinstance(self.parser, UnstructuredParser):
+                raise ValueError(
+                    f"Parser {self.parser}: Unsupported file extension: {file_extension}"
+                )
 
     def load(
         self,
@@ -104,6 +122,12 @@ class MegaParse:
             file=file, file_path=file_path, file_extension=file_extension
         )
         try:
+            parsed_document = self.parser.convert(file_path)
+            # @chloe FIXME: format_checker needs unstructured Elements as input which is to change
+            if self.formatters:
+                for formatter in self.formatters:
+                    parsed_document = formatter.format(parsed_document)
+
             parser = self._select_parser(file_path, file, file_extension)
             logger.info(f"Parsing using {parser.__class__.__name__} parser.")
             parsed_document = parser.convert(
@@ -113,6 +137,10 @@ class MegaParse:
             # if self.format_checker:
             #     parsed_document: str = await self.format_checker.check(parsed_document
             self.last_parsed_document = parsed_document
+            if not isinstance(parsed_document, str):
+                raise ValueError(
+                    "The parser or the last formatter should return a string"
+                )
             return parsed_document
         except Exception as e:
             raise ParsingException(
