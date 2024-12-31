@@ -1,19 +1,16 @@
 import logging
+import random
 from pathlib import Path
-from typing import BinaryIO
 
-from megaparse.predictor.models.base import PageLayout
 import numpy as np
 import pypdfium2 as pdfium
 from megaparse_sdk.schema.parser_config import StrategyEnum
 from onnxtr.io import DocumentFile
 from onnxtr.models import detection_predictor
 from pypdfium2._helpers.page import PdfPage
-from pypdfium2._helpers.pageobjects import PdfImage
-from pypdfium2._helpers.textpage import PdfTextPage
 
 from megaparse.predictor.doctr_layout_detector import LayoutPredictor
-import random
+from megaparse.predictor.models.base import PageLayout
 
 logger = logging.getLogger("megaparse")
 
@@ -25,17 +22,17 @@ def get_strategy_page(
     #     p_width == onnxtr_page.dimensions[1]
     #     and p_height == onnxtr_page.dimensions[0]
     # ), "Page dimensions do not match"
-    images_coords = []
+    text_coords = []
     # Get all the images in the page
     for obj in pdfium_page.get_objects():
-        if isinstance(obj, PdfImage) or obj.type == 2:
-            images_coords.append(obj.get_pos())
+        if obj.type == 1:
+            text_coords.append(obj.get_pos())
 
     p_width, p_height = int(pdfium_page.get_width()), int(pdfium_page.get_height())
 
     pdfium_canva = np.zeros((int(p_height), int(p_width)))
 
-    for coords in images_coords:
+    for coords in text_coords:
         # (left,bottom,right, top)
         # 0---l--------------R-> y
         # |
@@ -44,7 +41,12 @@ def get_strategy_page(
         # T                 (x1,y1)
         # ^
         # x
-        x0, y0, x1, y1 = coords[1], coords[0], coords[3], coords[2]
+        x0, y0, x1, y1 = (
+            p_height - coords[3],
+            coords[0],
+            p_height - coords[1],
+            coords[2],
+        )
         x0 = max(0, min(p_height, int(x0)))
         y0 = max(0, min(p_width, int(y0)))
         x1 = max(0, min(p_height, int(x1)))
@@ -60,10 +62,12 @@ def get_strategy_page(
         x1 = max(0, min(int(x1 * p_width), int(p_width)))
         y1 = max(0, min(int(y1 * p_height), int(p_height)))
         onnxtr_canva[y0:y1, x0:x1] = 1
-    intersection = np.logical_and(pdfium_canva, onnxtr_canva)
-    text_in_image_rate = np.sum(intersection) / np.sum(onnxtr_canva)
 
-    if text_in_image_rate > threshold:
+    intersection = np.logical_and(pdfium_canva, onnxtr_canva)
+    union = np.logical_or(pdfium_canva, onnxtr_canva)
+    iou = np.sum(intersection) / np.sum(union)
+
+    if iou < threshold:
         return StrategyEnum.HI_RES
     return StrategyEnum.FAST
 
@@ -73,7 +77,7 @@ def determine_strategy(
     | Path
     | bytes,  # FIXME : Careful here on removing BinaryIO (not handled by onnxtr)
     threshold_pages_ocr: float = 0.2,
-    threshold_per_page: float = 0.5,
+    threshold_per_page: float = 0.6,
     max_page_sample: int = 5,
 ) -> StrategyEnum:
     logger.info("Determining strategy...")
@@ -85,11 +89,11 @@ def determine_strategy(
 
     pdfium_document = pdfium.PdfDocument(file)
 
-    if len(onnxtr_document) > max_page_sample:
-        sampled_pages = random.sample(range(len(onnxtr_document)), max_page_sample)
-        # print("Sampled pages: ", sampled_pages)
-        onnxtr_document = [onnxtr_document[i] for i in sampled_pages]
-        pdfium_document = [pdfium_document.get_page(i) for i in sampled_pages]
+    # if len(onnxtr_document) > max_page_sample:
+    #     sampled_pages = random.sample(range(len(onnxtr_document)), max_page_sample)
+    #     # print("Sampled pages: ", sampled_pages)
+    #     onnxtr_document = [onnxtr_document[i] for i in sampled_pages]
+    #     pdfium_document = [pdfium_document.get_page(i) for i in sampled_pages]
 
     onnxtr_document_layout = layout_predictor(onnxtr_document)
 

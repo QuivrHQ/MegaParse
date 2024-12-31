@@ -1,7 +1,13 @@
 from typing import Any, List
 
 import numpy as np
-from megaparse.predictor.models.base import BlockLayout, PageLayout
+from megaparse.predictor.models.base import (
+    BlockLayout,
+    PageLayout,
+    BBOX,
+    Point2D,
+    BlockType,
+)
 from onnxtr.models.detection.predictor import DetectionPredictor
 from onnxtr.models.engine import EngineConfig
 from onnxtr.models.predictor.base import _OCRPredictor
@@ -113,8 +119,9 @@ class LayoutPredictor(NestedObject, _OCRPredictor):
             for bbox, score in zip(loc_pred, objectness_score, strict=True):
                 block_layouts.append(
                     BlockLayout(
-                        bbox=(bbox[:2], bbox[2:]),
+                        bbox=BBOX(bbox[:2].tolist(), bbox[2:].tolist()),
                         objectness_score=score,
+                        block_type=BlockType.TEXT,
                     )
                 )
             all_pages_layouts.append(
