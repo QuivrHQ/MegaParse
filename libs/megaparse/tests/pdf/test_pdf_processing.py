@@ -4,8 +4,11 @@ import pytest
 from megaparse.megaparse import MegaParse
 from megaparse.parser.strategy import determine_strategy
 from megaparse.parser.unstructured_parser import UnstructuredParser
+from megaparse_sdk.config import MegaParseConfig
 from megaparse_sdk.schema.extensions import FileExtension
 from megaparse_sdk.schema.parser_config import StrategyEnum
+
+config = MegaParseConfig()
 
 
 @pytest.fixture
@@ -53,8 +56,16 @@ async def test_megaparse_pdf_processor_file(pdf_name, request):
 
 
 def test_strategy(scanned_pdf, native_pdf):
-    strategy = determine_strategy(scanned_pdf)
+    strategy = determine_strategy(
+        scanned_pdf,
+        threshold_per_page=config.auto_page_threshold,
+        threshold_pages_ocr=config.auto_document_threshold,
+    )
     assert strategy == StrategyEnum.HI_RES
 
-    strategy = determine_strategy(native_pdf)
+    strategy = determine_strategy(
+        native_pdf,
+        threshold_per_page=config.auto_page_threshold,
+        threshold_pages_ocr=config.auto_document_threshold,
+    )
     assert strategy == StrategyEnum.FAST

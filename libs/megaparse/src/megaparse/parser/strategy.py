@@ -66,7 +66,6 @@ def get_strategy_page(
     intersection = np.logical_and(pdfium_canva, onnxtr_canva)
     union = np.logical_or(pdfium_canva, onnxtr_canva)
     iou = np.sum(intersection) / np.sum(union)
-
     if iou < threshold:
         return StrategyEnum.HI_RES
     return StrategyEnum.FAST
@@ -76,9 +75,8 @@ def determine_strategy(
     file: str
     | Path
     | bytes,  # FIXME : Careful here on removing BinaryIO (not handled by onnxtr)
-    threshold_pages_ocr: float = 0.2,
-    threshold_per_page: float = 0.6,
-    max_page_sample: int = 5,
+    threshold_pages_ocr: float,
+    threshold_per_page: float,
 ) -> StrategyEnum:
     logger.info("Determining strategy...")
     need_ocr = 0
@@ -88,12 +86,6 @@ def determine_strategy(
     layout_predictor = LayoutPredictor(det_predictor)
 
     pdfium_document = pdfium.PdfDocument(file)
-
-    # if len(onnxtr_document) > max_page_sample:
-    #     sampled_pages = random.sample(range(len(onnxtr_document)), max_page_sample)
-    #     # print("Sampled pages: ", sampled_pages)
-    #     onnxtr_document = [onnxtr_document[i] for i in sampled_pages]
-    #     pdfium_document = [pdfium_document.get_page(i) for i in sampled_pages]
 
     onnxtr_document_layout = layout_predictor(onnxtr_document)
 
@@ -105,7 +97,6 @@ def determine_strategy(
         )
         need_ocr += strategy == StrategyEnum.HI_RES
 
-    print(f"NEED OCR : {need_ocr} out of {len(pdfium_document)}")
     doc_need_ocr = (need_ocr / len(pdfium_document)) > threshold_pages_ocr
     if isinstance(pdfium_document, pdfium.PdfDocument):
         pdfium_document.close()
