@@ -102,7 +102,7 @@ def determine_strategy(
         pdfium_document.close()
 
     if doc_need_ocr:
-        print("Using HI_RES strategy")
+        logger.info("Using HI_RES strategy")
         return StrategyEnum.HI_RES
-    print("Using FAST strategy")
+    logger.info("Using FAST strategy")
     return StrategyEnum.FAST
