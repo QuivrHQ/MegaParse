@@ -8,6 +8,7 @@ from megaparse_sdk.schema.extensions import FileExtension
 from unstructured.documents.elements import Element
 from typing import IO, BinaryIO
 
+from megaparse_sdk.config import MegaParseConfig
 from megaparse_sdk.schema.extensions import FileExtension
 from megaparse_sdk.schema.parser_config import StrategyEnum
 
@@ -22,6 +23,8 @@ logger = logging.getLogger("megaparse")
 
 
 class MegaParse:
+    config: MegaParseConfig = MegaParseConfig()
+
     def __init__(
         self,
         parser: BaseParser = UnstructuredParser(),
@@ -157,9 +160,17 @@ class MegaParse:
         if self.strategy != StrategyEnum.AUTO or file_extension != FileExtension.PDF:
             return self.parser
         if file:
-            local_strategy = determine_strategy(file=file)
+            local_strategy = determine_strategy(
+                file=file,
+                threshold_pages_ocr=self.config.auto_document_threshold,
+                threshold_per_page=self.config.auto_page_threshold,
+            )
         if file_path:
-            local_strategy = determine_strategy(file=file_path)
+            local_strategy = determine_strategy(
+                file=file_path,
+                threshold_pages_ocr=self.config.auto_document_threshold,
+                threshold_per_page=self.config.auto_page_threshold,
+            )
 
         if local_strategy == StrategyEnum.HI_RES:
             return self.ocr_parser

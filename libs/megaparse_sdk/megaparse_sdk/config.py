@@ -2,16 +2,31 @@ from pydantic import BaseModel, FilePath
 from pydantic_settings import BaseSettings, SettingsConfigDict
 
 
-class MegaParseConfig(BaseSettings):
+class MegaParseSDKConfig(BaseSettings):
     """
     Configuration for the Megaparse SDK.
     """
 
-    model_config = SettingsConfigDict(env_prefix="megaparse_")
+    model_config = SettingsConfigDict(env_prefix="MEGAPARSE_SDK_")
     api_key: str | None = None
     url: str = "https://megaparse.tooling.quivr.app"
     timeout: int = 600
     max_retries: int = 3
+
+
+class MegaParseConfig(BaseSettings):
+    """
+    Configuration for Megaparse.
+    """
+
+    model_config = SettingsConfigDict(
+        env_prefix="MEGAPARSE_",
+        env_file=(".env.local", ".env"),
+        env_nested_delimiter="__",
+        extra="ignore",
+    )
+    auto_page_threshold: float = 0.6
+    auto_document_threshold: float = 0.2
 
 
 class SSLConfig(BaseModel):
