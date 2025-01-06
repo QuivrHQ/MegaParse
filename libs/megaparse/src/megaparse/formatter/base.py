@@ -22,19 +22,36 @@ class BaseFormatter(ABC):
     def __init__(self, model: BaseChatModel | None = None):
         self.model = model
 
-    async def format(
+    def format(
         self, elements: Union[List[Element], str], file_path: str | None = None
     ) -> Union[List[Element], str]:
         if isinstance(elements, list):
-            return await self.format_elements(elements, file_path)
-        return await self.format_string(elements, file_path)
+            return self.format_elements(elements, file_path)
+        return self.format_string(elements, file_path)
 
-    async def format_elements(
+    async def aformat(
+        self, elements: Union[List[Element], str], file_path: str | None = None
+    ) -> Union[List[Element], str]:
+        if isinstance(elements, list):
+            return await self.aformat_elements(elements, file_path)
+        return await self.aformat_string(elements, file_path)
+
+    def format_elements(
         self, elements: List[Element], file_path: str | None = None
     ) -> Union[List[Element], str]:
         raise NotImplementedError("Subclasses should implement this method")
 
-    async def format_string(
+    async def aformat_elements(
+        self, elements: List[Element], file_path: str | None = None
+    ) -> Union[List[Element], str]:
+        raise NotImplementedError("Subclasses should implement this method")
+
+    def format_string(
+        self, text: str, file_path: str | None = None
+    ) -> Union[List[Element], str]:
+        raise NotImplementedError("Subclasses should implement this method")
+
+    async def aformat_string(
         self, text: str, file_path: str | None = None
     ) -> Union[List[Element], str]:
         raise NotImplementedError("Subclasses should implement this method")

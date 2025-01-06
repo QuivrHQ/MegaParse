@@ -1,12 +1,19 @@
-from megaparse.formatter.unstructured_formatter.md_formatter import MarkDownFormatter
-from megaparse.megaparse import MegaParse
+import asyncio
+
+from langchain_openai import ChatOpenAI
 from megaparse.formatter.structured_formatter.custom_structured_formatter import (
     CustomStructuredFormatter,
 )
+from megaparse.formatter.unstructured_formatter.md_formatter import MarkDownFormatter
+from megaparse.megaparse import MegaParse
+from megaparse.parser.doctr_parser import DoctrParser
 from megaparse.parser.unstructured_parser import UnstructuredParser
-
-from langchain_openai import ChatOpenAI
 from pydantic import BaseModel, Field
+
+from llama_parse import LlamaParse
+from llama_parse.utils import Language, ResultType
+from typing import List
+from llama_index.core.schema import Document as LlamaDocument
 
 
 class MyCustomFormat(BaseModel):
@@ -15,15 +22,19 @@ class MyCustomFormat(BaseModel):
     solution: str = Field(description="The solution statement.")
 
 
-if __name__ == "__main__":
+def main():
     # Parse a file
-    parser = UnstructuredParser()
-    model = ChatOpenAI()
+    parser = DoctrParser()
+    model = ChatOpenAI(name="gpt-4o")
     formatter_1 = MarkDownFormatter()
     formatter_2 = CustomStructuredFormatter(model=model, output_model=MyCustomFormat)
 
     megaparse = MegaParse(parser=parser, formatters=[formatter_1, formatter_2])
 
-    file_path = "libs/megaparse/tests/pdf/sample_pdf.pdf"
+    file_path = "./tests/pdf/sample_pdf.pdf"
     result = megaparse.load(file_path=file_path)
     print(result)
+
+
+if __name__ == "__main__":
+    main()

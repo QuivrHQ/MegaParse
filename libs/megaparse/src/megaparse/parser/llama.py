@@ -1,4 +1,3 @@
-import asyncio
 from pathlib import Path
 from typing import IO, List
 
@@ -6,6 +5,10 @@ from llama_index.core.schema import Document as LlamaDocument
 from llama_parse import LlamaParse as _LlamaParse
 from llama_parse.utils import Language, ResultType
 from megaparse_sdk.schema.extensions import FileExtension
+from unstructured.documents.elements import (
+    Element,
+    Text,
+)
 
 from megaparse.parser import BaseParser
 
@@ -36,7 +39,7 @@ class LlamaParser(BaseParser):
         file: IO[bytes] | None = None,
         file_extension: None | FileExtension = None,
         **kwargs,
-    ) -> str:
+    ) -> List[Element]:
         if not file_path:
             raise ValueError("File_path should be provided to run LlamaParser")
         self.check_supported_extension(file_extension, file_path)
@@ -56,7 +59,7 @@ class LlamaParser(BaseParser):
             text_content = document.text
             parsed_md = parsed_md + text_content
 
-        return parsed_md
+        return self.__to_elements_list__(parsed_md)
 
     def convert(
         self,
@@ -64,14 +67,14 @@ class LlamaParser(BaseParser):
         file: IO[bytes] | None = None,
         file_extension: None | FileExtension = None,
         **kwargs,
-    ) -> str:
+    ) -> List[Element]:
         if not file_path:
             raise ValueError("File_path should be provided to run LlamaParser")
         self.check_supported_extension(file_extension, file_path)
 
         llama_parser = _LlamaParse(
             api_key=self.api_key,
-            result_type=ResultType.MD,
+            result_type=ResultType.JSON,
             gpt4o_mode=True,
             verbose=self.verbose,
             language=self.language,
@@ -84,4 +87,7 @@ class LlamaParser(BaseParser):
             text_content = document.text
             parsed_md = parsed_md + text_content
 
-        return parsed_md
+        return self.__to_elements_list__(parsed_md)
+
+    def __to_elements_list__(self, llama_doc: str) -> List[Element]:
+        return [Text(text=llama_doc)]

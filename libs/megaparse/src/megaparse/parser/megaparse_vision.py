@@ -3,12 +3,13 @@ import base64
 import re
 from io import BytesIO
 from pathlib import Path
-from typing import IO, List, Union
+from typing import IO, List
 
 from langchain_core.language_models.chat_models import BaseChatModel
 from langchain_core.messages import HumanMessage
 from megaparse_sdk.schema.extensions import FileExtension
 from pdf2image import convert_from_path
+from unstructured.documents.elements import Element, Text
 
 from megaparse.parser import BaseParser
 from megaparse.parser.entity import SupportedModel, TagEnum
@@ -147,7 +148,7 @@ class MegaParseVision(BaseParser):
         file_extension: FileExtension | None = None,
         batch_size: int = 3,
         **kwargs,
-    ) -> str:
+    ) -> List[Element]:
         """
         Parse a PDF file and process its content using the language model.
 
@@ -170,7 +171,7 @@ class MegaParseVision(BaseParser):
         ]
         self.parsed_chunks = await asyncio.gather(*tasks)
         responses = self.get_cleaned_content("\n".join(self.parsed_chunks))
-        return responses
+        return self.__to_elements_list__(responses)
 
     def convert(
         self,
@@ -179,7 +180,7 @@ class MegaParseVision(BaseParser):
         file_extension: FileExtension | None = None,
         batch_size: int = 3,
         **kwargs,
-    ) -> str:
+    ) -> List[Element]:
         """
         Parse a PDF file and process its content using the language model.
 
@@ -205,7 +206,7 @@ class MegaParseVision(BaseParser):
             response = self.send_to_mlm(chunk)
             self.parsed_chunks.append(response)
         responses = self.get_cleaned_content("\n".join(self.parsed_chunks))
-        return responses
+        return self.__to_elements_list__(responses)
 
     def get_cleaned_content(self, parsed_file: str) -> str:
         """
@@ -245,3 +246,6 @@ class MegaParseVision(BaseParser):
         cleaned_content = cleaned_content.strip()
 
         return cleaned_content
+
+    def __to_elements_list__(self, mpv_doc: str) -> List[Element]:
+        return [Text(text=mpv_doc)]

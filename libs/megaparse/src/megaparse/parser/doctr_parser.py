@@ -5,9 +5,17 @@ from typing import IO, BinaryIO, List
 
 import onnxruntime as rt
 from megaparse_sdk.schema.extensions import FileExtension
-from onnxtr.io import DocumentFile
+from onnxtr.io import Document, DocumentFile
 from onnxtr.models import ocr_predictor
 from onnxtr.models.engine import EngineConfig
+from unstructured.documents.coordinates import RelativeCoordinateSystem
+from unstructured.documents.elements import (
+    Element,
+    ElementMetadata,
+    Image,
+    PageBreak,
+    Text,
+)
 
 from megaparse.parser.base import BaseParser
 
@@ -27,7 +35,7 @@ class DoctrParser(BaseParser):
         straighten_pages: bool = False,
         use_gpu: bool = False,
         **kwargs,
-    ):
+    ) -> None:
         self.use_gpu = use_gpu
         general_options = rt.SessionOptions()
         providers = self._get_providers()
@@ -69,7 +77,7 @@ class DoctrParser(BaseParser):
         file: IO[bytes] | BinaryIO | None = None,
         file_extension: None | FileExtension = None,
         **kwargs,
-    ) -> str:
+    ) -> List[Element]:
         if file:
             file.seek(0)
             pdf = file.read()
@@ -82,8 +90,9 @@ class DoctrParser(BaseParser):
 
         doc = DocumentFile.from_pdf(pdf)
         # Analyze
-        result = self.predictor(doc)
-        return result.render()
+        doctr_result = self.predictor(doc)
+
+        return self.__to_elements_list__(doctr_result)
 
     async def aconvert(
         self,
@@ -91,10 +100,62 @@ class DoctrParser(BaseParser):
         file: IO[bytes] | BinaryIO | None = None,
         file_extension: None | FileExtension = None,
         **kwargs,
-    ) -> str:
+    ) -> List[Element]:
         warnings.warn(
-            "The UnstructuredParser is a sync parser, please use the sync convert method",
+            "The DocTRParser is a sync parser, please use the sync convert method",
             UserWarning,
             stacklevel=2,
         )
         return self.convert(file_path, file, file_extension, **kwargs)
+
+    def __to_elements_list__(self, doctr_document: Document) -> List[Element]:
+        result = []
+
+        for page in doctr_document.pages:
+            for block in page.blocks:
+                if len(block.lines) and len(block.artefacts) > 0:
+                    raise ValueError(
+                        "Block should not contain both lines and artefacts"
+                    )
+                word_coordinates = [
+                    word.geometry for line in block.lines for word in line.words
+                ]
+                x0 = min(word[0][0] for word in word_coordinates)
+                y0 = min(word[0][1] for word in word_coordinates)
+                x1 = max(word[1][0] for word in word_coordinates)
+                y1 = max(word[1][1] for word in word_coordinates)
+
+                result.append(
+                    Text(
+                        text=block.render(),
+                        coordinates=(
+                            (x0, y0),
+                            (x1, y0),
+                            (x1, y1),
+                            (x0, y1),
+                        ),
+                        coordinate_system=RelativeCoordinateSystem(),
+                        metadata=ElementMetadata(),
+                        detection_origin="doctr",
+                    )
+                )
+
+                for artefact in block.artefacts:
+                    result.append(
+                        Image(
+                            text="",
+                            coordinates=(
+                                (artefact.geometry[0][0], artefact.geometry[0][1]),
+                                (artefact.geometry[1][0], artefact.geometry[0][1]),
+                                (artefact.geometry[1][0], artefact.geometry[1][1]),
+                                (artefact.geometry[0][0], artefact.geometry[1][1]),
+                            ),
+                            coordinate_system=RelativeCoordinateSystem(),
+                            metadata=ElementMetadata(),
+                            detection_origin="doctr",
+                        )
+                    )
+
+            result.append(PageBreak(text=""))
+
+        return result

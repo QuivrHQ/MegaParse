@@ -255,7 +255,7 @@ layoutparser==0.3.4
     # via unstructured-inference
 llama-index-core==0.12.0
     # via llama-parse
-llama-parse==0.5.14
+llama-parse==0.5.19
     # via megaparse
 loguru==0.7.2
     # via megaparse-sdk
@@ -495,6 +495,7 @@ pydantic==2.9.2
     # via langchain-core
     # via langsmith
     # via llama-index-core
+    # via llama-parse
     # via openai
     # via pydantic-settings
     # via unstructured-client

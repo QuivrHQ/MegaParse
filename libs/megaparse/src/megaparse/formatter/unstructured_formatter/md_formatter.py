@@ -1,12 +1,12 @@
+import warnings
 from typing import List
 
-from unstructured.documents.elements import Element
-
 from megaparse.formatter.unstructured_formatter import UnstructuredFormatter
+from unstructured.documents.elements import Element
 
 
 class MarkDownFormatter(UnstructuredFormatter):
-    async def format_elements(
+    def format_elements(
         self, elements: List[Element], file_path: str | None = None
     ) -> str:
         print("Formatting elements using MarkDownFormatter...")
@@ -16,6 +16,16 @@ class MarkDownFormatter(UnstructuredFormatter):
             markdown_content += self.get_markdown_line(el.to_dict())
 
         return markdown_content
+
+    async def aformat_elements(
+        self, elements: List[Element], file_path: str | None = None
+    ) -> str:
+        warnings.warn(
+            "The MarkDownFormatter is a sync formatter, please use the sync format method",
+            UserWarning,
+            stacklevel=2,
+        )
+        return self.format_elements(elements, file_path)
 
     def get_markdown_line(self, el: dict):
         element_type = el["type"]

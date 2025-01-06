@@ -12,7 +12,7 @@ from unstructured.documents.elements import Element
 TABLE_OCR_PROMPT = """
 You are tasked with transcribing the content of a table into markdown format. Your goal is to create a well-structured, readable markdown table that accurately represents the original content while adding appropriate formatting.
 Answer uniquely with the parsed table. Do not include the fenced code blocks backticks.
- """
+"""
 
 
 class VisionMDTableFormatter(TableFormatter):
@@ -27,40 +27,111 @@ class VisionMDTableFormatter(TableFormatter):
     def __init__(self, model: Optional[BaseChatModel] = None):
         super().__init__(model)
 
-    async def format_elements(
+    def _crop_table_image(self, table_element: Element, file_path: str) -> str:
+        """
+        Helper method to crop the table portion of the PDF page and convert it to a base64 string.
+        """
+        assert (
+            table_element.metadata.coordinates
+        ), "Table element must have coordinates."
+        coordinates = table_element.metadata.coordinates.points
+        page_number = table_element.metadata.page_number
+        assert page_number, "Table element must have a page number."
+        assert coordinates, "Table element must have coordinates."
+
+        pages = convert_from_path(file_path)
+
+        # Calculate the box for cropping
+        box = (
+            min(coord[0] for coord in coordinates),
+            min(coord[1] for coord in coordinates),
+            max(coord[0] for coord in coordinates),
+            max(coord[1] for coord in coordinates),
+        )
+        table_image = pages[page_number - 1].crop(box)
+        # Convert the cropped image to base64
+        table_image64 = self.process_file([table_image])[0]
+        return table_image64
+
+    async def aformat_elements(
         self, elements: List[Element], file_path: str | None = None
     ) -> List[Element]:
         """
-        Formats table elements within a list of elements.
-        Args:
-            elements: A list of Element objects.
-        Returns:
-            A list of Element objects with formatted tables.
+        Asynchronously formats table elements within a list of elements.
         """
         if not self.model:
             raise ValueError("A Model is needed to use the VisionMDTableFormatter.")
-        print("Formatting tables using VisionMDTableFormatter...")
+        print("Formatting tables using VisionMDTableFormatter (async)...")
         assert (
             file_path
         ), "A file path is needed to format tables using VisionMDTableFormatter."
 
         formatted_elements = []
-
         for element in elements:
             if element.category == "Table":
-                formatted_table = await self.format_table(element, file_path)
+                formatted_table = await self.aformat_table(element, file_path)
                 formatted_elements.append(formatted_table)
             else:
                 formatted_elements.append(element)
-
         return formatted_elements
+
+    def format_elements(
+        self, elements: List[Element], file_path: str | None = None
+    ) -> List[Element]:
+        """
+        Synchronously formats table elements within a list of elements.
+        """
+        if not self.model:
+            raise ValueError("A Model is needed to use the VisionMDTableFormatter.")
+        print("Formatting tables using VisionMDTableFormatter (sync)...")
+        assert (
+            file_path
+        ), "A file path is needed to format tables using VisionMDTableFormatter."
+
+        formatted_elements = []
+        for element in elements:
+            if element.category == "Table":
+                formatted_table = self.format_table(element, file_path)
+                formatted_elements.append(formatted_table)
+            else:
+                formatted_elements.append(element)
+        return formatted_elements
+
+    async def aformat_table(self, table_element: Element, file_path: str) -> Element:
+        """
+        Asynchronously formats a table element into Markdown format using a Vision Model.
+        """
+        table_image64 = self._crop_table_image(table_element, file_path)
+        formatted_table = await self.avision_extract(table_image64)
+
+        markdown_table = (
+            f"{self.TABLE_MARKER_START}\n"
+            f"{formatted_table}\n"
+            f"{self.TABLE_MARKER_END}\n\n"
+        )
+        # Replace the element's text with the formatted table text
+        table_element.text = markdown_table
+        return table_element
+
+    def format_table(self, table_element: Element, file_path: str) -> Element:
+        """
+        Synchronously formats a table element into Markdown format using a Vision Model.
+        """
+        table_image64 = self._crop_table_image(table_element, file_path)
+        formatted_table = self.vision_extract(table_image64)
+
+        markdown_table = (
+            f"{self.TABLE_MARKER_START}\n"
+            f"{formatted_table}\n"
+            f"{self.TABLE_MARKER_END}\n\n"
+        )
+        # Replace the element's text with the formatted table text
+        table_element.text = markdown_table
+        return table_element
 
     def process_file(self, images: List[Image.Image], image_format="PNG") -> List[str]:
         """
-        Process a PDF file and convert its pages to base64 encoded images.
-        :param file_path: Path to the PDF file
-        :param image_format: Format to save the images (default: PNG)
-        :return: List of base64 encoded images
+        Convert a list of PIL images to base64 encoded images.
         """
         try:
             images_base64 = []
@@ -73,72 +144,13 @@ class VisionMDTableFormatter(TableFormatter):
         except Exception as e:
             raise ValueError(f"Error processing PDF file: {str(e)}")
 
-    async def format_table(self, table_element: Element, file_path: str) -> Element:
+    async def avision_extract(self, table_image: str) -> str:
         """
-        Formats a table element into Markdown format usinf a Vision Model
-        Args:
-            table_element: An Element object representing a table.
-            previous_table: A string representing the previous table.
-        Returns:
-            An Element object with the formatted table.
+        Asynchronously send image data to the language model for processing.
         """
         assert (
-            table_element.metadata.coordinates
-        ), "Table element must have coordinates."
-        coordinates = table_element.metadata.coordinates.points
-        page_number = table_element.metadata.page_number
-        assert page_number, "Table element must have a page number."
-        assert coordinates, "Table element must have coordinates."
-        pages = convert_from_path(file_path)
-
-        # Crop the file image to the table coordinates
-        # Convert coordinates to a tuple of four float values
-        box = (
-            min(
-                coordinates[0][0],
-                coordinates[1][0],
-                coordinates[2][0],
-                coordinates[3][0],
-            ),
-            min(
-                coordinates[0][1],
-                coordinates[1][1],
-                coordinates[2][1],
-                coordinates[3][1],
-            ),
-            max(
-                coordinates[0][0],
-                coordinates[1][0],
-                coordinates[2][0],
-                coordinates[3][0],
-            ),
-            max(
-                coordinates[0][1],
-                coordinates[1][1],
-                coordinates[2][1],
-                coordinates[3][1],
-            ),
-        )
-        table_image = pages[page_number - 1].crop(box)
-        table_image64 = self.process_file([table_image])[0]
-        formatted_table = await self.vision_extract(table_image64)
-
-        markdown_table = (
-            f"{self.TABLE_MARKER_START}\n"
-            f"{formatted_table}\n"
-            f"{self.TABLE_MARKER_END}\n\n"
-        )
-        # Convert the table image to text
-        table_element.text = markdown_table
-        return table_element
-
-    async def vision_extract(self, table_image) -> str:
-        """
-        Send images to the language model for processing.
-        :param images_data: List of base64 encoded images
-        :return: Processed content as a string
-        """
-        assert self.model, "A model is needed to use the SimpleMDTableFormatter."
+            self.model
+        ), "A model is needed to use the VisionMDTableFormatter (async)."
         image_prompt = {
             "type": "image_url",
             "image_url": {"url": f"data:image/jpeg;base64,{table_image}"},
@@ -151,4 +163,23 @@ class VisionMDTableFormatter(TableFormatter):
             ],
         )
         response = await self.model.ainvoke([message])
+        return str(response.content)
+
+    def vision_extract(self, table_image: str) -> str:
+        """
+        Synchronously send image data to the language model for processing.
+        """
+        assert self.model, "A model is needed to use the VisionMDTableFormatter (sync)."
+        image_prompt = {
+            "type": "image_url",
+            "image_url": {"url": f"data:image/jpeg;base64,{table_image}"},
+        }
+
+        message = HumanMessage(
+            content=[
+                {"type": "text", "text": TABLE_OCR_PROMPT},
+                image_prompt,
+            ],
+        )
+        response = self.model.invoke([message])
         return str(response.content)

@@ -1,5 +1,6 @@
 import re
 from typing import List, Optional
+import warnings
 
 from langchain_core.language_models.chat_models import BaseChatModel
 from langchain_core.prompts import ChatPromptTemplate
@@ -19,7 +20,17 @@ class SimpleMDTableFormatter(TableFormatter):
     def __init__(self, model: Optional[BaseChatModel] = None):
         super().__init__(model)
 
-    async def format_elements(
+    async def aformat_elements(
+        self, elements: List[Element], file_path: str | None = None
+    ) -> List[Element]:
+        warnings.warn(
+            "The SimpleMDTableFormatter is a sync formatter, please use the sync format method",
+            UserWarning,
+            stacklevel=2,
+        )
+        return self.format_elements(elements, file_path)
+
+    def format_elements(
         self, elements: List[Element], file_path: str | None = None
     ) -> List[Element]:
         """

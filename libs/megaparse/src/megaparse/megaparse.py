@@ -2,15 +2,12 @@ import asyncio
 import logging
 import os
 from pathlib import Path
-from typing import IO, List
-
-from megaparse_sdk.schema.extensions import FileExtension
-from unstructured.documents.elements import Element
-from typing import IO, BinaryIO
+from typing import IO, BinaryIO, List
 
 from megaparse_sdk.config import MegaParseConfig
 from megaparse_sdk.schema.extensions import FileExtension
 from megaparse_sdk.schema.parser_config import StrategyEnum
+from unstructured.documents.elements import Element
 
 from megaparse.exceptions.base import ParsingException
 from megaparse.formatter.base import BaseFormatter
@@ -31,14 +28,11 @@ class MegaParse:
         formatters: List[BaseFormatter] | None = None,
         ocr_parser: BaseParser = DoctrParser(),
         strategy: StrategyEnum = StrategyEnum.AUTO,
-        format_checker: FormatChecker | None = None,
     ) -> None:
         self.strategy = strategy
         self.parser = parser
         self.formatters = formatters
         self.ocr_parser = ocr_parser
-        self.format_checker = format_checker
-        self.last_parsed_document: str = ""
 
     def validate_input(
         self,
@@ -70,12 +64,6 @@ class MegaParse:
                 file_extension = FileExtension(file_extension)
             except ValueError:
                 raise ValueError(f"Unsupported file extension: {file_extension}")
-
-        if file_extension != FileExtension.PDF:
-            if self.format_checker:
-                raise ValueError(
-                    f"Format Checker : Unsupported file extension: {file_extension}"
-                )
         return file_extension
 
     async def aload(
@@ -92,28 +80,13 @@ class MegaParse:
             # @chloe FIXME: format_checker needs unstructured Elements as input which is to change to a megaparse element
             if self.formatters:
                 for formatter in self.formatters:
-                    parsed_document = await formatter.format(parsed_document)
+                    parsed_document = await formatter.aformat(parsed_document)
 
         except Exception as e:
             raise ParsingException(f"Error while parsing {file_path}: {e}")
         if not isinstance(parsed_document, str):
             raise ValueError("The parser or the last formatter should return a string")
         return parsed_document
-
-    def load(self, file_path: Path | str) -> str:
-        if isinstance(file_path, str):
-            file_path = Path(file_path)
-        file_extension: str = file_path.suffix
-
-        if file_extension != ".pdf":
-            if self.formatters:
-                raise ValueError(
-                    f"Format Checker : Unsupported file extension: {file_extension}"
-                )
-            if not isinstance(self.parser, UnstructuredParser):
-                raise ValueError(
-                    f"Parser {self.parser}: Unsupported file extension: {file_extension}"
-                )
 
     def load(
         self,
@@ -125,21 +98,19 @@ class MegaParse:
             file=file, file_path=file_path, file_extension=file_extension
         )
         try:
-            parsed_document = self.parser.convert(file_path)
-            # @chloe FIXME: format_checker needs unstructured Elements as input which is to change
-            if self.formatters:
-                for formatter in self.formatters:
-                    parsed_document = formatter.format(parsed_document)
-
             parser = self._select_parser(file_path, file, file_extension)
             logger.info(f"Parsing using {parser.__class__.__name__} parser.")
             parsed_document = parser.convert(
                 file_path=file_path, file=file, file_extension=file_extension
             )
             # @chloe FIXME: format_checker needs unstructured Elements as input which is to change
+            if self.formatters:
+                for formatter in self.formatters:
+                    parsed_document = formatter.format(parsed_document)
+
+            # @chloe FIXME: format_checker needs unstructured Elements as input which is to change
             # if self.format_checker:
-            #     parsed_document: str = await self.format_checker.check(parsed_document
-            self.last_parsed_document = parsed_document
+            #     parsed_document: str = self.format_checker.check(parsed_document)
             if not isinstance(parsed_document, str):
                 raise ValueError(
                     "The parser or the last formatter should return a string"
@@ -175,8 +146,3 @@ class MegaParse:
         if local_strategy == StrategyEnum.HI_RES:
             return self.ocr_parser
         return self.parser
-
-    def save(self, file_path: Path | str) -> None:
-        os.makedirs(os.path.dirname(file_path), exist_ok=True)
-        with open(file_path, "w+") as f:
-            f.write(self.last_parsed_document)

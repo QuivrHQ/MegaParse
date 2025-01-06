@@ -38,7 +38,7 @@ class UnstructuredParser(BaseParser):
         self.strategy = strategy
         self.model = model
 
-    async def convert(
+    def convert(
         self,
         file_path: str | Path | None = None,
         file: IO[bytes] | None = None,
@@ -53,3 +53,18 @@ class UnstructuredParser(BaseParser):
             content_type=file_extension.mimetype if file_extension else None,
         )
         return elements
+
+    async def aconvert(
+        self,
+        file_path: str | Path | None = None,
+        file: IO[bytes] | None = None,
+        file_extension: FileExtension | None = None,
+        **kwargs,
+    ) -> List[Element]:
+        self.check_supported_extension(file_extension, file_path)
+        warnings.warn(
+            "The UnstructuredParser is a sync parser, please use the sync convert method",
+            UserWarning,
+            stacklevel=2,
+        )
+        return self.convert(file_path, file, file_extension, **kwargs)
