@@ -11,6 +11,7 @@ from megaparse.formatter.structured_formatter.custom_structured_formatter import
 from megaparse.megaparse import MegaParse
 from megaparse.parser.doctr_parser import DoctrParser
 from megaparse.parser.unstructured_parser import UnstructuredParser
+from megaparse_sdk.schema.extensions import FileExtension
 from pydantic import BaseModel, Field
 
 
@@ -33,5 +34,15 @@ def main():
     print(result)
 
 
+async def test():
+    processor = MegaParse()
+    pdf = "./tests/pdf/sample_pdf.pdf"
+
+    with open(pdf, "rb") as f:
+        result = await processor.aload(file=f, file_extension=FileExtension.PDF)
+        assert len(str(result)) > 0
+
+
 if __name__ == "__main__":
-    main()
+    # main()
+    asyncio.run(test())

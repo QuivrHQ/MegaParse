@@ -8,6 +8,7 @@ from langchain_core.documents import Document
 from megaparse.api.app import app, get_playwright_loader, parser_builder_dep
 from megaparse.parser.base import BaseParser
 from megaparse_sdk.schema.extensions import FileExtension
+from megaparse.models.document import Document as MPDocument, TextBlock
 
 
 class FakeParserBuilder:
@@ -29,9 +30,14 @@ class FakeParserBuilder:
                 file: IO[bytes] | None = None,
                 file_extension: None | FileExtension = None,
                 **kwargs,
-            ) -> str:
+            ) -> MPDocument:
                 print("Fake parser is converting the file")
-                return "Fake conversion result"
+                return MPDocument(
+                    file_name="Fake file",
+                    content=[TextBlock(text="Fake conversion result", metadata={})],
+                    metadata={},
+                    detection_origin="fakeparser",
+                )
 
             async def aconvert(
                 self,
@@ -39,9 +45,14 @@ class FakeParserBuilder:
                 file: IO[bytes] | None = None,
                 file_extension: None | FileExtension = None,
                 **kwargs,
-            ) -> str:
+            ) -> MPDocument:
                 print("Fake parser is converting the file")
-                return "Fake conversion result"
+                return MPDocument(
+                    file_name="Fake file",
+                    content=[TextBlock(text="Fake conversion result", metadata={})],
+                    metadata={},
+                    detection_origin="fakeparser",
+                )
 
         return FakeParser()
 

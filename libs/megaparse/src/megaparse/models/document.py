@@ -26,7 +26,9 @@ class Block(BaseModel):
     bbox: Optional[BBOX] = (
         None  # (x0,y0),(x1, y1) Coordinates are given as Relative positions to the page they are in
     )
-    page_range: Optional[Tuple[int, int]] = Field(...)  # (start_page, end_page)
+    page_range: Optional[Tuple[int, int]] = Field(
+        default=None
+    )  # (start_page, end_page)
 
     @field_validator("page_range")
     def validate_range(cls, value):

@@ -85,7 +85,9 @@ class UnstructuredParser(BaseParser):
     def __to_mp_document(self, elements: List[Element]) -> MPDocument:
         text_blocks = []
         for element in elements:
-            text_blocks.append(self.__convert_element_to_block(element))
+            block = self.__convert_element_to_block(element)
+            if block:
+                text_blocks.append(block)
         return MPDocument(
             content=text_blocks, metadata={}, detection_origin="unstructured"
         )

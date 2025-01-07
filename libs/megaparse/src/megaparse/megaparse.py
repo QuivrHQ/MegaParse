@@ -73,8 +73,11 @@ class MegaParse:
         file_extension = self.validate_input(
             file=file, file_path=file_path, file_extension=file_extension
         )
+
         try:
-            parsed_document = await self.parser.aconvert(file_path=file_path, file=file)
+            parsed_document = await self.parser.aconvert(
+                file_path=file_path, file=file, file_extension=file_extension
+            )
             parsed_document.file_name = str(file_path) if file_path else None
             if self.formatters:
                 for formatter in self.formatters:
