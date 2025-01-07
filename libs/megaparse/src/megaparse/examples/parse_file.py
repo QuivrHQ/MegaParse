@@ -8,7 +8,6 @@ from llama_parse.utils import Language, ResultType
 from megaparse.formatter.structured_formatter.custom_structured_formatter import (
     CustomStructuredFormatter,
 )
-from megaparse.formatter.unstructured_formatter.md_formatter import MarkDownFormatter
 from megaparse.megaparse import MegaParse
 from megaparse.parser.doctr_parser import DoctrParser
 from megaparse.parser.unstructured_parser import UnstructuredParser
@@ -25,10 +24,9 @@ def main():
     # Parse a file
     parser = DoctrParser()
     model = ChatOpenAI(name="gpt-4o")
-    formatter_1 = MarkDownFormatter()
-    formatter_2 = CustomStructuredFormatter(model=model, output_model=MyCustomFormat)
+    formatter_1 = CustomStructuredFormatter(model=model, output_model=MyCustomFormat)
 
-    megaparse = MegaParse(parser=parser, formatters=[formatter_1, formatter_2])
+    megaparse = MegaParse(parser=parser)
 
     file_path = "./tests/pdf/sample_pdf.pdf"
     result = megaparse.load(file_path=file_path)

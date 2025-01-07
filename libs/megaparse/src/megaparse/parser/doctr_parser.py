@@ -8,16 +8,11 @@ from megaparse_sdk.schema.extensions import FileExtension
 from onnxtr.io import Document, DocumentFile
 from onnxtr.models import ocr_predictor
 from onnxtr.models.engine import EngineConfig
-from unstructured.documents.coordinates import RelativeCoordinateSystem
-from unstructured.documents.elements import (
-    Element,
-    ElementMetadata,
-    Image,
-    PageBreak,
-    Text,
-)
 
+from megaparse.models.document import Document as MPDocument
+from megaparse.models.document import ImageBlock, TextBlock
 from megaparse.parser.base import BaseParser
+from megaparse.predictor.models.base import BBOX, Point2D
 
 logger = logging.getLogger("megaparse")
 
@@ -77,7 +72,7 @@ class DoctrParser(BaseParser):
         file: IO[bytes] | BinaryIO | None = None,
         file_extension: None | FileExtension = None,
         **kwargs,
-    ) -> List[Element]:
+    ) -> MPDocument:
         if file:
             file.seek(0)
             pdf = file.read()
@@ -92,7 +87,7 @@ class DoctrParser(BaseParser):
         # Analyze
         doctr_result = self.predictor(doc)
 
-        return self.__to_elements_list__(doctr_result)
+        return self.__to_elements_list(doctr_result)
 
     async def aconvert(
         self,
@@ -100,7 +95,7 @@ class DoctrParser(BaseParser):
         file: IO[bytes] | BinaryIO | None = None,
         file_extension: None | FileExtension = None,
         **kwargs,
-    ) -> List[Element]:
+    ) -> MPDocument:
         warnings.warn(
             "The DocTRParser is a sync parser, please use the sync convert method",
             UserWarning,
@@ -108,10 +103,10 @@ class DoctrParser(BaseParser):
         )
         return self.convert(file_path, file, file_extension, **kwargs)
 
-    def __to_elements_list__(self, doctr_document: Document) -> List[Element]:
+    def __to_elements_list(self, doctr_document: Document) -> MPDocument:
         result = []
 
-        for page in doctr_document.pages:
+        for page_number, page in enumerate(doctr_document.pages):
             for block in page.blocks:
                 if len(block.lines) and len(block.artefacts) > 0:
                     raise ValueError(
@@ -126,36 +121,34 @@ class DoctrParser(BaseParser):
                 y1 = max(word[1][1] for word in word_coordinates)
 
                 result.append(
-                    Text(
+                    TextBlock(
                         text=block.render(),
-                        coordinates=(
-                            (x0, y0),
-                            (x1, y0),
-                            (x1, y1),
-                            (x0, y1),
+                        bbox=BBOX(
+                            top_left=Point2D(x=x0, y=y0),
+                            bottom_right=Point2D(x=x1, y=y1),
                         ),
-                        coordinate_system=RelativeCoordinateSystem(),
-                        metadata=ElementMetadata(),
-                        detection_origin="doctr",
+                        metadata={},
+                        page_range=(page_number, page_number),
                     )
                 )
 
                 for artefact in block.artefacts:
                     result.append(
-                        Image(
-                            text="",
-                            coordinates=(
-                                (artefact.geometry[0][0], artefact.geometry[0][1]),
-                                (artefact.geometry[1][0], artefact.geometry[0][1]),
-                                (artefact.geometry[1][0], artefact.geometry[1][1]),
-                                (artefact.geometry[0][0], artefact.geometry[1][1]),
+                        ImageBlock(
+                            bbox=BBOX(
+                                top_left=Point2D(
+                                    x=artefact.geometry[0][0], y=artefact.geometry[0][1]
+                                ),
+                                bottom_right=Point2D(
+                                    x=artefact.geometry[1][0], y=artefact.geometry[1][1]
+                                ),
                             ),
-                            coordinate_system=RelativeCoordinateSystem(),
-                            metadata=ElementMetadata(),
-                            detection_origin="doctr",
+                            metadata={},
+                            page_range=(page_number, page_number),
                         )
                     )
-
-            result.append(PageBreak(text=""))
-
-        return result
+        return MPDocument(
+            metadata={},
+            content=result,
+            detection_origin="doctr",
+        )

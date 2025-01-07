@@ -1,11 +1,12 @@
 import re
-from typing import List, Optional
 import warnings
+from pathlib import Path
+from typing import Optional
 
 from langchain_core.language_models.chat_models import BaseChatModel
 from langchain_core.prompts import ChatPromptTemplate
 from megaparse.formatter.table_formatter import TableFormatter
-from unstructured.documents.elements import Element
+from megaparse.models.document import Document, TableBlock
 
 
 class SimpleMDTableFormatter(TableFormatter):
@@ -20,19 +21,19 @@ class SimpleMDTableFormatter(TableFormatter):
     def __init__(self, model: Optional[BaseChatModel] = None):
         super().__init__(model)
 
-    async def aformat_elements(
-        self, elements: List[Element], file_path: str | None = None
-    ) -> List[Element]:
+    async def aformat(
+        self, document: Document, file_path: Path | str | None = None
+    ) -> Document:
         warnings.warn(
             "The SimpleMDTableFormatter is a sync formatter, please use the sync format method",
             UserWarning,
             stacklevel=2,
         )
-        return self.format_elements(elements, file_path)
+        return self.format(document=document, file_path=file_path)
 
-    def format_elements(
-        self, elements: List[Element], file_path: str | None = None
-    ) -> List[Element]:
+    def format(
+        self, document: Document, file_path: Path | str | None = None
+    ) -> Document:
         """
         Formats table elements within a list of elements.
         Args:
@@ -46,18 +47,21 @@ class SimpleMDTableFormatter(TableFormatter):
         table_stack = []
         formatted_elements = []
 
-        for element in elements:
-            if element.category == "Table":
+        for block in document.content:
+            if isinstance(block, TableBlock):
                 previous_table = table_stack[-1] if table_stack else ""
-                formatted_table = self.format_table(element, previous_table)
+                formatted_table = self.format_table(block, previous_table)
                 table_stack.append(formatted_table.text)
                 formatted_elements.append(formatted_table)
             else:
-                formatted_elements.append(element)
+                formatted_elements.append(block)
 
-        return formatted_elements
+        document.content = formatted_elements
+        return document
 
-    def format_table(self, table_element: Element, previous_table: str) -> Element:
+    def format_table(
+        self, table_element: TableBlock, previous_table: str
+    ) -> TableBlock:
         """
         Formats a single table element into Markdown using an AI language model.
         Args:
@@ -73,10 +77,9 @@ class SimpleMDTableFormatter(TableFormatter):
                 (
                     "human",
                     (
-                        "You are an expert in markdown tables. Match the following text and HTML table "
-                        "to create a markdown table. Provide just the table in pure markdown, nothing else.\n"
+                        "You are an expert in markdown tables. Transform the following parsed table into a "
+                        "markdown table. Provide just the table in pure markdown, nothing else.\n"
                         "<TEXT>\n{text}\n</TEXT>\n"
-                        "<HTML>\n{html}\n</HTML>\n"
                         "<PREVIOUS_TABLE>\n{previous_table}\n</PREVIOUS_TABLE>"
                     ),
                 ),
@@ -87,7 +90,6 @@ class SimpleMDTableFormatter(TableFormatter):
         result = chain.invoke(
             {
                 "text": table_element.text,
-                "html": table_element.metadata.text_as_html,
                 "previous_table": previous_table,
             }
         )

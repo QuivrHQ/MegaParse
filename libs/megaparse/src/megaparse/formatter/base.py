@@ -1,11 +1,11 @@
 from abc import ABC
+from pathlib import Path
 from typing import List, Union
 
 from langchain_core.language_models.chat_models import BaseChatModel
-from unstructured.documents.elements import Element
+from megaparse.models.document import Document
 
 
-# TODO: Implement the Formatter class @Chloe
 class BaseFormatter(ABC):
     """
     A class used to improve the layout of elements, particularly focusing on converting HTML tables to markdown tables.
@@ -23,35 +23,11 @@ class BaseFormatter(ABC):
         self.model = model
 
     def format(
-        self, elements: Union[List[Element], str], file_path: str | None = None
-    ) -> Union[List[Element], str]:
-        if isinstance(elements, list):
-            return self.format_elements(elements, file_path)
-        return self.format_string(elements, file_path)
+        self, document: Document, file_path: Path | str | None = None
+    ) -> Union[Document, str]:
+        raise NotImplementedError("Subclasses should implement this method")
 
     async def aformat(
-        self, elements: Union[List[Element], str], file_path: str | None = None
-    ) -> Union[List[Element], str]:
-        if isinstance(elements, list):
-            return await self.aformat_elements(elements, file_path)
-        return await self.aformat_string(elements, file_path)
-
-    def format_elements(
-        self, elements: List[Element], file_path: str | None = None
-    ) -> Union[List[Element], str]:
-        raise NotImplementedError("Subclasses should implement this method")
-
-    async def aformat_elements(
-        self, elements: List[Element], file_path: str | None = None
-    ) -> Union[List[Element], str]:
-        raise NotImplementedError("Subclasses should implement this method")
-
-    def format_string(
-        self, text: str, file_path: str | None = None
-    ) -> Union[List[Element], str]:
-        raise NotImplementedError("Subclasses should implement this method")
-
-    async def aformat_string(
-        self, text: str, file_path: str | None = None
-    ) -> Union[List[Element], str]:
+        self, document: Document, file_path: Path | str | None = None
+    ) -> Union[Document, str]:
         raise NotImplementedError("Subclasses should implement this method")

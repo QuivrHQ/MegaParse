@@ -1,10 +1,12 @@
 import base64
 from io import BytesIO
+from pathlib import Path
 from typing import List, Optional
 
 from langchain_core.language_models.chat_models import BaseChatModel
 from langchain_core.messages import HumanMessage
 from megaparse.formatter.table_formatter import TableFormatter
+from megaparse.models.document import Document, TableBlock
 from pdf2image import convert_from_path
 from PIL import Image
 from unstructured.documents.elements import Element
@@ -27,35 +29,33 @@ class VisionMDTableFormatter(TableFormatter):
     def __init__(self, model: Optional[BaseChatModel] = None):
         super().__init__(model)
 
-    def _crop_table_image(self, table_element: Element, file_path: str) -> str:
+    def _crop_table_image(self, table_element: TableBlock, file_path: str) -> str:
         """
         Helper method to crop the table portion of the PDF page and convert it to a base64 string.
         """
-        assert (
-            table_element.metadata.coordinates
-        ), "Table element must have coordinates."
-        coordinates = table_element.metadata.coordinates.points
-        page_number = table_element.metadata.page_number
+        assert table_element.bbox, "Table element must have coordinates."
+        bbox = table_element.bbox
+        page_number = table_element.page_range[0]
         assert page_number, "Table element must have a page number."
-        assert coordinates, "Table element must have coordinates."
+        assert bbox, "Table element must have coordinates."
 
         pages = convert_from_path(file_path)
 
         # Calculate the box for cropping
         box = (
-            min(coord[0] for coord in coordinates),
-            min(coord[1] for coord in coordinates),
-            max(coord[0] for coord in coordinates),
-            max(coord[1] for coord in coordinates),
+            bbox.top_left.x,
+            bbox.top_left.y,
+            bbox.bottom_right.x,
+            bbox.bottom_right.y,
         )
         table_image = pages[page_number - 1].crop(box)
         # Convert the cropped image to base64
         table_image64 = self.process_file([table_image])[0]
         return table_image64
 
-    async def aformat_elements(
-        self, elements: List[Element], file_path: str | None = None
-    ) -> List[Element]:
+    async def aformat(
+        self, document: Document, file_path: Path | str | None = None
+    ) -> Document:
         """
         Asynchronously formats table elements within a list of elements.
         """
@@ -65,39 +65,47 @@ class VisionMDTableFormatter(TableFormatter):
         assert (
             file_path
         ), "A file path is needed to format tables using VisionMDTableFormatter."
-
+        if not isinstance(file_path, str):
+            file_path = str(file_path)
         formatted_elements = []
-        for element in elements:
-            if element.category == "Table":
-                formatted_table = await self.aformat_table(element, file_path)
+        for block in document.content:
+            if isinstance(block, TableBlock):
+                formatted_table = await self.aformat_table(block, file_path)
                 formatted_elements.append(formatted_table)
             else:
-                formatted_elements.append(element)
-        return formatted_elements
+                formatted_elements.append(block)
 
-    def format_elements(
-        self, elements: List[Element], file_path: str | None = None
-    ) -> List[Element]:
+        document.content = formatted_elements
+        return document
+
+    def format(
+        self, document: Document, file_path: Path | str | None = None
+    ) -> Document:
         """
-        Synchronously formats table elements within a list of elements.
+        Asynchronously formats table elements within a list of elements.
         """
         if not self.model:
             raise ValueError("A Model is needed to use the VisionMDTableFormatter.")
-        print("Formatting tables using VisionMDTableFormatter (sync)...")
+        print("Formatting tables using VisionMDTableFormatter (async)...")
         assert (
             file_path
         ), "A file path is needed to format tables using VisionMDTableFormatter."
-
+        if not isinstance(file_path, str):
+            file_path = str(file_path)
         formatted_elements = []
-        for element in elements:
-            if element.category == "Table":
-                formatted_table = self.format_table(element, file_path)
+        for block in document.content:
+            if isinstance(block, TableBlock):
+                formatted_table = self.format_table(block, file_path)
                 formatted_elements.append(formatted_table)
             else:
-                formatted_elements.append(element)
-        return formatted_elements
+                formatted_elements.append(block)
 
-    async def aformat_table(self, table_element: Element, file_path: str) -> Element:
+        document.content = formatted_elements
+        return document
+
+    async def aformat_table(
+        self, table_element: TableBlock, file_path: str
+    ) -> TableBlock:
         """
         Asynchronously formats a table element into Markdown format using a Vision Model.
         """
@@ -113,9 +121,9 @@ class VisionMDTableFormatter(TableFormatter):
         table_element.text = markdown_table
         return table_element
 
-    def format_table(self, table_element: Element, file_path: str) -> Element:
+    def format_table(self, table_element: TableBlock, file_path: str) -> TableBlock:
         """
-        Synchronously formats a table element into Markdown format using a Vision Model.
+        Asynchronously formats a table element into Markdown format using a Vision Model.
         """
         table_image64 = self._crop_table_image(table_element, file_path)
         formatted_table = self.vision_extract(table_image64)

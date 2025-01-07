@@ -1,13 +1,11 @@
-import asyncio
 import logging
-import os
 from pathlib import Path
 from typing import IO, BinaryIO, List
+import warnings
 
 from megaparse_sdk.config import MegaParseConfig
 from megaparse_sdk.schema.extensions import FileExtension
 from megaparse_sdk.schema.parser_config import StrategyEnum
-from unstructured.documents.elements import Element
 
 from megaparse.exceptions.base import ParsingException
 from megaparse.formatter.base import BaseFormatter
@@ -77,15 +75,23 @@ class MegaParse:
         )
         try:
             parsed_document = await self.parser.aconvert(file_path=file_path, file=file)
-            # @chloe FIXME: format_checker needs unstructured Elements as input which is to change to a megaparse element
+            parsed_document.file_name = str(file_path) if file_path else None
             if self.formatters:
                 for formatter in self.formatters:
-                    parsed_document = await formatter.aformat(parsed_document)
+                    if isinstance(parsed_document, str):
+                        warnings.warn(
+                            f"The last step returned a string, the {formatter.__class__} and following will not be applied",
+                            stacklevel=2,
+                        )
+                        break
+                    parsed_document = await formatter.aformat(
+                        document=parsed_document, file_path=file_path
+                    )
 
         except Exception as e:
             raise ParsingException(f"Error while parsing {file_path}: {e}")
         if not isinstance(parsed_document, str):
-            raise ValueError("The parser or the last formatter should return a string")
+            return str(parsed_document)
         return parsed_document
 
     def load(
@@ -103,18 +109,23 @@ class MegaParse:
             parsed_document = parser.convert(
                 file_path=file_path, file=file, file_extension=file_extension
             )
-            # @chloe FIXME: format_checker needs unstructured Elements as input which is to change
+            parsed_document.file_name = str(file_path) if file_path else None
+
             if self.formatters:
                 for formatter in self.formatters:
+                    if isinstance(parsed_document, str):
+                        warnings.warn(
+                            f"The last step returned a string, the {formatter.__class__} and following will not be applied",
+                            stacklevel=2,
+                        )
+                        break
                     parsed_document = formatter.format(parsed_document)
 
             # @chloe FIXME: format_checker needs unstructured Elements as input which is to change
             # if self.format_checker:
             #     parsed_document: str = self.format_checker.check(parsed_document)
             if not isinstance(parsed_document, str):
-                raise ValueError(
-                    "The parser or the last formatter should return a string"
-                )
+                return str(parsed_document)
             return parsed_document
         except Exception as e:
             raise ParsingException(

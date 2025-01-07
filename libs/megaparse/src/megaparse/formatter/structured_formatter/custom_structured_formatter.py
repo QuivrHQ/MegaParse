@@ -1,12 +1,14 @@
+from pathlib import Path
 from megaparse.formatter.structured_formatter import StructuredFormatter
+from megaparse.models.document import Document
 from pydantic import BaseModel
 
 
 class CustomStructuredFormatter(StructuredFormatter):
-    def format_string(
+    def format(
         self,
-        text: str,
-        file_path: str | None = None,
+        document: Document,
+        file_path: Path | str | None = None,
     ) -> str:
         """
         Structure the file using an AI language model.
@@ -20,6 +22,7 @@ class CustomStructuredFormatter(StructuredFormatter):
         if not self.model:
             raise ValueError("A Model is needed to use the CustomStructuredFormatter.")
         print("Formatting text using CustomStructuredFormatter...")
+        text = str(document)
         if len(text) < 0:
             raise ValueError(
                 "A non empty text is needed to format text using CustomStructuredFormatter."
@@ -38,10 +41,10 @@ class CustomStructuredFormatter(StructuredFormatter):
 
         return formatted_text.model_dump_json()
 
-    async def aformat_string(
+    async def aformat(
         self,
-        text: str,
-        file_path: str | None = None,
+        document: Document,
+        file_path: Path | str | None = None,
     ) -> str:
         """
         Asynchronously structure the file using an AI language model.
@@ -55,6 +58,8 @@ class CustomStructuredFormatter(StructuredFormatter):
         if not self.model:
             raise ValueError("A Model is needed to use the CustomStructuredFormatter.")
         print("Formatting text using CustomStructuredFormatter...")
+        text = str(document)
+
         if len(text) < 0:
             raise ValueError(
                 "A non empty text is needed to format text using CustomStructuredFormatter."

@@ -1,16 +1,17 @@
-from typing import List
+from pathlib import Path
+from typing import Union
 
 from megaparse.formatter.base import BaseFormatter
-from unstructured.documents.elements import Element
+from megaparse.models.document import Document
 
 
 class TableFormatter(BaseFormatter):
-    async def aformat_elements(
-        self, elements: List[Element], file_path: str | None = None
-    ) -> List[Element]:
-        raise NotImplementedError()
+    def format(
+        self, document: Document, file_path: Path | str | None = None
+    ) -> Document:
+        raise NotImplementedError("Subclasses should implement this method")
 
-    def format_elements(
-        self, elements: List[Element], file_path: str | None = None
-    ) -> List[Element]:
-        raise NotImplementedError()
+    async def aformat(
+        self, document: Document, file_path: Path | str | None = None
+    ) -> Document:
+        raise NotImplementedError("Subclasses should implement this method")
