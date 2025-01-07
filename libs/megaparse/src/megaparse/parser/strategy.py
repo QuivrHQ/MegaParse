@@ -1,4 +1,6 @@
 import logging
+import random
+import warnings
 from pathlib import Path
 from typing import Any, List
 
@@ -11,7 +13,7 @@ from onnxtr.models import detection_predictor
 from onnxtr.models.engine import EngineConfig
 from pypdfium2._helpers.page import PdfPage
 
-from megaparse.configs.auto import AutoStrategyConfig
+from megaparse.configs.auto import AutoStrategyConfig, DeviceEnum, TextDetConfig
 from megaparse.predictor.doctr_layout_detector import LayoutPredictor
 from megaparse.predictor.models.base import PageLayout
 
@@ -19,16 +21,14 @@ logger = logging.getLogger("megaparse")
 
 
 class StrategyHandler:
-    config: AutoStrategyConfig = AutoStrategyConfig()
-
     def __init__(
         self,
-        assume_straight_pages: bool = True,
-        preserve_aspect_ratio: bool = True,
-        symmetric_pad: bool = True,
-        load_in_8_bit: bool = False,
+        auto_config: AutoStrategyConfig = AutoStrategyConfig(),
+        text_det_config: TextDetConfig = TextDetConfig(),
+        device: DeviceEnum = DeviceEnum.CPU,
     ) -> None:
-        self.use_gpu = self.config.use_gpu
+        self.config = auto_config
+        self.device = device
         general_options = rt.SessionOptions()
         providers = self._get_providers()
         engine_config = EngineConfig(
@@ -37,26 +37,39 @@ class StrategyHandler:
         )
 
         self.det_predictor = detection_predictor(
-            arch=self.config.det_arch,
-            assume_straight_pages=assume_straight_pages,
-            preserve_aspect_ratio=preserve_aspect_ratio,
-            symmetric_pad=symmetric_pad,
-            batch_size=self.config.batch_size,
-            load_in_8_bit=load_in_8_bit,
+            arch=text_det_config.det_arch,
+            assume_straight_pages=text_det_config.assume_straight_pages,
+            preserve_aspect_ratio=text_det_config.preserve_aspect_ratio,
+            symmetric_pad=text_det_config.symmetric_pad,
+            batch_size=text_det_config.batch_size,
+            load_in_8_bit=text_det_config.load_in_8_bit,
             engine_cfg=engine_config,
         )
 
     def _get_providers(self) -> List[str]:
         prov = rt.get_available_providers()
         logger.info("Available providers:", prov)
-        if self.use_gpu:
+        if self.device == DeviceEnum.CUDA:
             # TODO: support openvino, directml etc
             if "CUDAExecutionProvider" not in prov:
                 raise ValueError(
                     "onnxruntime can't find CUDAExecutionProvider in list of available providers"
                 )
-            return ["CUDAExecutionProvider"]
+            return ["TensorrtExecutionProvider", "CUDAExecutionProvider"]
+        elif self.device == DeviceEnum.COREML:
+            if "CoreMLExecutionProvider" not in prov:
+                raise ValueError(
+                    "onnxruntime can't find CoreMLExecutionProvider in list of available providers"
+                )
+            return ["CoreMLExecutionProvider"]
+        elif self.device == DeviceEnum.CPU:
+            return ["CPUExecutionProvider"]
         else:
+            warnings.warn(
+                "Device not supported, using CPU",
+                UserWarning,
+                stacklevel=2,
+            )
             return ["CPUExecutionProvider"]
 
     def get_strategy_page(
@@ -119,6 +132,7 @@ class StrategyHandler:
         file: str
         | Path
         | bytes,  # FIXME : Careful here on removing BinaryIO (not handled by onnxtr)
+        max_samples: int = 5,
     ) -> StrategyEnum:
         logger.info("Determining strategy...")
         need_ocr = 0
@@ -126,6 +140,11 @@ class StrategyHandler:
         onnxtr_document = DocumentFile.from_pdf(file)
         layout_predictor = LayoutPredictor(self.det_predictor)
         pdfium_document = pdfium.PdfDocument(file)
+
+        if len(pdfium_document) > max_samples:
+            sample_pages_index = random.sample(range(len(onnxtr_document)), max_samples)
+            onnxtr_document = [onnxtr_document[i] for i in sample_pages_index]
+            pdfium_document = [pdfium_document[i] for i in sample_pages_index]
 
         onnxtr_document_layout = layout_predictor(onnxtr_document)
 

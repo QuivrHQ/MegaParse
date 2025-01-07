@@ -4,6 +4,7 @@ import os
 from pathlib import Path
 from typing import IO, BinaryIO
 
+from megaparse.configs.auto import DeviceEnum, MegaParseConfig
 from megaparse_sdk.schema.extensions import FileExtension
 from megaparse_sdk.schema.parser_config import StrategyEnum
 
@@ -18,21 +19,35 @@ logger = logging.getLogger("megaparse")
 
 
 class MegaParse:
+    config = MegaParseConfig()
+
     def __init__(
         self,
-        parser: BaseParser = UnstructuredParser(strategy=StrategyEnum.FAST),
-        ocr_parser: BaseParser = DoctrParser(),
+        parser: BaseParser | None = None,
+        ocr_parser: BaseParser | None = None,
         strategy: StrategyEnum = StrategyEnum.AUTO,
         format_checker: FormatChecker | None = None,
-        use_gpu: bool = False,
     ) -> None:
+        if not parser:
+            parser = UnstructuredParser(strategy=StrategyEnum.FAST)
+        if not ocr_parser:
+            ocr_parser = DoctrParser(
+                text_det_config=self.config.text_det_config,
+                text_reco_config=self.config.text_reco_config,
+                device=self.config.device,
+            )
+
         self.strategy = strategy
         self.parser = parser
         self.ocr_parser = ocr_parser
         self.format_checker = format_checker
         self.last_parsed_document: str = ""
 
-        self.strategy_handler = StrategyHandler()
+        self.strategy_handler = StrategyHandler(
+            text_det_config=self.config.text_det_config,
+            auto_config=self.config.auto_parse_config,
+            device=self.config.device,
+        )
 
     def validate_input(
         self,

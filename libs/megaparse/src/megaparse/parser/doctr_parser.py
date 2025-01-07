@@ -3,6 +3,7 @@ import warnings
 from pathlib import Path
 from typing import IO, BinaryIO, List
 
+from megaparse.configs.auto import DeviceEnum, TextRecoConfig, TextDetConfig
 import onnxruntime as rt
 from megaparse_sdk.schema.extensions import FileExtension
 from onnxtr.io import DocumentFile
@@ -19,16 +20,13 @@ class DoctrParser(BaseParser):
 
     def __init__(
         self,
-        det_predictor_model: str = "db_resnet50",
-        reco_predictor_model: str = "crnn_vgg16_bn",
-        det_bs: int = 2,
-        reco_bs: int = 512,
-        assume_straight_pages: bool = True,
+        text_det_config: TextDetConfig = TextDetConfig(),
+        text_reco_config: TextRecoConfig = TextRecoConfig(),
+        device: DeviceEnum = DeviceEnum.CPU,
         straighten_pages: bool = False,
-        use_gpu: bool = False,
         **kwargs,
     ):
-        self.use_gpu = use_gpu
+        self.device = device
         general_options = rt.SessionOptions()
         providers = self._get_providers()
         engine_config = EngineConfig(
@@ -37,11 +35,11 @@ class DoctrParser(BaseParser):
         )
         # TODO: set in config or pass as kwargs
         self.predictor = ocr_predictor(
-            det_arch=det_predictor_model,
-            reco_arch=reco_predictor_model,
-            det_bs=det_bs,
-            reco_bs=reco_bs,
-            assume_straight_pages=assume_straight_pages,
+            det_arch=text_det_config.det_arch,
+            reco_arch=text_reco_config.reco_arch,
+            det_bs=text_det_config.batch_size,
+            reco_bs=text_reco_config.batch_size,
+            assume_straight_pages=text_det_config.assume_straight_pages,
             straighten_pages=straighten_pages,
             # Preprocessing related parameters
             det_engine_cfg=engine_config,
@@ -53,14 +51,27 @@ class DoctrParser(BaseParser):
     def _get_providers(self) -> List[str]:
         prov = rt.get_available_providers()
         logger.info("Available providers:", prov)
-        if self.use_gpu:
+        if self.device == DeviceEnum.CUDA:
             # TODO: support openvino, directml etc
             if "CUDAExecutionProvider" not in prov:
                 raise ValueError(
                     "onnxruntime can't find CUDAExecutionProvider in list of available providers"
                 )
-            return ["CUDAExecutionProvider"]
+            return ["TensorrtExecutionProvider", "CUDAExecutionProvider"]
+        elif self.device == DeviceEnum.COREML:
+            if "CoreMLExecutionProvider" not in prov:
+                raise ValueError(
+                    "onnxruntime can't find CoreMLExecutionProvider in list of available providers"
+                )
+            return ["CoreMLExecutionProvider"]
+        elif self.device == DeviceEnum.CPU:
+            return ["CPUExecutionProvider"]
         else:
+            warnings.warn(
+                "Device not supported, using CPU",
+                UserWarning,
+                stacklevel=2,
+            )
             return ["CPUExecutionProvider"]
 
     def convert(
