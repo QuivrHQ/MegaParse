@@ -348,6 +348,24 @@ class UnstructuredParser(BaseParser):
                 if metadata.coordinates and metadata.coordinates.points
                 else None,
             ),
+            "UncategorizedText": TextBlock(
+                text=text,
+                metadata={},
+                page_range=(metadata.page_number, metadata.page_number)
+                if metadata.page_number
+                else None,
+                bbox=BBOX(
+                    top_left=Point2D(
+                        x=metadata.coordinates.points[0][0],
+                        y=metadata.coordinates.points[0][1],
+                    ),
+                    bottom_right=Point2D(
+                        x=metadata.coordinates.points[3][0],
+                        y=metadata.coordinates.points[3][1],
+                    ),
+                )
+                if metadata.coordinates and metadata.coordinates.points
+                else None,
+            ),
         }
-
         return markdown_types.get(element_type, None)
