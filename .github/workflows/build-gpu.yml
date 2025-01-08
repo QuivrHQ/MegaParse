@@ -19,7 +19,8 @@ permissions:
 jobs:
   deploy:
     name: Build docker-gpu
-    runs-on: big-boy-gpu
+    runs-on:
+      group: big-boy-gpu
     environment: production
     outputs:
       imageoutput: ${{ steps.build-image.outputs.imageoutput }}
