@@ -4,7 +4,7 @@ import os
 from pathlib import Path
 from typing import IO, BinaryIO
 
-from megaparse_sdk.config import MegaParseConfig
+from megaparse.configs.auto import DeviceEnum, MegaParseConfig
 from megaparse_sdk.schema.extensions import FileExtension
 from megaparse_sdk.schema.parser_config import StrategyEnum
 
@@ -12,27 +12,42 @@ from megaparse.checker.format_checker import FormatChecker
 from megaparse.exceptions.base import ParsingException
 from megaparse.parser.base import BaseParser
 from megaparse.parser.doctr_parser import DoctrParser
-from megaparse.parser.strategy import determine_strategy
+from megaparse.parser.strategy import StrategyHandler
 from megaparse.parser.unstructured_parser import UnstructuredParser
 
 logger = logging.getLogger("megaparse")
 
 
 class MegaParse:
-    config: MegaParseConfig = MegaParseConfig()
+    config = MegaParseConfig()
 
     def __init__(
         self,
-        parser: BaseParser = UnstructuredParser(strategy=StrategyEnum.FAST),
-        ocr_parser: BaseParser = DoctrParser(),
+        parser: BaseParser | None = None,
+        ocr_parser: BaseParser | None = None,
         strategy: StrategyEnum = StrategyEnum.AUTO,
         format_checker: FormatChecker | None = None,
     ) -> None:
+        if not parser:
+            parser = UnstructuredParser(strategy=StrategyEnum.FAST)
+        if not ocr_parser:
+            ocr_parser = DoctrParser(
+                text_det_config=self.config.text_det_config,
+                text_reco_config=self.config.text_reco_config,
+                device=self.config.device,
+            )
+
         self.strategy = strategy
         self.parser = parser
         self.ocr_parser = ocr_parser
         self.format_checker = format_checker
         self.last_parsed_document: str = ""
+
+        self.strategy_handler = StrategyHandler(
+            text_det_config=self.config.text_det_config,
+            auto_config=self.config.auto_parse_config,
+            device=self.config.device,
+        )
 
     def validate_input(
         self,
@@ -132,17 +147,11 @@ class MegaParse:
         if self.strategy != StrategyEnum.AUTO or file_extension != FileExtension.PDF:
             return self.parser
         if file:
-            local_strategy = determine_strategy(
-                file=file,
-                threshold_pages_ocr=self.config.auto_document_threshold,
-                threshold_per_page=self.config.auto_page_threshold,
+            local_strategy = self.strategy_handler.determine_strategy(
+                file=file,  # type: ignore #FIXME: Careful here on removing BinaryIO (not handled by onnxtr)
             )
         if file_path:
-            local_strategy = determine_strategy(
-                file=file_path,
-                threshold_pages_ocr=self.config.auto_document_threshold,
-                threshold_per_page=self.config.auto_page_threshold,
-            )
+            local_strategy = self.strategy_handler.determine_strategy(file=file_path)
 
         if local_strategy == StrategyEnum.HI_RES:
             return self.ocr_parser
