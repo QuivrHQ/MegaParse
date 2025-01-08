@@ -3,15 +3,18 @@ import base64
 import re
 from io import BytesIO
 from pathlib import Path
-from typing import IO, List, Union
+from typing import IO, List
 
 from langchain_core.language_models.chat_models import BaseChatModel
 from langchain_core.messages import HumanMessage
 from megaparse_sdk.schema.extensions import FileExtension
 from pdf2image import convert_from_path
 
+from megaparse.models.document import Block, TextBlock
+from megaparse.models.document import Document as MPDocument
 from megaparse.parser import BaseParser
 from megaparse.parser.entity import SupportedModel, TagEnum
+from megaparse.predictor.models.base import BBOX, Point2D
 
 # BASE_OCR_PROMPT = """
 # Transcribe the content of this file into markdown. Be mindful of the formatting.
@@ -147,7 +150,7 @@ class MegaParseVision(BaseParser):
         file_extension: FileExtension | None = None,
         batch_size: int = 3,
         **kwargs,
-    ) -> str:
+    ) -> MPDocument:
         """
         Parse a PDF file and process its content using the language model.
 
@@ -164,13 +167,14 @@ class MegaParseVision(BaseParser):
         self.check_supported_extension(file_extension, file_path)
 
         pdf_base64 = self.process_file(file_path)
+        n_pages = len(pdf_base64)
         tasks = [
             self.asend_to_mlm(pdf_base64[i : i + batch_size])
             for i in range(0, len(pdf_base64), batch_size)
         ]
         self.parsed_chunks = await asyncio.gather(*tasks)
         responses = self.get_cleaned_content("\n".join(self.parsed_chunks))
-        return responses
+        return self.__to_elements_list__(responses, n_pages=n_pages)
 
     def convert(
         self,
@@ -179,7 +183,7 @@ class MegaParseVision(BaseParser):
         file_extension: FileExtension | None = None,
         batch_size: int = 3,
         **kwargs,
-    ) -> str:
+    ) -> MPDocument:
         """
         Parse a PDF file and process its content using the language model.
 
@@ -196,6 +200,7 @@ class MegaParseVision(BaseParser):
         self.check_supported_extension(file_extension, file_path)
 
         pdf_base64 = self.process_file(file_path)
+        n_pages = len(pdf_base64)
         chunks = [
             pdf_base64[i : i + batch_size]
             for i in range(0, len(pdf_base64), batch_size)
@@ -205,7 +210,7 @@ class MegaParseVision(BaseParser):
             response = self.send_to_mlm(chunk)
             self.parsed_chunks.append(response)
         responses = self.get_cleaned_content("\n".join(self.parsed_chunks))
-        return responses
+        return self.__to_elements_list__(responses, n_pages)
 
     def get_cleaned_content(self, parsed_file: str) -> str:
         """
@@ -245,3 +250,18 @@ class MegaParseVision(BaseParser):
         cleaned_content = cleaned_content.strip()
 
         return cleaned_content
+
+    def __to_elements_list__(self, mpv_doc: str, n_pages: int) -> MPDocument:
+        list_blocks: List[Block] = [
+            TextBlock(
+                text=mpv_doc,
+                metadata={},
+                page_range=(0, n_pages - 1),
+                bbox=BBOX(top_left=Point2D(x=0, y=0), bottom_right=Point2D(x=1, y=1)),
+            )
+        ]
+        return MPDocument(
+            metadata={},
+            detection_origin="megaparse_vision",
+            content=list_blocks,
+        )

@@ -4,6 +4,8 @@ from typing import IO
 
 from megaparse_sdk.schema.extensions import FileExtension
 
+from megaparse.models.document import Document
+
 
 class BaseParser(ABC):
     """Mother Class for all the parsers [Unstructured, LlamaParse, MegaParseVision]"""
@@ -15,12 +17,12 @@ class BaseParser(ABC):
     ):
         if not file_extension and not file_path:
             raise ValueError(
-                "Either file_path or file_extension must be provided for {self.__class__.__name__}"
+                f"Either file_path or file_extension must be provided for {self.__class__.__name__}"
             )
         if file_path and not file_extension:
             file_path = Path(file_path) if isinstance(file_path, str) else file_path
             file_extension = FileExtension(file_path.suffix)
-        if file_extension not in self.supported_extensions:
+        if file_extension and file_extension not in self.supported_extensions:
             raise ValueError(
                 f"Unsupported file extension {file_extension.value} for {self.__class__.__name__}"
             )
@@ -32,7 +34,7 @@ class BaseParser(ABC):
         file: IO[bytes] | None = None,
         file_extension: FileExtension | None = None,
         **kwargs,
-    ) -> str:
+    ) -> Document:
         """
         Convert the given file to a specific format.
 
@@ -55,9 +57,9 @@ class BaseParser(ABC):
         file: IO[bytes] | None = None,
         file_extension: FileExtension | None = None,
         **kwargs,
-    ) -> str:
+    ) -> Document:
         """
-        Convert the given file to a specific format.
+        Convert the given file to the unstructured format.
 
         Args:
             file_path (str | Path): The path to the file to be converted.
