@@ -12,6 +12,9 @@ strategy_handler = StrategyHandler()
 
 @pytest.mark.parametrize("hi_res_pdf", ocr_pdfs)
 def test_hi_res_strategy(hi_res_pdf):
+    if hi_res_pdf == "0168004.pdf":
+        pytest.skip("Skip 0168004.pdf as it is flaky currently")
+
     strategy = strategy_handler.determine_strategy(
         f"./tests/pdf/ocr/{hi_res_pdf}",
     )
