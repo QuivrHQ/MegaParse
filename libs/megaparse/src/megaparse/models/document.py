@@ -145,6 +145,22 @@ class FooterBlock(TextBlock):
         return f"{'='*len(self.text)}\n\n{self.text}\n\n{'='*len(self.text)}"
 
 
+class SectionBlock(Block):
+    """
+    A class to represent a section block
+
+    """
+
+    title: str
+    depth: int
+    content: List[Block]
+
+    def __str__(self):
+        lines = []
+        lines.extend(str(block) for block in self.content)
+        return "\n".join(lines)
+
+
 class TOCItem(BaseModel):
     title: str
     depth: int
