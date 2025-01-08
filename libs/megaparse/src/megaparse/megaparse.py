@@ -3,6 +3,7 @@ import warnings
 from pathlib import Path
 from typing import IO, BinaryIO, List
 
+from megaparse.models.page import Page
 from megaparse_sdk.schema.extensions import FileExtension
 from megaparse_sdk.schema.parser_config import StrategyEnum
 
@@ -88,11 +89,15 @@ class MegaParse:
         file_extension = self.validate_input(
             file=file, file_path=file_path, file_extension=file_extension
         )
+        opened_file = None  # FIXM: Not sure of this method
         try:
-            parser = self._select_parser(file_path, file, file_extension)
+            if file_path:
+                opended_file = open(file_path, "rb")
+                file = opended_file
+            parser = self._select_parser(file, file_extension)
             logger.info(f"Parsing using {parser.__class__.__name__} parser.")
             parsed_document = await parser.aconvert(
-                file_path=file_path, file=file, file_extension=file_extension
+                file=file, file_extension=file_extension
             )
             parsed_document.file_name = str(file_path) if file_path else None
 
@@ -116,6 +121,9 @@ class MegaParse:
             raise ParsingException(
                 f"Error while parsing file {file_path or file}, file_extension: {file_extension}: {e}"
             )
+        finally:
+            if opened_file:
+                opened_file.close()
 
     def load(
         self,
@@ -126,12 +134,21 @@ class MegaParse:
         file_extension = self.validate_input(
             file=file, file_path=file_path, file_extension=file_extension
         )
+        opened_file = None  # FIXM: Not sure of this method
         try:
-            parser = self._select_parser(file_path, file, file_extension)
-            logger.info(f"Parsing using {parser.__class__.__name__} parser.")
-            parsed_document = parser.convert(
-                file_path=file_path, file=file, file_extension=file_extension
+            if file_path:
+                opended_file = open(file_path, "rb")
+                file = opended_file
+
+            assert file is not None, "No File provided"
+            # First parse the file in with fast and get text detections
+            pages = self.strategy_handler.determine_strategy(
+                file=file,
             )
+            parser = self._select_parser(pages=pages, file_extension=file_extension)
+
+            logger.info(f"Parsing using {parser.__class__.__name__} parser.")
+            parsed_document = parser.convert(file=file, file_extension=file_extension)
             parsed_document.file_name = str(file_path) if file_path else None
 
             if self.formatters:
@@ -144,9 +161,6 @@ class MegaParse:
                         break
                     parsed_document = formatter.format(parsed_document)
 
-            # @chloe FIXME: format_checker needs unstructured Elements as input which is to change
-            # if self.format_checker:
-            #     parsed_document: str = self.format_checker.check(parsed_document)
             if not isinstance(parsed_document, str):
                 return str(parsed_document)
             return parsed_document
@@ -154,23 +168,29 @@ class MegaParse:
             raise ParsingException(
                 f"Error while parsing file {file_path or file}, file_extension: {file_extension}: {e}"
             )
+        finally:
+            if opened_file:
+                opened_file.close()
 
     def _select_parser(
         self,
-        file_path: Path | str | None = None,
-        file: BinaryIO | None = None,
+        pages: List[Page],
         file_extension: str | FileExtension = "",
     ) -> BaseParser:
-        local_strategy = None
-        if self.strategy != StrategyEnum.AUTO or file_extension != FileExtension.PDF:
+        if file_extension != FileExtension.PDF or self.strategy == StrategyEnum.FAST:
             return self.parser
-        if file:
-            local_strategy = self.strategy_handler.determine_strategy(
-                file=file,  # type: ignore #FIXME: Careful here on removing BinaryIO (not handled by onnxtr)
-            )
-        if file_path:
-            local_strategy = self.strategy_handler.determine_strategy(file=file_path)
+        if self.strategy == StrategyEnum.HI_RES:
+            return self.ocr_parser
 
-        if local_strategy == StrategyEnum.HI_RES:
+        need_ocr = 0
+        for page in pages:
+            if page.strategy == StrategyEnum.HI_RES:
+                need_ocr += 1
+
+        doc_need_ocr = (
+            need_ocr / len(pages)
+        ) > self.config.auto_parse_config.auto_document_threshold
+
+        if doc_need_ocr:
             return self.ocr_parser
         return self.parser

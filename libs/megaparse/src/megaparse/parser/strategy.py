@@ -2,7 +2,7 @@ import logging
 import random
 import warnings
 from pathlib import Path
-from typing import Any, List
+from typing import BinaryIO, List, Tuple
 
 import numpy as np
 import onnxruntime as rt
@@ -14,6 +14,7 @@ from onnxtr.models.engine import EngineConfig
 from pypdfium2._helpers.page import PdfPage
 
 from megaparse.configs.auto import AutoStrategyConfig, DeviceEnum, TextDetConfig
+from megaparse.models.page import Page, PageDimension
 from megaparse.predictor.doctr_layout_detector import LayoutPredictor
 from megaparse.predictor.models.base import PageLayout
 
@@ -129,39 +130,44 @@ class StrategyHandler:
 
     def determine_strategy(
         self,
-        file: str
-        | Path
-        | bytes,  # FIXME : Careful here on removing BinaryIO (not handled by onnxtr)
+        file: BinaryIO | Path | bytes,
         max_samples: int = 5,
-    ) -> StrategyEnum:
+    ) -> List[Page]:
+        if isinstance(file, BinaryIO):
+            file = file.read()  # onnxtr expects a file as AbstractPath or bytes
         logger.info("Determining strategy...")
-        need_ocr = 0
 
         onnxtr_document = DocumentFile.from_pdf(file)
         layout_predictor = LayoutPredictor(self.det_predictor)
         pdfium_document = pdfium.PdfDocument(file)
 
-        if len(pdfium_document) > max_samples:
-            sample_pages_index = random.sample(range(len(onnxtr_document)), max_samples)
-            onnxtr_document = [onnxtr_document[i] for i in sample_pages_index]
-            pdfium_document = [pdfium_document[i] for i in sample_pages_index]
+        # if len(pdfium_document) > max_samples:
+        #     sample_pages_index = random.sample(range(len(onnxtr_document)), max_samples)
+        #     onnxtr_document = [onnxtr_document[i] for i in sample_pages_index]
+        #     pdfium_document = [pdfium_document[i] for i in sample_pages_index]
 
         onnxtr_document_layout = layout_predictor(onnxtr_document)
+
+        mp_pages: List[Page] = []
 
         for pdfium_page, onnxtr_page in zip(
             pdfium_document, onnxtr_document_layout, strict=True
         ):
             strategy = self.get_strategy_page(pdfium_page, onnxtr_page)
-            need_ocr += strategy == StrategyEnum.HI_RES
+            mp_pages.append(
+                Page(
+                    strategy=strategy,
+                    text_detections=onnxtr_page,
+                    rasterized=pdfium_page.render(),  # FIXME check
+                    page_size=PageDimension(
+                        width=pdfium_page.get_width(), height=pdfium_page.get_height()
+                    ),
+                    page_index=onnxtr_page.page_index,
+                    pdfium_elements=pdfium_page,
+                )
+            )
 
-        doc_need_ocr = (
-            need_ocr / len(pdfium_document)
-        ) > self.config.auto_document_threshold
         if isinstance(pdfium_document, pdfium.PdfDocument):
             pdfium_document.close()
 
-        if doc_need_ocr:
-            logger.info("Using HI_RES strategy")
-            return StrategyEnum.HI_RES
-        logger.info("Using FAST strategy")
-        return StrategyEnum.FAST
+        return mp_pages
