@@ -14,21 +14,6 @@ class MegaParseSDKConfig(BaseSettings):
     max_retries: int = 3
 
 
-class MegaParseConfig(BaseSettings):
-    """
-    Configuration for Megaparse.
-    """
-
-    model_config = SettingsConfigDict(
-        env_prefix="MEGAPARSE_",
-        env_file=(".env.local", ".env"),
-        env_nested_delimiter="__",
-        extra="ignore",
-    )
-    auto_page_threshold: float = 0.6
-    auto_document_threshold: float = 0.2
-
-
 class SSLConfig(BaseModel):
     ssl_key_file: FilePath
     ssl_cert_file: FilePath

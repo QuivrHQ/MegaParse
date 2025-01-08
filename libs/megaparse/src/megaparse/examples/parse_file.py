@@ -1,4 +1,5 @@
 import asyncio
+from pathlib import Path
 from typing import List
 
 from langchain_openai import ChatOpenAI
@@ -21,28 +22,18 @@ class MyCustomFormat(BaseModel):
     solution: str = Field(description="The solution statement.")
 
 
-def main():
+async def main():
     # Parse a file
     parser = DoctrParser()
     model = ChatOpenAI(name="gpt-4o")
     formatter_1 = CustomStructuredFormatter(model=model, output_model=MyCustomFormat)
 
-    megaparse = MegaParse(parser=parser)
+    megaparse = MegaParse(ocr_parser=parser, formatters=[formatter_1])
 
-    file_path = "./tests/pdf/sample_pdf.pdf"
-    result = megaparse.load(file_path=file_path)
+    file_path = Path("./tests/pdf/sample_pdf.pdf")
+    result = await megaparse.aload(file_path=file_path)
     print(result)
 
 
-async def test():
-    processor = MegaParse()
-    pdf = "./tests/pdf/sample_pdf.pdf"
-
-    with open(pdf, "rb") as f:
-        result = await processor.aload(file=f, file_extension=FileExtension.PDF)
-        assert len(str(result)) > 0
-
-
 if __name__ == "__main__":
-    # main()
-    asyncio.run(test())
+    asyncio.run(main())

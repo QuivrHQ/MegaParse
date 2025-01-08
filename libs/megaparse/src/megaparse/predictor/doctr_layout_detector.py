@@ -1,18 +1,20 @@
+import logging
 from typing import Any, List
 
 import numpy as np
 from megaparse.predictor.models.base import (
-    BlockLayout,
-    PageLayout,
     BBOX,
-    Point2D,
+    BlockLayout,
     BlockType,
+    PageLayout,
 )
 from onnxtr.models.detection.predictor import DetectionPredictor
 from onnxtr.models.engine import EngineConfig
 from onnxtr.models.predictor.base import _OCRPredictor
 from onnxtr.utils.geometry import detach_scores
 from onnxtr.utils.repr import NestedObject
+
+logger = logging.getLogger("megaparse")
 
 
 class LayoutPredictor(NestedObject, _OCRPredictor):
@@ -42,6 +44,7 @@ class LayoutPredictor(NestedObject, _OCRPredictor):
         preserve_aspect_ratio: bool = True,
         symmetric_pad: bool = True,
         detect_orientation: bool = False,
+        use_gpu: bool = False,
         clf_engine_cfg: EngineConfig | None = None,
         **kwargs: Any,
     ):
