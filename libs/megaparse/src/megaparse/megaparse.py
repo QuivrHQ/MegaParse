@@ -3,17 +3,18 @@ import warnings
 from pathlib import Path
 from typing import IO, BinaryIO, List
 
-from megaparse.models.page import Page
 from megaparse_sdk.schema.extensions import FileExtension
 from megaparse_sdk.schema.parser_config import StrategyEnum
 
 from megaparse.configs.auto import DeviceEnum, MegaParseConfig
 from megaparse.exceptions.base import ParsingException
 from megaparse.formatter.base import BaseFormatter
+from megaparse.models.page import Page
 from megaparse.parser.base import BaseParser
 from megaparse.parser.doctr_parser import DoctrParser
 from megaparse.parser.strategy import StrategyHandler
 from megaparse.parser.unstructured_parser import UnstructuredParser
+from megaparse.utils.strategy_utils import need_hi_res
 
 logger = logging.getLogger("megaparse")
 
@@ -94,7 +95,14 @@ class MegaParse:
             if file_path:
                 opended_file = open(file_path, "rb")
                 file = opended_file
-            parser = self._select_parser(file, file_extension)
+
+            assert file is not None, "No File provided"
+            # First parse the file in with fast and get text detections
+            pages = self.strategy_handler.determine_strategy(
+                file=file, strategy=self.strategy
+            )
+            parser = self._select_parser(pages=pages, file_extension=file_extension)
+
             logger.info(f"Parsing using {parser.__class__.__name__} parser.")
             parsed_document = await parser.aconvert(
                 file=file, file_extension=file_extension
@@ -111,9 +119,6 @@ class MegaParse:
                         break
                     parsed_document = await formatter.aformat(parsed_document)
 
-            # @chloe FIXME: format_checker needs unstructured Elements as input which is to change
-            # if self.format_checker:
-            #     parsed_document: str = self.format_checker.check(parsed_document)
             if not isinstance(parsed_document, str):
                 return str(parsed_document)
             return parsed_document
@@ -182,15 +187,6 @@ class MegaParse:
         if self.strategy == StrategyEnum.HI_RES:
             return self.ocr_parser
 
-        need_ocr = 0
-        for page in pages:
-            if page.strategy == StrategyEnum.HI_RES:
-                need_ocr += 1
-
-        doc_need_ocr = (
-            need_ocr / len(pages)
-        ) > self.config.auto_parse_config.auto_document_threshold
-
-        if doc_need_ocr:
+        if need_hi_res(pages, self.config.auto_parse_config):
             return self.ocr_parser
         return self.parser

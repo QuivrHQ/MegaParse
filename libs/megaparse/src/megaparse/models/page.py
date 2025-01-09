@@ -3,8 +3,9 @@ from typing import List
 from megaparse.predictor.models.base import PageLayout
 from megaparse_sdk.schema.parser_config import StrategyEnum
 from numpy.typing import NDArray
-from pydantic import BaseModel
+from pydantic import BaseModel, ConfigDict
 from pypdfium2._helpers.page import PdfPage
+from PIL.Image import Image as PILImage
 
 
 class PageDimension(BaseModel):
@@ -12,8 +13,8 @@ class PageDimension(BaseModel):
     A class to represent a page dimension
     """
 
-    width: int
-    height: int
+    width: float
+    height: float
 
 
 class Page(BaseModel):
@@ -22,8 +23,10 @@ class Page(BaseModel):
     """
 
     strategy: StrategyEnum
-    text_detections: PageLayout
-    rasterized: NDArray
+    text_detections: PageLayout | None = None
+    rasterized: PILImage
     page_size: PageDimension
     page_index: int
     pdfium_elements: PdfPage
+
+    model_config = ConfigDict(arbitrary_types_allowed=True)

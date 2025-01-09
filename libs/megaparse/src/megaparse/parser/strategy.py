@@ -132,14 +132,33 @@ class StrategyHandler:
         self,
         file: BinaryIO | Path | bytes,
         max_samples: int = 5,
+        strategy: StrategyEnum = StrategyEnum.AUTO,
     ) -> List[Page]:
         if isinstance(file, BinaryIO):
             file = file.read()  # onnxtr expects a file as AbstractPath or bytes
         logger.info("Determining strategy...")
+        pdfium_document = pdfium.PdfDocument(file)
+
+        if strategy == StrategyEnum.FAST:
+            mp_pages = []
+            for i, pdfium_page in enumerate(pdfium_document):
+                mp_pages.append(
+                    Page(
+                        strategy=strategy,
+                        text_detections=None,
+                        rasterized=pdfium_page.render().to_pil(),
+                        page_size=PageDimension(
+                            width=pdfium_page.get_width(),
+                            height=pdfium_page.get_height(),
+                        ),
+                        page_index=i,
+                        pdfium_elements=pdfium_page,
+                    )
+                )
+            return mp_pages
 
         onnxtr_document = DocumentFile.from_pdf(file)
         layout_predictor = LayoutPredictor(self.det_predictor)
-        pdfium_document = pdfium.PdfDocument(file)
 
         # if len(pdfium_document) > max_samples:
         #     sample_pages_index = random.sample(range(len(onnxtr_document)), max_samples)
@@ -158,7 +177,7 @@ class StrategyHandler:
                 Page(
                     strategy=strategy,
                     text_detections=onnxtr_page,
-                    rasterized=pdfium_page.render(),  # FIXME check
+                    rasterized=pdfium_page.render().to_pil(),  # FIXME check
                     page_size=PageDimension(
                         width=pdfium_page.get_width(), height=pdfium_page.get_height()
                     ),

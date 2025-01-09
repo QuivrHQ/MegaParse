@@ -26,9 +26,9 @@ async def main():
     # Parse a file
     parser = DoctrParser()
     model = ChatOpenAI(name="gpt-4o")
-    formatter_1 = CustomStructuredFormatter(model=model, output_model=MyCustomFormat)
+    # formatter_1 = CustomStructuredFormatter(model=model, output_model=MyCustomFormat)
 
-    megaparse = MegaParse(ocr_parser=parser, formatters=[formatter_1])
+    megaparse = MegaParse(ocr_parser=parser)
 
     file_path = Path("./tests/pdf/sample_pdf.pdf")
     result = await megaparse.aload(file_path=file_path)
