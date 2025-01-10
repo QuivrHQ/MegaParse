@@ -1,16 +1,29 @@
-import re
 import warnings
 from pathlib import Path
-from typing import IO
+from typing import IO, Dict, List
 
 from dotenv import load_dotenv
 from langchain_core.language_models.chat_models import BaseChatModel
-from langchain_core.prompts import ChatPromptTemplate
 from megaparse_sdk.schema.extensions import FileExtension
 from megaparse_sdk.schema.parser_config import StrategyEnum
+from unstructured.documents.elements import Element
 from unstructured.partition.auto import partition
 
+from megaparse.models.document import (
+    Block,
+    FooterBlock,
+    HeaderBlock,
+    ImageBlock,
+    SubTitleBlock,
+    TableBlock,
+    TextBlock,
+    TitleBlock,
+)
+from megaparse.models.document import (
+    Document as MPDocument,
+)
 from megaparse.parser import BaseParser
+from megaparse.predictor.models.base import BBOX, Point2D
 
 
 class UnstructuredParser(BaseParser):
@@ -37,83 +50,22 @@ class UnstructuredParser(BaseParser):
         self.strategy = strategy
         self.model = model
 
-    # Function to convert element category to markdown format
-    def convert_to_markdown(self, elements):
-        markdown_content = ""
-
-        for el in elements:
-            markdown_content += self.get_markdown_line(el)
-
-        return markdown_content
-
-    def get_markdown_line(self, el: dict):
-        element_type = el["type"]
-        text = el["text"]
-        metadata = el["metadata"]
-        parent_id = metadata.get("parent_id", None)
-        category_depth = metadata.get("category_depth", 0)
-        table_stack = []  # type: ignore
-
-        # Markdown line defaults to empty
-        markdown_line = ""
-
-        # Element type-specific markdown content
-        markdown_types = {
-            "Title": f"## {text}\n\n" if parent_id else f"# {text}\n\n",
-            "Subtitle": f"## {text}\n\n",
-            "Header": f"{'#' * (category_depth + 1)} {text}\n\n",
-            "Footer": f"#### {text}\n\n",
-            "NarrativeText": f"{text}\n\n",
-            "ListItem": f"- {text}\n",
-            "Table": f"{text}\n\n",
-            "PageBreak": "---\n\n",
-            "Image": f"![Image]({el['metadata'].get('image_path', '')})\n\n",
-            "Formula": f"$$ {text} $$\n\n",
-            "FigureCaption": f"**Figure:** {text}\n\n",
-            "Address": f"**Address:** {text}\n\n",
-            "EmailAddress": f"**Email:** {text}\n\n",
-            "CodeSnippet": f"```{el['metadata'].get('language', '')}\n{text}\n```\n\n",
-            "PageNumber": "",  # Page number is not included in markdown
-        }
-
-        markdown_line = markdown_types.get(element_type, f"{text}\n\n")
-
-        if element_type == "Table" and self.model:
-            # FIXME: @Chloé - Add a modular table enhancement here - LVM
-            prompt = ChatPromptTemplate.from_messages(
-                [
-                    (
-                        "human",
-                        """You are an expert in markdown tables, match this text and this html table to fill a md table. You answer with just the table in pure markdown, nothing else.
-                        <TEXT>
-                        {text}
-                        </TEXT>
-                        <HTML>
-                        {html}
-                        </HTML>
-                        <PREVIOUS_TABLE>
-                        {previous_table}
-                        </PREVIOUS_TABLE>""",
-                    ),
-                ]
-            )
-            chain = prompt | self.model
-            result = chain.invoke(
-                {
-                    "text": el["text"],
-                    "html": metadata["text_as_html"],
-                    "previous_table": table_stack[-1] if table_stack else "",
-                }
-            )
-            content_str = (
-                str(result.content)
-                if not isinstance(result.content, str)
-                else result.content
-            )
-            cleaned_content = re.sub(r"^```.*$\n?", "", content_str, flags=re.MULTILINE)
-            markdown_line = f"[TABLE]\n{cleaned_content}\n[/TABLE]\n\n"
-
-        return markdown_line
+    def convert(
+        self,
+        file_path: str | Path | None = None,
+        file: IO[bytes] | None = None,
+        file_extension: FileExtension | None = None,
+        **kwargs,
+    ) -> MPDocument:
+        self.check_supported_extension(file_extension, file_path)
+        # Partition the PDF
+        elements = partition(
+            filename=str(file_path) if file_path else None,
+            file=file,
+            strategy=self.strategy,
+            content_type=file_extension.mimetype if file_extension else None,
+        )
+        return self.__to_mp_document(elements)
 
     async def aconvert(
         self,
@@ -121,7 +73,7 @@ class UnstructuredParser(BaseParser):
         file: IO[bytes] | None = None,
         file_extension: FileExtension | None = None,
         **kwargs,
-    ) -> str:
+    ) -> MPDocument:
         self.check_supported_extension(file_extension, file_path)
         warnings.warn(
             "The UnstructuredParser is a sync parser, please use the sync convert method",
@@ -130,21 +82,290 @@ class UnstructuredParser(BaseParser):
         )
         return self.convert(file_path, file, file_extension, **kwargs)
 
-    def convert(
-        self,
-        file_path: str | Path | None = None,
-        file: IO[bytes] | None = None,
-        file_extension: FileExtension | None = None,
-        **kwargs,
-    ) -> str:
-        self.check_supported_extension(file_extension, file_path)
-
-        elements = partition(
-            filename=str(file_path) if file_path else None,
-            file=file,
-            strategy=self.strategy,
-            content_type=file_extension.mimetype if file_extension else None,
+    def __to_mp_document(self, elements: List[Element]) -> MPDocument:
+        text_blocks = []
+        for element in elements:
+            block = self.__convert_element_to_block(element)
+            if block:
+                text_blocks.append(block)
+        return MPDocument(
+            content=text_blocks, metadata={}, detection_origin="unstructured"
         )
-        elements_dict = [el.to_dict() for el in elements]
-        markdown_content = self.convert_to_markdown(elements_dict)
-        return markdown_content
+
+    def __convert_element_to_block(self, element: Element) -> Block | None:
+        element_type = element.category
+        text = element.text
+        metadata = element.metadata
+        category_depth = metadata.category_depth
+
+        # Element type-specific markdown content
+        markdown_types: Dict[str, Block] = {
+            "Title": TitleBlock(
+                text=text,
+                metadata={},
+                page_range=(metadata.page_number, metadata.page_number)
+                if metadata.page_number
+                else None,
+                bbox=BBOX(
+                    top_left=Point2D(
+                        x=metadata.coordinates.points[0][0],
+                        y=metadata.coordinates.points[0][1],
+                    ),
+                    bottom_right=Point2D(
+                        x=metadata.coordinates.points[3][0],
+                        y=metadata.coordinates.points[3][1],
+                    ),
+                )
+                if metadata.coordinates and metadata.coordinates.points
+                else None,
+            ),
+            "Subtitle": SubTitleBlock(
+                text=text,
+                depth=category_depth if category_depth else 0,
+                metadata={},
+                page_range=(metadata.page_number, metadata.page_number)
+                if metadata.page_number
+                else None,
+                bbox=BBOX(
+                    top_left=Point2D(
+                        x=metadata.coordinates.points[0][0],
+                        y=metadata.coordinates.points[0][1],
+                    ),
+                    bottom_right=Point2D(
+                        x=metadata.coordinates.points[3][0],
+                        y=metadata.coordinates.points[3][1],
+                    ),
+                )
+                if metadata.coordinates and metadata.coordinates.points
+                else None,
+            ),
+            "Header": HeaderBlock(
+                text=text,
+                metadata={},
+                page_range=(metadata.page_number, metadata.page_number)
+                if metadata.page_number
+                else None,
+                bbox=BBOX(
+                    top_left=Point2D(
+                        x=metadata.coordinates.points[0][0],
+                        y=metadata.coordinates.points[0][1],
+                    ),
+                    bottom_right=Point2D(
+                        x=metadata.coordinates.points[3][0],
+                        y=metadata.coordinates.points[3][1],
+                    ),
+                )
+                if metadata.coordinates and metadata.coordinates.points
+                else None,
+            ),
+            "Footer": FooterBlock(
+                text=text,
+                metadata={},
+                page_range=(metadata.page_number, metadata.page_number)
+                if metadata.page_number
+                else None,
+                bbox=BBOX(
+                    top_left=Point2D(
+                        x=metadata.coordinates.points[0][0],
+                        y=metadata.coordinates.points[0][1],
+                    ),
+                    bottom_right=Point2D(
+                        x=metadata.coordinates.points[3][0],
+                        y=metadata.coordinates.points[3][1],
+                    ),
+                )
+                if metadata.coordinates and metadata.coordinates.points
+                else None,
+            ),
+            "NarrativeText": TextBlock(
+                text=text,
+                metadata={},
+                page_range=(metadata.page_number, metadata.page_number)
+                if metadata.page_number
+                else None,
+                bbox=BBOX(
+                    top_left=Point2D(
+                        x=metadata.coordinates.points[0][0],
+                        y=metadata.coordinates.points[0][1],
+                    ),
+                    bottom_right=Point2D(
+                        x=metadata.coordinates.points[3][0],
+                        y=metadata.coordinates.points[3][1],
+                    ),
+                )
+                if metadata.coordinates and metadata.coordinates.points
+                else None,
+            ),
+            "ListItem": TextBlock(  # FIXME: @chloedia, list item need to be handled differently in ListBlock
+                text=text,
+                metadata={},
+                page_range=(metadata.page_number, metadata.page_number)
+                if metadata.page_number
+                else None,
+                bbox=BBOX(
+                    top_left=Point2D(
+                        x=metadata.coordinates.points[0][0],
+                        y=metadata.coordinates.points[0][1],
+                    ),
+                    bottom_right=Point2D(
+                        x=metadata.coordinates.points[3][0],
+                        y=metadata.coordinates.points[3][1],
+                    ),
+                )
+                if metadata.coordinates and metadata.coordinates.points
+                else None,
+            ),
+            "Table": TableBlock(
+                text=text,
+                metadata={},
+                page_range=(metadata.page_number, metadata.page_number)
+                if metadata.page_number
+                else None,
+                bbox=BBOX(
+                    top_left=Point2D(
+                        x=metadata.coordinates.points[0][0],
+                        y=metadata.coordinates.points[0][1],
+                    ),
+                    bottom_right=Point2D(
+                        x=metadata.coordinates.points[3][0],
+                        y=metadata.coordinates.points[3][1],
+                    ),
+                )
+                if metadata.coordinates and metadata.coordinates.points
+                else None,
+            ),
+            "Image": ImageBlock(
+                text=text,
+                metadata={},
+                page_range=(metadata.page_number, metadata.page_number)
+                if metadata.page_number
+                else None,
+                bbox=BBOX(
+                    top_left=Point2D(
+                        x=metadata.coordinates.points[0][0],
+                        y=metadata.coordinates.points[0][1],
+                    ),
+                    bottom_right=Point2D(
+                        x=metadata.coordinates.points[3][0],
+                        y=metadata.coordinates.points[3][1],
+                    ),
+                )
+                if metadata.coordinates and metadata.coordinates.points
+                else None,
+            ),
+            "Formula": TextBlock(
+                text=text,
+                metadata={},
+                page_range=(metadata.page_number, metadata.page_number)
+                if metadata.page_number
+                else None,
+                bbox=BBOX(
+                    top_left=Point2D(
+                        x=metadata.coordinates.points[0][0],
+                        y=metadata.coordinates.points[0][1],
+                    ),
+                    bottom_right=Point2D(
+                        x=metadata.coordinates.points[3][0],
+                        y=metadata.coordinates.points[3][1],
+                    ),
+                )
+                if metadata.coordinates and metadata.coordinates.points
+                else None,
+            ),
+            "FigureCaption": TextBlock(
+                text=text,
+                metadata={},
+                page_range=(metadata.page_number, metadata.page_number)
+                if metadata.page_number
+                else None,
+                bbox=BBOX(
+                    top_left=Point2D(
+                        x=metadata.coordinates.points[0][0],
+                        y=metadata.coordinates.points[0][1],
+                    ),
+                    bottom_right=Point2D(
+                        x=metadata.coordinates.points[3][0],
+                        y=metadata.coordinates.points[3][1],
+                    ),
+                )
+                if metadata.coordinates and metadata.coordinates.points
+                else None,
+            ),
+            "Address": TextBlock(
+                text=text,
+                metadata={},
+                page_range=(metadata.page_number, metadata.page_number)
+                if metadata.page_number
+                else None,
+                bbox=BBOX(
+                    top_left=Point2D(
+                        x=metadata.coordinates.points[0][0],
+                        y=metadata.coordinates.points[0][1],
+                    ),
+                    bottom_right=Point2D(
+                        x=metadata.coordinates.points[3][0],
+                        y=metadata.coordinates.points[3][1],
+                    ),
+                )
+                if metadata.coordinates and metadata.coordinates.points
+                else None,
+            ),
+            "EmailAddress": TextBlock(
+                text=text,
+                metadata={},
+                page_range=(metadata.page_number, metadata.page_number)
+                if metadata.page_number
+                else None,
+                bbox=BBOX(
+                    top_left=Point2D(
+                        x=metadata.coordinates.points[0][0],
+                        y=metadata.coordinates.points[0][1],
+                    ),
+                    bottom_right=Point2D(
+                        x=metadata.coordinates.points[3][0],
+                        y=metadata.coordinates.points[3][1],
+                    ),
+                )
+                if metadata.coordinates and metadata.coordinates.points
+                else None,
+            ),
+            "CodeSnippet": TextBlock(
+                text=text,
+                metadata={},
+                page_range=(metadata.page_number, metadata.page_number)
+                if metadata.page_number
+                else None,
+                bbox=BBOX(
+                    top_left=Point2D(
+                        x=metadata.coordinates.points[0][0],
+                        y=metadata.coordinates.points[0][1],
+                    ),
+                    bottom_right=Point2D(
+                        x=metadata.coordinates.points[3][0],
+                        y=metadata.coordinates.points[3][1],
+                    ),
+                )
+                if metadata.coordinates and metadata.coordinates.points
+                else None,
+            ),
+            "UncategorizedText": TextBlock(
+                text=text,
+                metadata={},
+                page_range=(metadata.page_number, metadata.page_number)
+                if metadata.page_number
+                else None,
+                bbox=BBOX(
+                    top_left=Point2D(
+                        x=metadata.coordinates.points[0][0],
+                        y=metadata.coordinates.points[0][1],
+                    ),
+                    bottom_right=Point2D(
+                        x=metadata.coordinates.points[3][0],
+                        y=metadata.coordinates.points[3][1],
+                    ),
+                )
+                if metadata.coordinates and metadata.coordinates.points
+                else None,
+            ),
+        }
+        return markdown_types.get(element_type, None)

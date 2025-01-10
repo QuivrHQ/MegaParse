@@ -34,7 +34,7 @@ def test_sync_parser(parser, extension):
         response = myparser.convert(file_path)
 
         assert response
-        assert len(response) > 0
+        assert len(str(response)) > 0
     else:
         with pytest.raises(ValueError):
             myparser.convert(file_path)

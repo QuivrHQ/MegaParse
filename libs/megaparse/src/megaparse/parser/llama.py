@@ -1,4 +1,3 @@
-import asyncio
 from pathlib import Path
 from typing import IO, List
 
@@ -7,7 +6,10 @@ from llama_parse import LlamaParse as _LlamaParse
 from llama_parse.utils import Language, ResultType
 from megaparse_sdk.schema.extensions import FileExtension
 
+from megaparse.models.document import Document as MPDocument
+from megaparse.models.document import TextBlock
 from megaparse.parser import BaseParser
+from megaparse.predictor.models.base import BBOX, Point2D
 
 
 class LlamaParser(BaseParser):
@@ -36,7 +38,7 @@ class LlamaParser(BaseParser):
         file: IO[bytes] | None = None,
         file_extension: None | FileExtension = None,
         **kwargs,
-    ) -> str:
+    ) -> MPDocument:
         if not file_path:
             raise ValueError("File_path should be provided to run LlamaParser")
         self.check_supported_extension(file_extension, file_path)
@@ -51,12 +53,8 @@ class LlamaParser(BaseParser):
         )
 
         documents: List[LlamaDocument] = await llama_parser.aload_data(str(file_path))
-        parsed_md = ""
-        for document in documents:
-            text_content = document.text
-            parsed_md = parsed_md + text_content
 
-        return parsed_md
+        return self.__to_elements_list__(documents)
 
     def convert(
         self,
@@ -64,14 +62,14 @@ class LlamaParser(BaseParser):
         file: IO[bytes] | None = None,
         file_extension: None | FileExtension = None,
         **kwargs,
-    ) -> str:
+    ) -> MPDocument:
         if not file_path:
             raise ValueError("File_path should be provided to run LlamaParser")
         self.check_supported_extension(file_extension, file_path)
 
         llama_parser = _LlamaParse(
             api_key=self.api_key,
-            result_type=ResultType.MD,
+            result_type=ResultType.JSON,
             gpt4o_mode=True,
             verbose=self.verbose,
             language=self.language,
@@ -79,9 +77,24 @@ class LlamaParser(BaseParser):
         )
 
         documents: List[LlamaDocument] = llama_parser.load_data(str(file_path))
-        parsed_md = ""
-        for document in documents:
-            text_content = document.text
-            parsed_md = parsed_md + text_content
 
-        return parsed_md
+        return self.__to_elements_list__(documents)
+
+    def __to_elements_list__(self, llama_doc: List[LlamaDocument]) -> MPDocument:
+        list_blocks = []
+        for i, page in enumerate(llama_doc):
+            list_blocks.append(
+                TextBlock(
+                    text=page.text,
+                    metadata={},
+                    page_range=(i, i + 1),
+                    bbox=BBOX(
+                        top_left=Point2D(x=0, y=0), bottom_right=Point2D(x=1, y=1)
+                    ),
+                )
+            )
+        return MPDocument(
+            metadata={},
+            detection_origin="llamaparse",
+            content=list_blocks,
+        )

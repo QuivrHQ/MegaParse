@@ -6,11 +6,14 @@ from typing import IO, BinaryIO, List
 from megaparse.configs.auto import DeviceEnum, TextRecoConfig, TextDetConfig
 import onnxruntime as rt
 from megaparse_sdk.schema.extensions import FileExtension
-from onnxtr.io import DocumentFile
+from onnxtr.io import Document, DocumentFile
 from onnxtr.models import ocr_predictor
 from onnxtr.models.engine import EngineConfig
 
+from megaparse.models.document import Document as MPDocument
+from megaparse.models.document import ImageBlock, TextBlock
 from megaparse.parser.base import BaseParser
+from megaparse.predictor.models.base import BBOX, Point2D
 
 logger = logging.getLogger("megaparse")
 
@@ -80,7 +83,7 @@ class DoctrParser(BaseParser):
         file: IO[bytes] | BinaryIO | None = None,
         file_extension: None | FileExtension = None,
         **kwargs,
-    ) -> str:
+    ) -> MPDocument:
         if file:
             file.seek(0)
             pdf = file.read()
@@ -93,8 +96,9 @@ class DoctrParser(BaseParser):
 
         doc = DocumentFile.from_pdf(pdf)
         # Analyze
-        result = self.predictor(doc)
-        return result.render()
+        doctr_result = self.predictor(doc)
+
+        return self.__to_elements_list(doctr_result)
 
     async def aconvert(
         self,
@@ -102,10 +106,60 @@ class DoctrParser(BaseParser):
         file: IO[bytes] | BinaryIO | None = None,
         file_extension: None | FileExtension = None,
         **kwargs,
-    ) -> str:
+    ) -> MPDocument:
         warnings.warn(
-            "The UnstructuredParser is a sync parser, please use the sync convert method",
+            "The DocTRParser is a sync parser, please use the sync convert method",
             UserWarning,
             stacklevel=2,
         )
         return self.convert(file_path, file, file_extension, **kwargs)
+
+    def __to_elements_list(self, doctr_document: Document) -> MPDocument:
+        result = []
+
+        for page_number, page in enumerate(doctr_document.pages):
+            for block in page.blocks:
+                if len(block.lines) and len(block.artefacts) > 0:
+                    raise ValueError(
+                        "Block should not contain both lines and artefacts"
+                    )
+                word_coordinates = [
+                    word.geometry for line in block.lines for word in line.words
+                ]
+                x0 = min(word[0][0] for word in word_coordinates)
+                y0 = min(word[0][1] for word in word_coordinates)
+                x1 = max(word[1][0] for word in word_coordinates)
+                y1 = max(word[1][1] for word in word_coordinates)
+
+                result.append(
+                    TextBlock(
+                        text=block.render(),
+                        bbox=BBOX(
+                            top_left=Point2D(x=x0, y=y0),
+                            bottom_right=Point2D(x=x1, y=y1),
+                        ),
+                        metadata={},
+                        page_range=(page_number, page_number),
+                    )
+                )
+
+                for artefact in block.artefacts:
+                    result.append(
+                        ImageBlock(
+                            bbox=BBOX(
+                                top_left=Point2D(
+                                    x=artefact.geometry[0][0], y=artefact.geometry[0][1]
+                                ),
+                                bottom_right=Point2D(
+                                    x=artefact.geometry[1][0], y=artefact.geometry[1][1]
+                                ),
+                            ),
+                            metadata={},
+                            page_range=(page_number, page_number),
+                        )
+                    )
+        return MPDocument(
+            metadata={},
+            content=result,
+            detection_origin="doctr",
+        )
