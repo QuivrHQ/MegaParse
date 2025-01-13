@@ -41,34 +41,25 @@ pip install megaparse
 
 4. If you have a mac, you also need to install libmagic ```brew install libmagic```
 
-
+Use MegaParse as it is : 
 ```python
 from megaparse import MegaParse
 from langchain_openai import ChatOpenAI
-from megaparse.parser.unstructured_parser import UnstructuredParser
 
-parser = UnstructuredParser()
-megaparse = MegaParse(parser)
+megaparse = MegaParse()
 response = megaparse.load("./test.pdf")
 print(response)
-megaparse.save("./test.md")
 ```
 
 ### Use MegaParse Vision
 
-* Change the parser to MegaParseVision
-
 ```python
-from megaparse import MegaParse
-from langchain_openai import ChatOpenAI
 from megaparse.parser.megaparse_vision import MegaParseVision
 
 model = ChatOpenAI(model="gpt-4o", api_key=os.getenv("OPENAI_API_KEY"))  # type: ignore
 parser = MegaParseVision(model=model)
-megaparse = MegaParse(parser)
-response = megaparse.load("./test.pdf")
+response = parser.convert("./test.pdf")
 print(response)
-megaparse.save("./test.md")
 
 ```
 **Note**: The model supported by MegaParse Vision are the multimodal ones such as claude 3.5, claude 4, gpt-4o and gpt-4.
