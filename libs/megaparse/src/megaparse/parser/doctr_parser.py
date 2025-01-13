@@ -53,7 +53,6 @@ class DoctrParser(BaseParser):
 
     def _get_providers(self) -> List[str]:
         prov = rt.get_available_providers()
-        logger.info("Available providers:", prov)
         if self.device == DeviceEnum.CUDA:
             # TODO: support openvino, directml etc
             if "CUDAExecutionProvider" not in prov:
