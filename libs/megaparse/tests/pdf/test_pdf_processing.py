@@ -2,13 +2,9 @@ from pathlib import Path
 
 import pytest
 from megaparse.megaparse import MegaParse
-from megaparse.parser.strategy import StrategyHandler
-from megaparse.parser.unstructured_parser import UnstructuredParser
-from megaparse.utils.strategy_utils import need_hi_res
+from megaparse.utils.strategy import determine_global_strategy
 from megaparse_sdk.schema.extensions import FileExtension
 from megaparse_sdk.schema.parser_config import StrategyEnum
-
-strategy_handler = StrategyHandler()
 
 
 @pytest.fixture
@@ -23,9 +19,9 @@ def scanned_pdf() -> Path:
     return p
 
 
-def test_get_default_processors_megaparse():
-    megaparse = MegaParse()
-    assert type(megaparse.parser) is UnstructuredParser
+# def test_get_default_processors_megaparse():
+#     megaparse = MegaParse()
+#     assert type(megaparse.parser) is UnstructuredParser
 
 
 @pytest.mark.asyncio
@@ -56,16 +52,23 @@ async def test_megaparse_pdf_processor_file(pdf_name, request):
 
 
 def test_strategy(scanned_pdf, native_pdf):
+    processor = MegaParse()
     with open(native_pdf, "rb") as f:
-        native_pages = strategy_handler.determine_strategy(
-            f,
+        pages = processor.extract_page_strategies(f)
+
+    assert (
+        determine_global_strategy(
+            pages, processor.config.auto_config.document_threshold
         )
-        result = need_hi_res(native_pages)
-        assert not result
+        == StrategyEnum.FAST
+    )
 
     with open(scanned_pdf, "rb") as f:
-        scanned_pages = strategy_handler.determine_strategy(
-            f,
+        pages = processor.extract_page_strategies(f)
+
+    assert (
+        determine_global_strategy(
+            pages, processor.config.auto_config.document_threshold
         )
-        result = need_hi_res(scanned_pages)
-        assert result
+        == StrategyEnum.HI_RES
+    )

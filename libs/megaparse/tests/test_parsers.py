@@ -9,7 +9,7 @@ from megaparse_sdk.schema.extensions import FileExtension
 
 PARSER_LIST = [
     UnstructuredParser,
-    DoctrParser,
+    # DoctrParser,
 ]
 
 

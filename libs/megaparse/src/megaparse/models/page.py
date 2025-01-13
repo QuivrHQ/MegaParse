@@ -1,11 +1,9 @@
 from typing import List
-
 from megaparse.predictor.models.base import PageLayout
 from megaparse_sdk.schema.parser_config import StrategyEnum
+from PIL.Image import Image as PILImage
 from pydantic import BaseModel, ConfigDict
 from pypdfium2._helpers.page import PdfPage
-from PIL.Image import Image as PILImage
-import numpy as np
 
 
 class PageDimension(BaseModel):
@@ -30,3 +28,12 @@ class Page(BaseModel):
     pdfium_elements: PdfPage
 
     model_config = ConfigDict(arbitrary_types_allowed=True)
+
+
+class GatewayDocument(BaseModel):
+    """
+    A class to represent a Gateway MegaParse Document, which is a container of pages.
+    """
+
+    file_name: str
+    pages: List[Page]

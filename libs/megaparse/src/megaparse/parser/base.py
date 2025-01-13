@@ -33,7 +33,6 @@ class BaseParser(ABC):
         self,
         file_path: str | Path | None = None,
         file: IO[bytes] | None = None,
-        pages: List[Page] | None = None,
         file_extension: FileExtension | None = None,
         **kwargs,
     ) -> Document:
@@ -57,7 +56,6 @@ class BaseParser(ABC):
         self,
         file_path: str | Path | None = None,
         file: IO[bytes] | None = None,
-        pages: List[Page] | None = None,
         file_extension: FileExtension | None = None,
         **kwargs,
     ) -> Document:

@@ -1,14 +1,13 @@
 import logging
 import warnings
-from pathlib import Path
-from typing import IO, Any, BinaryIO, List
+from typing import Any, List
 
-import PIL
+import numpy as np
 import onnxruntime as rt
 from megaparse_sdk.schema.extensions import FileExtension
-from onnxtr.io import Document, DocumentFile
-from onnxtr.models import detection_predictor, ocr_predictor, recognition_predictor
-from onnxtr.models.detection.predictor import DetectionPredictor
+from onnxtr.io import Document
+from onnxtr.models import detection_predictor, recognition_predictor
+from onnxtr.models._utils import get_language
 from onnxtr.models.engine import EngineConfig
 from onnxtr.models.predictor.base import _OCRPredictor
 from onnxtr.utils.geometry import detach_scores
@@ -18,7 +17,6 @@ from megaparse.configs.auto import DeviceEnum, TextDetConfig, TextRecoConfig
 from megaparse.models.document import Document as MPDocument
 from megaparse.models.document import ImageBlock, TextBlock
 from megaparse.models.page import Page
-from megaparse.parser.base import BaseParser
 from megaparse.predictor.models.base import (
     BBOX,
     BlockLayout,
@@ -26,13 +24,6 @@ from megaparse.predictor.models.base import (
     PageLayout,
     Point2D,
 )
-from onnxtr.models._utils import get_language
-
-
-import numpy as np
-from typing import List
-
-from PIL import Image as PILImage
 
 logger = logging.getLogger("megaparse")
 
@@ -133,7 +124,7 @@ class DoctrParser(NestedObject, _OCRPredictor):
         # Detect document rotation and rotate pages
         seg_maps = [
             np.where(
-                out_map > self.det_predictor.model.postprocessor,
+                out_map > self.det_predictor.model.postprocessor.bin_thresh,
                 255,
                 0,
             ).astype(np.uint8)
@@ -204,8 +195,11 @@ class DoctrParser(NestedObject, _OCRPredictor):
         orientations = []
         origin_page_shapes = []
         for page in pages:
+            page_loc_pred = page.text_detections.get_loc_preds()  # type: ignore
+            if page_loc_pred.shape[0] == 0:
+                page_loc_pred = np.zeros((0, 4))
             rasterized_pages.append(np.array(page.rasterized))
-            loc_preds.append(page.text_detections.get_loc_preds())  # type: ignore
+            loc_preds.append(page_loc_pred)  # type: ignore
             objectness_scores.append(page.text_detections.get_objectness_scores())  # type: ignore
             orientations.append(page.text_detections.get_orientations())  # type: ignore
             origin_page_shapes.append(page.text_detections.get_origin_page_shapes())  # type: ignore
