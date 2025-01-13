@@ -22,12 +22,10 @@ logger = logging.getLogger("megaparse")
 
 
 class MegaParse:
-    config = MegaParseConfig()
-
     def __init__(
-        self,
-        formatters: List[BaseFormatter] | None = None,
+        self, formatters: List[BaseFormatter] | None = None, config=MegaParseConfig()
     ) -> None:
+        self.config = config
         self.formatters = formatters
         self.doctr_parser = DoctrParser(
             text_det_config=self.config.doctr_config.text_det_config,
