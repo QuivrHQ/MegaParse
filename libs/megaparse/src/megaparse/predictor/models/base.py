@@ -19,6 +19,11 @@ class BBOX(NamedTuple):
     top_left: Point2D
     bottom_right: Point2D
 
+    def to_numpy(self):
+        return np.array(
+            [self.top_left.x, self.top_left.y, self.bottom_right.x, self.bottom_right.y]
+        )
+
 
 class BlockLayout(BaseModel):
     bbox: BBOX
@@ -85,17 +90,7 @@ class PageLayout:
         Returns:
             np.ndarray: The location predictions as a NumPy array.
         """
-        loc_preds = np.array(
-            [
-                [
-                    block.bbox.top_left.x,
-                    block.bbox.top_left.y,
-                    block.bbox.bottom_right.x,
-                    block.bbox.bottom_right.y,
-                ]
-                for block in self.bboxes
-            ]
-        )
+        loc_preds = np.array([block.bbox.to_numpy() for block in self.bboxes])
         return loc_preds
 
     def get_objectness_scores(self) -> np.ndarray:
