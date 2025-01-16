@@ -1,5 +1,24 @@
 # Changelog
 
+## [0.0.53](https://github.com/QuivrHQ/MegaParse/compare/megaparse-v0.0.52...megaparse-v0.0.53) (2025-01-16)
+
+
+### Features
+
+* modular parser and formatter v0 ([#175](https://github.com/QuivrHQ/MegaParse/issues/175)) ([1f4dcf8](https://github.com/QuivrHQ/MegaParse/commit/1f4dcf88a5901c5a2682cb79284a0dbb08034cb2))
+* Text detection in auto strategy ([#209](https://github.com/QuivrHQ/MegaParse/issues/209)) ([03c7ada](https://github.com/QuivrHQ/MegaParse/commit/03c7ada1dc245e13ef41ffd6fa3a8ed869269d37))
+* type strategy output ([#216](https://github.com/QuivrHQ/MegaParse/issues/216)) ([deb8765](https://github.com/QuivrHQ/MegaParse/commit/deb8765a4df8917a4857f51a02025243192d5cf8))
+
+
+### Bug Fixes
+
+* Add EngineConfig & StrategyHandler ([#211](https://github.com/QuivrHQ/MegaParse/issues/211)) ([2e1c6dd](https://github.com/QuivrHQ/MegaParse/commit/2e1c6ddd676227d1cbc4cff9771b20595259ba38))
+* add parse tests for every supported extensions ([#198](https://github.com/QuivrHQ/MegaParse/issues/198)) ([9dff0de](https://github.com/QuivrHQ/MegaParse/commit/9dff0de0c1de848151fe9a6519b658f0924c1228))
+* logging error ([#218](https://github.com/QuivrHQ/MegaParse/issues/218)) ([a2170d7](https://github.com/QuivrHQ/MegaParse/commit/a2170d7c711a5d7a0531f03aa9576937ddd6576e))
+* megaparse.load & add tests ([#202](https://github.com/QuivrHQ/MegaParse/issues/202)) ([13c2677](https://github.com/QuivrHQ/MegaParse/commit/13c2677bdadb4ba985a1abf9bafeb70548ab59f9))
+* Strategy heuristic test & fix ([#203](https://github.com/QuivrHQ/MegaParse/issues/203)) ([7b7fb40](https://github.com/QuivrHQ/MegaParse/commit/7b7fb40cae4ed380a5f0ca0035a7bd2bcc9147c3))
+* sync convert to parsers ([#186](https://github.com/QuivrHQ/MegaParse/issues/186)) ([fbb7d36](https://github.com/QuivrHQ/MegaParse/commit/fbb7d365fbaf710a687fdc6becacd6d301c09707))
+
 ## [0.0.52](https://github.com/QuivrHQ/MegaParse/compare/megaparse-v0.0.51...megaparse-v0.0.52) (2024-12-16)
 
 
