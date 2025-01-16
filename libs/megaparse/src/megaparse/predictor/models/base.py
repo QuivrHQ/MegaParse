@@ -24,6 +24,21 @@ class BBOX(NamedTuple):
             [self.top_left.x, self.top_left.y, self.bottom_right.x, self.bottom_right.y]
         )
 
+    def iou(self, other: "BBOX"):
+        x1 = max(self.top_left.x, other.top_left.x)
+        y1 = max(self.top_left.y, other.top_left.y)
+        x2 = min(self.bottom_right.x, other.bottom_right.x)
+        y2 = min(self.bottom_right.y, other.bottom_right.y)
+        intersection = max(0, x2 - x1) * max(0, y2 - y1)
+        area_self = (self.bottom_right.x - self.top_left.x) * (
+            self.bottom_right.y - self.top_left.y
+        )
+        area_other = (other.bottom_right.x - other.top_left.x) * (
+            other.bottom_right.y - other.top_left.y
+        )
+        union = area_self + area_other - intersection
+        return intersection / union
+
 
 class BlockLayout(BaseModel):
     bbox: BBOX

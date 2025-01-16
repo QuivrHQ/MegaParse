@@ -2,6 +2,7 @@ import logging
 import warnings
 from typing import Any, List
 
+from megaparse.utils.onnx import _get_providers
 import numpy as np
 import onnxruntime as rt
 from megaparse_sdk.schema.extensions import FileExtension
@@ -43,7 +44,7 @@ class DoctrParser(NestedObject, _OCRPredictor):
     ):
         self.device = device
         general_options = rt.SessionOptions()
-        providers = self._get_providers()
+        providers = _get_providers(self.device)
         engine_config = EngineConfig(
             session_options=general_options,
             providers=providers,

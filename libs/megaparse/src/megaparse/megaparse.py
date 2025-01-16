@@ -3,6 +3,7 @@ import warnings
 from pathlib import Path
 from typing import IO, BinaryIO, List
 
+import numpy as np
 import pypdfium2 as pdfium
 from megaparse_sdk.schema.extensions import FileExtension
 from megaparse_sdk.schema.parser_config import StrategyEnum
@@ -10,7 +11,8 @@ from megaparse_sdk.schema.parser_config import StrategyEnum
 from megaparse.configs.auto import DeviceEnum, MegaParseConfig
 from megaparse.exceptions.base import ParsingException
 from megaparse.formatter.base import BaseFormatter
-from megaparse.models.page import GatewayDocument, Page, PageDimension
+from megaparse.layout_detection.layout_detector import LayoutDetector
+from megaparse.models.page import Page, PageDimension
 from megaparse.parser.doctr_parser import DoctrParser
 from megaparse.parser.unstructured_parser import UnstructuredParser
 from megaparse.utils.strategy import (
@@ -36,6 +38,7 @@ class MegaParse:
             detect_language=self.config.doctr_config.detect_language,
         )
         self.unstructured_parser = UnstructuredParser()
+        self.layout_detector = LayoutDetector(device=DeviceEnum.COREML)
 
     def validate_input(
         self,
@@ -141,6 +144,11 @@ class MegaParse:
                 pages = self.extract_page_strategies(file)
                 strategy = determine_global_strategy(
                     pages, self.config.auto_config.document_threshold
+                )
+
+                print("Detecting Layout")
+                layout = self.layout_detector(
+                    [np.array(page.rasterized) for page in pages]
                 )
 
                 if strategy == StrategyEnum.HI_RES:
