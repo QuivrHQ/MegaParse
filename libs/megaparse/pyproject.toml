@@ -1,6 +1,6 @@
 [project]
 name = "megaparse"
-version = "0.0.52"
+version = "0.0.53"
 authors = [
     { name = "Stan Girard", email = "stan@quivr.app" },
     { name = "Chloé Daems", email = "chloe@quivr.app" },
