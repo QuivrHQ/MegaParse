@@ -1,5 +1,6 @@
 import logging
 from typing import Any, Dict, List
+import uuid
 
 import numpy as np
 import onnxruntime as rt
@@ -75,7 +76,9 @@ class LayoutDetector:
 
         self.model = rt.InferenceSession(model_path, engine_config=engine_config)
 
-    def __call__(self, pages: list[np.ndarray], output_dir: str | None = None):
+    def __call__(
+        self, pages: list[np.ndarray], output_dir: str | None = None
+    ) -> List[List[LayoutDetectionOutput]]:
         # Dimension check
         if any(page.ndim != 3 for page in pages):
             raise ValueError(
@@ -116,7 +119,6 @@ class LayoutDetector:
         scale_h = img_h / self.required_height
         scale_w = img_w / self.required_width
 
-        current_id = 0
         for det in preds:
             # Rescale the bounding box coordinates to the original dimensions
             x1, y1, x2, y2, score, cls_idx = det
@@ -140,18 +142,19 @@ class LayoutDetector:
             y1 = max(0, min(y1, img_h))
             y2 = max(0, min(y2, img_h))
 
+            bbox_id = uuid.uuid4()
+
             results.append(
                 LayoutDetectionOutput(
-                    bbox_id=current_id,
+                    bbox_id=bbox_id,
                     bbox=BBOX(
-                        top_left=Point2D(x=x1, y=y1),
-                        bottom_right=Point2D(x=x2, y=y2),
+                        top_left=Point2D(x=x1 / img_w, y=y1 / img_h),
+                        bottom_right=Point2D(x=x2 / img_w, y=y2 / img_h),
                     ),
                     prob=det[4],
                     label=int(det[5]),
                 )
             )
-            current_id += 1
 
         result = self.topK(results)  # or topK
         return result
@@ -212,10 +215,11 @@ class LayoutDetector:
         for i, (page, layout) in enumerate(zip(pages, preds, strict=True)):
             image = Image.fromarray(page)
             draw = ImageDraw.Draw(image)
+            img_w, img_h = image.size
 
             for detection in layout:
                 x_min, y_min, x_max, y_max = detection.bbox.to_numpy()
-                bbox = x_min, y_min, x_max, y_max
+                bbox = x_min * img_w, y_min * img_h, x_max * img_w, y_max * img_h
                 confidence = detection.prob
                 category = detection.label
                 label = label_map.get(category, "Unknown")

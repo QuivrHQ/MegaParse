@@ -54,6 +54,15 @@ class TextBlock(Block):
         return self.text
 
 
+class UndefinedBlock(TextBlock):
+    """
+    A class to represent a text block
+
+    """
+
+    pass
+
+
 class TitleBlock(TextBlock):
     """
     A class to represent a title block
@@ -69,7 +78,7 @@ class SubTitleBlock(TextBlock):
     A class to represent a subtitle block
     """
 
-    depth: int
+    depth: int = 0
 
     def __str__(self):
         heading_level = min(self.depth + 1, 6)
@@ -98,14 +107,13 @@ class TableBlock(ImageBlock):
         return self.text if self.text else f"[Table : {self.caption}]"
 
 
-class ListElement(BaseModel):
+class ListElementBlock(TextBlock):
     """
     A class to represent a list element
 
     """
 
-    text: str
-    depth: int
+    depth: int = 0
 
 
 class ListBlock(TextBlock):
@@ -114,7 +122,7 @@ class ListBlock(TextBlock):
 
     """
 
-    list_elements: List[ListElement]
+    list_elements: List[ListElementBlock]
 
     # rajouter fonction pydantic pour compute l attribut
 
@@ -219,6 +227,6 @@ class Document(BaseModel):
             lines.append(self.table_of_contents.text)
 
         # Print each block’s text representation
-        lines.extend(str(block) for block in self.content)
+        lines.extend(str(block) + "\n" for block in self.content)
 
         return "\n".join(lines)

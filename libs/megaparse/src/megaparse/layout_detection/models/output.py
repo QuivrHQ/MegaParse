@@ -5,7 +5,7 @@ from pydantic import BaseModel
 
 
 class LayoutDetectionOutput(BaseModel):
-    bbox_id: int
+    bbox_id: UUID
     bbox: BBOX
     prob: float
     label: int

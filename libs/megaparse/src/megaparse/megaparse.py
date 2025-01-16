@@ -12,6 +12,8 @@ from megaparse.configs.auto import DeviceEnum, MegaParseConfig
 from megaparse.exceptions.base import ParsingException
 from megaparse.formatter.base import BaseFormatter
 from megaparse.layout_detection.layout_detector import LayoutDetector
+from megaparse.layout_detection.models.output import LayoutDetectionOutput
+from megaparse.models.document import Document
 from megaparse.models.page import Page, PageDimension
 from megaparse.parser.doctr_parser import DoctrParser
 from megaparse.parser.unstructured_parser import UnstructuredParser
@@ -153,7 +155,9 @@ class MegaParse:
 
                 if strategy == StrategyEnum.HI_RES:
                     print("Using Doctr for text recognition")
-                    parsed_document = self.doctr_parser.get_text_recognition(pages)
+                    parsed_document = self.doctr_parser.get_text_recognition(
+                        pages, layout
+                    )
 
                 else:
                     print("Switching to Unstructured Parser")
@@ -198,7 +202,7 @@ class MegaParse:
         if file_extension != FileExtension.PDF or strategy == StrategyEnum.FAST:
             self.unstructured_parser.strategy = strategy
             parsed_document = await self.unstructured_parser.aconvert(
-                file_path=file_path, file=file, file_extension=file_extension
+                file=file, file_extension=file_extension
             )
             return str(parsed_document)
         else:
@@ -214,9 +218,16 @@ class MegaParse:
                     pages, self.config.auto_config.document_threshold
                 )
 
+                print("Detecting Layout")
+                layout = self.layout_detector(
+                    [np.array(page.rasterized) for page in pages]
+                )
+
                 if strategy == StrategyEnum.HI_RES:
                     print("Using Doctr for text recognition")
-                    parsed_document = self.doctr_parser.get_text_recognition(pages)
+                    parsed_document = self.doctr_parser.get_text_recognition(
+                        pages, layout
+                    )
 
                 else:
                     print("Switching to Unstructured Parser")
