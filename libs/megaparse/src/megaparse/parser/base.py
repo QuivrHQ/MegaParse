@@ -1,7 +1,8 @@
 from abc import ABC, abstractmethod
 from pathlib import Path
-from typing import IO
+from typing import IO, List
 
+from megaparse.models.page import Page
 from megaparse_sdk.schema.extensions import FileExtension
 
 from megaparse.models.document import Document

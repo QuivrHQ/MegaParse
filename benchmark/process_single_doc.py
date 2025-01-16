@@ -24,8 +24,8 @@ async def process_file(megaparse: MegaParse, file_path: str | Path):
 
 
 async def test_process_file(file: str | Path):
-    parser = UnstructuredParser(strategy=StrategyEnum.HI_RES)
-    megaparse = MegaParse(parser=parser)
+    # parser = UnstructuredParser(strategy=StrategyEnum.HI_RES)
+    megaparse = MegaParse()
     task = []
     for _ in range(N_TRY):
         task.append(process_file(megaparse, file))

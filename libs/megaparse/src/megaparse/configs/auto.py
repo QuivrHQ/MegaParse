@@ -14,8 +14,8 @@ class TextDetConfig(BaseModel):
 
 
 class AutoStrategyConfig(BaseModel):
-    auto_page_threshold: float = 0.6
-    auto_document_threshold: float = 0.2
+    page_threshold: float = 0.6
+    document_threshold: float = 0.2
 
 
 class TextRecoConfig(BaseModel):
@@ -27,6 +27,14 @@ class DeviceEnum(str, Enum):
     CPU = "cpu"
     CUDA = "cuda"
     COREML = "coreml"
+
+
+class DoctrConfig(BaseModel):
+    straighten_pages: bool = False
+    detect_orientation: bool = False
+    detect_language: bool = False
+    text_det_config: TextDetConfig = TextDetConfig()
+    text_reco_config: TextRecoConfig = TextRecoConfig()
 
 
 class MegaParseConfig(BaseSettings):
@@ -41,7 +49,6 @@ class MegaParseConfig(BaseSettings):
         extra="ignore",
         use_enum_values=True,
     )
-    text_det_config: TextDetConfig = TextDetConfig()
-    text_reco_config: TextRecoConfig = TextRecoConfig()
-    auto_parse_config: AutoStrategyConfig = AutoStrategyConfig()
+    doctr_config: DoctrConfig = DoctrConfig()
+    auto_config: AutoStrategyConfig = AutoStrategyConfig()
     device: DeviceEnum = DeviceEnum.CPU

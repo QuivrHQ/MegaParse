@@ -89,16 +89,16 @@ async def parse_file(
         else:
             raise HTTPModelNotSupported()
 
-    parser_config = ParseFileConfig(
-        method=method,
-        strategy=strategy,
-        model=model if model and check_table else None,
-        language=language,
-        parsing_instruction=parsing_instruction,
-    )
+    # parser_config = ParseFileConfig( #FIXME
+    #     method=method,
+    #     strategy=strategy,
+    #     llm_model_name=SupportedModel(model_name) if model_name and check_table else None,
+    #     language=language,
+    #     parsing_instruction=parsing_instruction,
+    # )
     try:
-        parser = parser_builder.build(parser_config)
-        megaparse = MegaParse(parser=parser)
+        # parser = parser_builder.build(parser_config)
+        megaparse = MegaParse()
         if not file.filename:
             raise HTTPFileNotFound("No filename provided")
         _, extension = os.path.splitext(file.filename)
@@ -136,9 +136,7 @@ async def upload_url(
         with tempfile.NamedTemporaryFile(delete=False, suffix="pdf") as temp_file:
             temp_file.write(response.content)
             try:
-                megaparse = MegaParse(
-                    parser=UnstructuredParser(strategy=StrategyEnum.AUTO)
-                )
+                megaparse = MegaParse()
                 result = await megaparse.aload(temp_file.name)
                 return {"message": "File parsed successfully", "result": result}
             except ParsingException:
