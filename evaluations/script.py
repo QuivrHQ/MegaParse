@@ -6,6 +6,7 @@ from megaparse.megaparse import MegaParse
 from megaparse.parser.llama import LlamaParser
 from megaparse.parser.megaparse_vision import MegaParseVision
 from megaparse.parser.unstructured_parser import UnstructuredParser
+from megaparse_sdk.schema.parser_config import StrategyEnum
 
 if __name__ == "__main__":
     print("---Launching evaluations script---")
@@ -29,7 +30,7 @@ if __name__ == "__main__":
 
     for method, parser in parser_dict.items():
         print(f"Method: {method}")
-        megaparse = MegaParse(parser=parser)
+        megaparse = MegaParse()
         result = megaparse.load(file_path=base_pdf_path)
         score_dict[method] = difflib.SequenceMatcher(None, base_md, result).ratio()
         print(f"Score for method {method}: {score_dict[method]}")

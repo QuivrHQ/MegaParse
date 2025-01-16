@@ -3,49 +3,39 @@ import warnings
 from pathlib import Path
 from typing import IO, BinaryIO, List
 
+import pypdfium2 as pdfium
 from megaparse_sdk.schema.extensions import FileExtension
 from megaparse_sdk.schema.parser_config import StrategyEnum
 
 from megaparse.configs.auto import DeviceEnum, MegaParseConfig
 from megaparse.exceptions.base import ParsingException
 from megaparse.formatter.base import BaseFormatter
-from megaparse.parser.base import BaseParser
+from megaparse.models.page import GatewayDocument, Page, PageDimension
 from megaparse.parser.doctr_parser import DoctrParser
-from megaparse.parser.strategy import StrategyHandler
 from megaparse.parser.unstructured_parser import UnstructuredParser
+from megaparse.utils.strategy import (
+    determine_global_strategy,
+    get_page_strategy,
+)
 
 logger = logging.getLogger("megaparse")
 
 
 class MegaParse:
-    config = MegaParseConfig()
-
     def __init__(
-        self,
-        parser: BaseParser | None = None,
-        ocr_parser: BaseParser | None = None,
-        formatters: List[BaseFormatter] | None = None,
-        strategy: StrategyEnum = StrategyEnum.AUTO,
+        self, formatters: List[BaseFormatter] | None = None, config=MegaParseConfig()
     ) -> None:
-        if not parser:
-            parser = UnstructuredParser(strategy=StrategyEnum.FAST)
-        if not ocr_parser:
-            ocr_parser = DoctrParser(
-                text_det_config=self.config.text_det_config,
-                text_reco_config=self.config.text_reco_config,
-                device=self.config.device,
-            )
-
-        self.strategy = strategy
-        self.parser = parser
+        self.config = config
         self.formatters = formatters
-        self.ocr_parser = ocr_parser
-
-        self.strategy_handler = StrategyHandler(
-            text_det_config=self.config.text_det_config,
-            auto_config=self.config.auto_parse_config,
+        self.doctr_parser = DoctrParser(
+            text_det_config=self.config.doctr_config.text_det_config,
+            text_reco_config=self.config.doctr_config.text_reco_config,
             device=self.config.device,
+            straighten_pages=self.config.doctr_config.straighten_pages,
+            detect_orientation=self.config.doctr_config.detect_orientation,
+            detect_language=self.config.doctr_config.detect_language,
         )
+        self.unstructured_parser = UnstructuredParser()
 
     def validate_input(
         self,
@@ -79,98 +69,173 @@ class MegaParse:
                 raise ValueError(f"Unsupported file extension: {file_extension}")
         return file_extension
 
-    async def aload(
-        self,
-        file_path: Path | str | None = None,
-        file: BinaryIO | None = None,
-        file_extension: str | FileExtension = "",
-    ) -> str:
-        file_extension = self.validate_input(
-            file=file, file_path=file_path, file_extension=file_extension
-        )
-        try:
-            parser = self._select_parser(file_path, file, file_extension)
-            logger.info(f"Parsing using {parser.__class__.__name__} parser.")
-            parsed_document = await parser.aconvert(
-                file_path=file_path, file=file, file_extension=file_extension
-            )
-            parsed_document.file_name = str(file_path) if file_path else None
+    def extract_page_strategies(
+        self, file: BinaryIO, rast_scale: int = 2
+    ) -> List[Page]:
+        pdfium_document = pdfium.PdfDocument(file)
 
-            if self.formatters:
-                for formatter in self.formatters:
-                    if isinstance(parsed_document, str):
-                        warnings.warn(
-                            f"The last step returned a string, the {formatter.__class__} and following will not be applied",
-                            stacklevel=2,
-                        )
-                        break
-                    parsed_document = await formatter.aformat(parsed_document)
-
-            # @chloe FIXME: format_checker needs unstructured Elements as input which is to change
-            # if self.format_checker:
-            #     parsed_document: str = self.format_checker.check(parsed_document)
-            if not isinstance(parsed_document, str):
-                return str(parsed_document)
-            return parsed_document
-        except Exception as e:
-            raise ParsingException(
-                f"Error while parsing file {file_path or file}, file_extension: {file_extension}: {e}"
+        pages = []
+        for i, pdfium_page in enumerate(pdfium_document):
+            rasterized_page = pdfium_page.render(scale=rast_scale)
+            assert (
+                abs(pdfium_page.get_width() * rast_scale - rasterized_page.width) <= 1
+            ), (
+                f"Widths do not match within a margin of 1: "
+                f"{pdfium_page.get_width() * rast_scale} != {rasterized_page.width}"
             )
+            pages.append(
+                Page(
+                    strategy=StrategyEnum.AUTO,
+                    text_detections=None,
+                    rasterized=rasterized_page.to_pil(),
+                    page_size=PageDimension(
+                        width=pdfium_page.get_width() * rast_scale,
+                        height=pdfium_page.get_height() * rast_scale,
+                    ),
+                    page_index=i,
+                    pdfium_elements=pdfium_page,
+                )
+            )
+
+        # ----
+        # Get text detection for each page -> PAGE
+
+        pages = self.doctr_parser.get_text_detections(pages)
+
+        # ---
+
+        # Get strategy per page -> PAGE
+        for page in pages:
+            page.strategy = get_page_strategy(
+                page.pdfium_elements,
+                page.text_detections,
+                threshold=self.config.auto_config.page_threshold,
+            )
+        return pages
 
     def load(
         self,
         file_path: Path | str | None = None,
         file: BinaryIO | None = None,
         file_extension: str | FileExtension = "",
+        strategy: StrategyEnum = StrategyEnum.AUTO,
     ) -> str:
         file_extension = self.validate_input(
             file=file, file_path=file_path, file_extension=file_extension
         )
-        try:
-            parser = self._select_parser(file_path, file, file_extension)
-            logger.info(f"Parsing using {parser.__class__.__name__} parser.")
-            parsed_document = parser.convert(
-                file_path=file_path, file=file, file_extension=file_extension
+        if file_extension != FileExtension.PDF or strategy == StrategyEnum.FAST:
+            self.unstructured_parser.strategy = strategy
+            return str(
+                self.unstructured_parser.convert(
+                    file_path=file_path, file=file, file_extension=file_extension
+                )
             )
-            parsed_document.file_name = str(file_path) if file_path else None
+        else:
+            opened_file = None
+            try:
+                if file_path:
+                    opened_file = open(file_path, "rb")
+                    file = opened_file
 
-            if self.formatters:
-                for formatter in self.formatters:
-                    if isinstance(parsed_document, str):
-                        warnings.warn(
-                            f"The last step returned a string, the {formatter.__class__} and following will not be applied",
-                            stacklevel=2,
-                        )
-                        break
-                    parsed_document = formatter.format(parsed_document)
+                assert file is not None, "No File provided"
+                pages = self.extract_page_strategies(file)
+                strategy = determine_global_strategy(
+                    pages, self.config.auto_config.document_threshold
+                )
 
-            # @chloe FIXME: format_checker needs unstructured Elements as input which is to change
-            # if self.format_checker:
-            #     parsed_document: str = self.format_checker.check(parsed_document)
-            if not isinstance(parsed_document, str):
-                return str(parsed_document)
-            return parsed_document
-        except Exception as e:
-            raise ParsingException(
-                f"Error while parsing file {file_path or file}, file_extension: {file_extension}: {e}"
-            )
+                if strategy == StrategyEnum.HI_RES:
+                    print("Using Doctr for text recognition")
+                    parsed_document = self.doctr_parser.get_text_recognition(pages)
 
-    def _select_parser(
+                else:
+                    print("Switching to Unstructured Parser")
+                    self.unstructured_parser.strategy = StrategyEnum.FAST
+                    parsed_document = self.unstructured_parser.convert(
+                        file=file, file_extension=file_extension
+                    )
+
+                parsed_document.file_name = str(file_path) if file_path else None
+
+                if self.formatters:
+                    for formatter in self.formatters:
+                        if isinstance(parsed_document, str):
+                            warnings.warn(
+                                f"The last step returned a string, the {formatter.__class__} and following will not be applied",
+                                stacklevel=2,
+                            )
+                            break
+                        parsed_document = formatter.format(parsed_document)
+
+                if not isinstance(parsed_document, str):
+                    return str(parsed_document)
+                return parsed_document
+            except Exception as e:
+                raise ParsingException(
+                    f"Error while parsing file {file_path or file}, file_extension: {file_extension}: {e}"
+                )
+            finally:
+                if opened_file:
+                    opened_file.close()
+
+    async def aload(
         self,
         file_path: Path | str | None = None,
         file: BinaryIO | None = None,
         file_extension: str | FileExtension = "",
-    ) -> BaseParser:
-        local_strategy = None
-        if self.strategy != StrategyEnum.AUTO or file_extension != FileExtension.PDF:
-            return self.parser
-        if file:
-            local_strategy = self.strategy_handler.determine_strategy(
-                file=file,  # type: ignore #FIXME: Careful here on removing BinaryIO (not handled by onnxtr)
+        strategy: StrategyEnum = StrategyEnum.AUTO,
+    ) -> str:
+        file_extension = self.validate_input(
+            file=file, file_path=file_path, file_extension=file_extension
+        )
+        if file_extension != FileExtension.PDF or strategy == StrategyEnum.FAST:
+            self.unstructured_parser.strategy = strategy
+            parsed_document = await self.unstructured_parser.aconvert(
+                file_path=file_path, file=file, file_extension=file_extension
             )
-        if file_path:
-            local_strategy = self.strategy_handler.determine_strategy(file=file_path)
+            return str(parsed_document)
+        else:
+            opened_file = None
+            try:
+                if file_path:
+                    opened_file = open(file_path, "rb")
+                    file = opened_file
 
-        if local_strategy == StrategyEnum.HI_RES:
-            return self.ocr_parser
-        return self.parser
+                assert file is not None, "No File provided"
+                pages = self.extract_page_strategies(file)
+                strategy = determine_global_strategy(
+                    pages, self.config.auto_config.document_threshold
+                )
+
+                if strategy == StrategyEnum.HI_RES:
+                    print("Using Doctr for text recognition")
+                    parsed_document = self.doctr_parser.get_text_recognition(pages)
+
+                else:
+                    print("Switching to Unstructured Parser")
+                    self.unstructured_parser.strategy = StrategyEnum.FAST
+                    parsed_document = await self.unstructured_parser.aconvert(
+                        file=file, file_extension=file_extension
+                    )
+
+                parsed_document.file_name = str(file_path) if file_path else None
+
+                if self.formatters:
+                    for formatter in self.formatters:
+                        if isinstance(parsed_document, str):
+                            warnings.warn(
+                                f"The last step returned a string, the {formatter.__class__} and following will not be applied",
+                                stacklevel=2,
+                            )
+                            break
+                        parsed_document = await formatter.aformat(parsed_document)
+
+                if not isinstance(parsed_document, str):
+                    return str(parsed_document)
+                return parsed_document
+            except Exception as e:
+                raise ParsingException(
+                    f"Error while parsing file {file_path or file}, file_extension: {file_extension}: {e}"
+                )
+            finally:
+                if opened_file:
+                    opened_file.close()
