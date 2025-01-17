@@ -167,6 +167,7 @@ class MegaParse:
                     )
 
                 parsed_document.file_name = str(file_path) if file_path else None
+                parsed_document.clean()
 
                 if self.formatters:
                     for formatter in self.formatters:

@@ -29,7 +29,7 @@ def main():
 
     megaparse = MegaParse()
 
-    file_path = Path("./tests/pdf/ocr/0168004.pdf")
+    file_path = Path("./tests/pdf/ocr/0168127.pdf")
     result = megaparse.load(file_path=file_path)
     print(result)
 

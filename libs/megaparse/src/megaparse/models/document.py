@@ -85,6 +85,14 @@ class SubTitleBlock(TextBlock):
         return f"{'#' * heading_level} {self.text}"
 
 
+class CaptionBlock(TextBlock):
+    """
+    A class to represent a caption block
+    """
+
+    pass
+
+
 class ImageBlock(Block):
     """
     A class to represent an image block
@@ -116,7 +124,7 @@ class ListElementBlock(TextBlock):
     depth: int = 0
 
 
-class ListBlock(TextBlock):
+class ListBlock(Block):
     """
     A class to represent a list block
 
@@ -230,3 +238,41 @@ class Document(BaseModel):
         lines.extend(str(block) + "\n" for block in self.content)
 
         return "\n".join(lines)
+
+    def clean(self):
+        """
+        Clean the Document element by :
+        - Merging Caption in ImageBlock
+        - Merging continuous list items elements into ListBlock
+        - Add Depth to Title / SubTitle / ListElementBlock
+        - Creating sections
+        - Creating TOC
+        """
+
+        # Merge caption in ImageBlock simplified
+        i = 0
+        list_elements_stack = []
+        while i < len(self.content) - 1:
+            if isinstance(self.content[i], ListElementBlock):
+                list_elements_stack.append(self.content[i])
+                self.content.pop(i)
+                continue
+            else:
+                if list_elements_stack:
+                    self.content.insert(
+                        i, ListBlock(list_elements=list_elements_stack, metadata={})
+                    )
+                    list_elements_stack = []
+
+            if isinstance(self.content[i], ImageBlock) and isinstance(
+                self.content[i + 1], CaptionBlock
+            ):
+                self.content[i].caption = str(self.content[i + 1])  # type: ignore
+                self.content.pop(i + 1)
+            elif isinstance(self.content[i], CaptionBlock) and isinstance(
+                self.content[i + 1], ImageBlock
+            ):
+                self.content[i + 1].caption = str(self.content[i])  # type: ignore
+                self.content.pop(i)
+
+            i += 1

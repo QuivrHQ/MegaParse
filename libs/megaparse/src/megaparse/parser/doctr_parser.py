@@ -20,6 +20,7 @@ from megaparse.configs.auto import DeviceEnum, TextDetConfig, TextRecoConfig
 from megaparse.layout_detection.models.output import LayoutDetectionOutput
 from megaparse.models.document import (
     Block,
+    CaptionBlock,
     FooterBlock,
     HeaderBlock,
     ImageBlock,
@@ -45,7 +46,7 @@ from megaparse.utils.onnx import _get_providers
 logger = logging.getLogger("megaparse")
 
 block_cls_map: Dict[int, Type[Block]] = {
-    0: SectionBlock,
+    0: CaptionBlock,
     1: TextBlock,
     2: TextBlock,
     3: ListElementBlock,
@@ -361,34 +362,24 @@ class DoctrParser(NestedObject, _OCRPredictor):
                             metadata={},
                             page_range=(page_number, page_number),
                         )
-
-                for artefact in block.artefacts:
-                    x0, y0, x1, y1 = (
-                        artefact.geometry[0][0],
-                        artefact.geometry[0][1],
-                        artefact.geometry[1][0],
-                        artefact.geometry[1][1],
-                    )
-
-                    block_id, block_cls = self._get_block_cls(
-                        coordinates=(x0, y0, x1, y1), layout=layout
-                    )
-                    if issubclass(block_cls, ImageBlock):
-                        result[block_id] = block_cls(
+                # We add the Image Blocks to the MPDocument with the right order
+                for det in layout:
+                    if det.label in [6, 8]:
+                        x0, y0, x1, y1 = det.bbox.to_numpy()
+                        block_cls = block_cls_map[det.label]
+                        result[uuid.uuid4()] = block_cls(
                             bbox=BBOX(
-                                top_left=Point2D(
-                                    x=artefact.geometry[0][0],
-                                    y=artefact.geometry[0][1],
-                                ),
-                                bottom_right=Point2D(
-                                    x=artefact.geometry[1][0],
-                                    y=artefact.geometry[1][1],
-                                ),
+                                top_left=Point2D(x=x0, y=y0),
+                                bottom_right=Point2D(x=x1, y=y1),
                             ),
                             metadata={},
                             page_range=(page_number, page_number),
                         )
-            results += list(result.values())
+            sorted_page_blocks = sorted(
+                result.values(), key=lambda block: block.bbox.top_left.y
+            )
+
+            results += sorted_page_blocks
         return MPDocument(
             metadata={},
             content=results,
