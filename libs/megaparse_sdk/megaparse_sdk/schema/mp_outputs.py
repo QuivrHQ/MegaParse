@@ -3,6 +3,8 @@ from enum import Enum, auto
 from llama_parse.base import Dict
 from pydantic import BaseModel, Field
 
+from megaparse_sdk.schema.document import Document
+
 
 class MPErrorType(Enum):
     MEMORY_LIMIT = auto()
@@ -24,6 +26,6 @@ class MPOutputType(str, Enum):
 
 class MPOutput(BaseModel):
     output_type: MPOutputType
-    result: str | None  # TODO: more structured outptut
+    result: str | Document | None
     err: ParseError | None = None
     metadata: Dict[str, str] = Field(default_factory=dict)

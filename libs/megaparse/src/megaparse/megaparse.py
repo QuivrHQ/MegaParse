@@ -3,17 +3,15 @@ import warnings
 from pathlib import Path
 from typing import IO, BinaryIO, List
 
-import numpy as np
 import pypdfium2 as pdfium
+from megaparse_sdk.schema import document
 from megaparse_sdk.schema.extensions import FileExtension
 from megaparse_sdk.schema.parser_config import StrategyEnum
 
-from megaparse.configs.auto import DeviceEnum, MegaParseConfig
+from megaparse.configs.auto import MegaParseConfig
 from megaparse.exceptions.base import ParsingException
 from megaparse.formatter.base import BaseFormatter
 from megaparse.layout_detection.layout_detector import LayoutDetector
-from megaparse.layout_detection.models.output import LayoutDetectionOutput
-from megaparse.models.document import Document
 from megaparse.models.page import Page, PageDimension
 from megaparse.parser.doctr_parser import DoctrParser
 from megaparse.parser.unstructured_parser import UnstructuredParser
@@ -27,7 +25,10 @@ logger = logging.getLogger("megaparse")
 
 class MegaParse:
     def __init__(
-        self, formatters: List[BaseFormatter] | None = None, config=MegaParseConfig()
+        self,
+        formatters: List[BaseFormatter] | None = None,
+        config: MegaParseConfig = MegaParseConfig(),
+        unstructured_strategy: StrategyEnum = StrategyEnum.AUTO,
     ) -> None:
         self.config = config
         self.formatters = formatters
@@ -39,8 +40,9 @@ class MegaParse:
             detect_orientation=self.config.doctr_config.detect_orientation,
             detect_language=self.config.doctr_config.detect_language,
         )
-        self.unstructured_parser = UnstructuredParser()
-        self.layout_detector = LayoutDetector(device=DeviceEnum.COREML)
+
+        self.layout_model = LayoutDetector()
+        self.unstructured_parser = UnstructuredParser(unstructured_strategy)
 
     def validate_input(
         self,
@@ -75,10 +77,8 @@ class MegaParse:
         return file_extension
 
     def extract_page_strategies(
-        self, file: BinaryIO, rast_scale: int = 2
+        self, pdfium_document: pdfium.PdfDocument, rast_scale: int = 2
     ) -> List[Page]:
-        pdfium_document = pdfium.PdfDocument(file)
-
         pages = []
         for i, pdfium_page in enumerate(pdfium_document):
             rasterized_page = pdfium_page.render(scale=rast_scale)
@@ -102,14 +102,8 @@ class MegaParse:
                 )
             )
 
-        # ----
-        # Get text detection for each page -> PAGE
-
         pages = self.doctr_parser.get_text_detections(pages)
 
-        # ---
-
-        # Get strategy per page -> PAGE
         for page in pages:
             page.strategy = get_page_strategy(
                 page.pdfium_elements,
@@ -143,32 +137,37 @@ class MegaParse:
                     file = opened_file
 
                 assert file is not None, "No File provided"
-                pages = self.extract_page_strategies(file)
+
+                pdfium_document = pdfium.PdfDocument(file)
+
+                # Rasterize pages and extract text recognition
+                pages = self.extract_page_strategies(pdfium_document)
                 strategy = determine_global_strategy(
                     pages, self.config.auto_config.document_threshold
                 )
 
-                print("Detecting Layout")
-                layout = self.layout_detector(
-                    [np.array(page.rasterized) for page in pages]
-                )
+                # Extract layout model
+                assert all(p.rasterized for p in pages)
+                layout_result = self.layout_model([p.rasterized for p in pages])  # type: ignore
 
                 if strategy == StrategyEnum.HI_RES:
-                    print("Using Doctr for text recognition")
+                    logger.debug("Using doctr for text recognition")
                     parsed_document = self.doctr_parser.get_text_recognition(
-                        pages, layout
+                        pages, layout_result
                     )
 
                 else:
-                    print("Switching to Unstructured Parser")
+                    logger.debug("Using Unstructured Parser")
                     self.unstructured_parser.strategy = StrategyEnum.FAST
                     parsed_document = self.unstructured_parser.convert(
                         file=file, file_extension=file_extension
                     )
 
+                # additional attributes
                 parsed_document.file_name = str(file_path) if file_path else None
-                parsed_document.clean()
+                parsed_document.metadata = pdfium_document.get_metadata_dict()
 
+                # Format -> TODO: should be generic
                 if self.formatters:
                     for formatter in self.formatters:
                         if isinstance(parsed_document, str):
@@ -183,6 +182,7 @@ class MegaParse:
                     return str(parsed_document)
                 return parsed_document
             except Exception as e:
+                logger.exception(f"Error occured while parsing {file}: {e}")
                 raise ParsingException(
                     f"Error while parsing file {file_path or file}, file_extension: {file_extension}: {e}"
                 )
@@ -196,14 +196,14 @@ class MegaParse:
         file: BinaryIO | None = None,
         file_extension: str | FileExtension = "",
         strategy: StrategyEnum = StrategyEnum.AUTO,
-    ) -> str:
+    ) -> str | document.Document:
         file_extension = self.validate_input(
             file=file, file_path=file_path, file_extension=file_extension
         )
         if file_extension != FileExtension.PDF or strategy == StrategyEnum.FAST:
             self.unstructured_parser.strategy = strategy
             parsed_document = await self.unstructured_parser.aconvert(
-                file=file, file_extension=file_extension
+                file_path=file_path, file=file, file_extension=file_extension
             )
             return str(parsed_document)
         else:
@@ -214,30 +214,32 @@ class MegaParse:
                     file = opened_file
 
                 assert file is not None, "No File provided"
-                pages = self.extract_page_strategies(file)
+                pdfium_document = pdfium.PdfDocument(file)
+                # Determine strategy
+                pages = self.extract_page_strategies(pdfium_document)
                 strategy = determine_global_strategy(
                     pages, self.config.auto_config.document_threshold
                 )
 
-                print("Detecting Layout")
-                layout = self.layout_detector(
-                    [np.array(page.rasterized) for page in pages]
-                )
+                # Run layout model
+                assert all(p.rasterized for p in pages)
+                layout_result = self.layout_model([p.rasterized for p in pages])  # type: ignore
 
                 if strategy == StrategyEnum.HI_RES:
-                    print("Using Doctr for text recognition")
+                    logger.info("Using Doctr for text recognition")
                     parsed_document = self.doctr_parser.get_text_recognition(
-                        pages, layout
+                        pages, layout_result
                     )
 
                 else:
-                    print("Switching to Unstructured Parser")
+                    logger.info("Switching to Unstructured Parser")
                     self.unstructured_parser.strategy = StrategyEnum.FAST
                     parsed_document = await self.unstructured_parser.aconvert(
                         file=file, file_extension=file_extension
                     )
 
                 parsed_document.file_name = str(file_path) if file_path else None
+                parsed_document.metadata = pdfium_document.get_metadata_dict()
 
                 if self.formatters:
                     for formatter in self.formatters:
@@ -249,8 +251,6 @@ class MegaParse:
                             break
                         parsed_document = await formatter.aformat(parsed_document)
 
-                if not isinstance(parsed_document, str):
-                    return str(parsed_document)
                 return parsed_document
             except Exception as e:
                 raise ParsingException(

@@ -1,21 +1,23 @@
 import logging
-from typing import Any, Dict, List
+import os
+import pathlib
 import uuid
+from typing import Any, List
 
 import numpy as np
 import onnxruntime as rt
 from megaparse.configs.auto import DeviceEnum
-from megaparse.layout_detection.models.output import LayoutDetectionOutput
-from megaparse.predictor.models.base import BBOX, Point2D
-from megaparse.utils.onnx import _get_providers
-from onnxtr.models.engine import Engine, EngineConfig
+from megaparse.layout_detection.output import LayoutDetectionOutput
+from megaparse.utils.onnx import get_providers
+from megaparse_sdk.schema.document import BBOX, Point2D
+from onnxtr.models.engine import EngineConfig
 from onnxtr.models.preprocessor import PreProcessor
 from PIL import Image, ImageDraw
-import os
+from PIL.Image import Image as PILImage
 
 logger = logging.getLogger("megaparse")
 
-label_map = {
+LABEL_MAP = {
     0: "Caption",
     1: "Footnote",
     2: "Formula",
@@ -31,11 +33,11 @@ label_map = {
 
 default_cfg: dict[str, dict[str, Any]] = {
     "yolov10s-doclaynet": {
-        "input_shape": (1, 1024, 1024),
         "mean": (0.5, 0.5, 0.5),
         "std": (1.0, 1.0, 1.0),
-        "url": "/Users/chloed./Documents/quivr/MegaParse/libs/megaparse/src/megaparse/layout_detection/onnx_models/yolov10s-doclaynet.onnx",
         "url_8_bit": None,
+        "input_shape": (1, 1024, 1024),
+        "url": pathlib.Path(__file__).parent.joinpath("models/yolov10s-doclaynet.onnx"),
     }
 }
 
@@ -52,11 +54,11 @@ class LayoutDetector:
         model_config = default_cfg[model_name]
         self.device = device
         general_options = rt.SessionOptions()
-        providers = _get_providers(self.device)
+        providers = get_providers(self.device)
         self.threshold = threshold
-        self.batch_size, self.required_width, self.required_height = model_config.get(
-            "input_shape", (1, 1024, 1024)
-        )
+        self.batch_size, self.required_width, self.required_height = model_config[
+            "input_shape"
+        ]
         self.preserve_aspect_ratio = preserve_aspect_ratio
 
         self.pre_processor = PreProcessor(
@@ -77,8 +79,9 @@ class LayoutDetector:
         self.model = rt.InferenceSession(model_path, engine_config=engine_config)
 
     def __call__(
-        self, pages: list[np.ndarray], output_dir: str | None = None
+        self, img_pages: list[PILImage], output_dir: str | None = None
     ) -> List[List[LayoutDetectionOutput]]:
+        pages = [np.array(img) for img in img_pages]
         # Dimension check
         if any(page.ndim != 3 for page in pages):
             raise ValueError(
@@ -222,7 +225,7 @@ class LayoutDetector:
                 bbox = x_min * img_w, y_min * img_h, x_max * img_w, y_max * img_h
                 confidence = detection.prob
                 category = detection.label
-                label = label_map.get(category, "Unknown")
+                label = LABEL_MAP.get(category, "Unknown")
 
                 draw.rectangle(bbox, outline="red", width=2)
                 # assert bbox[2] <= image.width

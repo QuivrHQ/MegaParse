@@ -8,7 +8,7 @@ from megaparse.configs.auto import DeviceEnum
 logger = logging.getLogger("megaparse")
 
 
-def _get_providers(device: DeviceEnum) -> List[str]:
+def get_providers(device: DeviceEnum) -> List[str]:
     prov = rt.get_available_providers()
     logger.info("Available providers:", prov)
     if device == DeviceEnum.CUDA:

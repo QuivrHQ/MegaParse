@@ -1,8 +1,7 @@
 from pathlib import Path
-from typing import Union
 
 from megaparse.formatter.base import BaseFormatter
-from megaparse.models.document import Document
+from megaparse_sdk.schema.document import Document
 
 
 class TableFormatter(BaseFormatter):

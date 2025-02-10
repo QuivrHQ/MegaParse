@@ -12,6 +12,7 @@ import nats
 from nats.errors import NoRespondersError, TimeoutError
 
 from megaparse_sdk.config import ClientNATSConfig, MegaParseSDKConfig
+from megaparse_sdk.schema.document import Document
 from megaparse_sdk.schema.mp_exceptions import (
     DownloadError,
     InternalServiceError,
@@ -135,7 +136,7 @@ class MegaParseNATSClient:
 
     async def parse_file(
         self, file: Path | BytesIO, file_name: str | None = None
-    ) -> str:
+    ) -> str | Document:
         if isinstance(file, Path):
             with open(file, "rb") as f:
                 data = f.read()
@@ -154,7 +155,7 @@ class MegaParseNATSClient:
         inp = MPInput(input=file_input)
         return await self._send_req(inp)
 
-    async def _send_req(self, inp: MPInput) -> str:
+    async def _send_req(self, inp: MPInput) -> str | Document:
         logger.debug(f"Sending {inp} to megaparse service.")
 
         for attempt in range(self.max_retries):
@@ -177,7 +178,7 @@ class MegaParseNATSClient:
         response = MPOutput.model_validate_json(raw_response.data.decode("utf-8"))
         return self._handle_mp_output(response)
 
-    def _handle_mp_output(self, response: MPOutput) -> str:
+    def _handle_mp_output(self, response: MPOutput) -> str | Document:
         if response.output_type == MPOutputType.PARSE_OK:
             assert response.result, "Parsing OK but response is None"
             return response.result

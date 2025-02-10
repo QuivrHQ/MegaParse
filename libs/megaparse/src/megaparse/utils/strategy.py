@@ -1,15 +1,14 @@
 from typing import List
 
 import numpy as np
+from megaparse.models.page import Page
+from megaparse_sdk.schema.document import TextDetection
 from megaparse_sdk.schema.parser_config import StrategyEnum
 from pypdfium2._helpers.page import PdfPage
 
-from megaparse.models.page import Page
-from megaparse.predictor.models.base import PageLayout
-
 
 def get_page_strategy(
-    pdfium_page: PdfPage, onnxtr_page: PageLayout | None, threshold: float
+    pdfium_page: PdfPage, onnxtr_page: TextDetection | None, threshold: float
 ) -> StrategyEnum:
     if onnxtr_page is None:
         return StrategyEnum.FAST

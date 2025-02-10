@@ -1,6 +1,7 @@
 from pathlib import Path
+
 from megaparse.formatter.structured_formatter import StructuredFormatter
-from megaparse.models.document import Document
+from megaparse_sdk.schema.document import Document
 from pydantic import BaseModel
 
 

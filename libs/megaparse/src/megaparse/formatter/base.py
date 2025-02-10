@@ -1,9 +1,9 @@
 from abc import ABC
 from pathlib import Path
-from typing import List, Union
+from typing import Union
 
 from langchain_core.language_models.chat_models import BaseChatModel
-from megaparse.models.document import Document
+from megaparse_sdk.schema.document import Document
 
 
 class BaseFormatter(ABC):

@@ -1,5 +1,6 @@
 import os
 
+import pypdfium2
 import pytest
 from megaparse.megaparse import MegaParse
 from megaparse.utils.strategy import determine_global_strategy
@@ -16,9 +17,8 @@ def test_hi_res_strategy(hi_res_pdf):
     if hi_res_pdf == "0168004.pdf":
         pytest.skip("Skip 0168004.pdf as it is flaky currently")
 
-    with open(f"./tests/pdf/ocr/{hi_res_pdf}", "rb") as f:
-        pages = megaparse.extract_page_strategies(f)
-
+    pdf_doc = pypdfium2.PdfDocument(f"./tests/pdf/ocr/{hi_res_pdf}")
+    pages = megaparse.extract_page_strategies(pdf_doc)
     assert (
         determine_global_strategy(
             pages, megaparse.config.auto_config.document_threshold
@@ -32,8 +32,8 @@ def test_fast_strategy(native_pdf):
     if native_pdf == "0168029.pdf":
         pytest.skip("Skip 0168029.pdf as it is too long to process")
 
-    with open(f"./tests/pdf/native/{native_pdf}", "rb") as f:
-        pages = megaparse.extract_page_strategies(f)
+    pdf_doc = pypdfium2.PdfDocument(f"./tests/pdf/native/{native_pdf}")
+    pages = megaparse.extract_page_strategies(pdf_doc)
 
     assert (
         determine_global_strategy(

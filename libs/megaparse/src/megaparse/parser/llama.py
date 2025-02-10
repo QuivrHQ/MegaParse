@@ -4,12 +4,11 @@ from typing import IO, List
 from llama_index.core.schema import Document as LlamaDocument
 from llama_parse import LlamaParse as _LlamaParse
 from llama_parse.utils import Language, ResultType
+from megaparse_sdk.schema.document import BBOX, Point2D, TextBlock
+from megaparse_sdk.schema.document import Document as MPDocument
 from megaparse_sdk.schema.extensions import FileExtension
 
-from megaparse.models.document import Document as MPDocument
-from megaparse.models.document import TextBlock
 from megaparse.parser import BaseParser
-from megaparse.predictor.models.base import BBOX, Point2D
 
 
 class LlamaParser(BaseParser):

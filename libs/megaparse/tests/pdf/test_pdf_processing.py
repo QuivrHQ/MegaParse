@@ -1,6 +1,11 @@
 from pathlib import Path
 
+import pypdfium2
 import pytest
+from megaparse.configs.auto import (
+    DeviceEnum,
+    MegaParseConfig,
+)
 from megaparse.megaparse import MegaParse
 from megaparse.utils.strategy import determine_global_strategy
 from megaparse_sdk.schema.extensions import FileExtension
@@ -28,9 +33,9 @@ def scanned_pdf() -> Path:
 @pytest.mark.parametrize("pdf_name", ["scanned_pdf", "native_pdf"])
 async def test_async_megaparse_pdf_processor_file_path(pdf_name, request):
     pdf = request.getfixturevalue(pdf_name)
-    processor = MegaParse()
+    processor = MegaParse(config=MegaParseConfig(device=DeviceEnum.COREML))
     result = await processor.aload(file_path=pdf)
-    assert len(result) > 0
+    assert len(str(result)) > 0
 
 
 @pytest.mark.parametrize("pdf_name", ["scanned_pdf", "native_pdf"])
@@ -48,13 +53,14 @@ async def test_megaparse_pdf_processor_file(pdf_name, request):
     processor = MegaParse()
     with open(pdf, "rb") as f:
         result = await processor.aload(file=f, file_extension=FileExtension.PDF)
-        assert len(result) > 0
+        assert len(str(result)) > 0
 
 
-def test_strategy(scanned_pdf, native_pdf):
+def test_strategy_native(native_pdf):
     processor = MegaParse()
-    with open(native_pdf, "rb") as f:
-        pages = processor.extract_page_strategies(f)
+    pdf_doc = pypdfium2.PdfDocument(native_pdf)
+
+    pages = processor.extract_page_strategies(pdf_doc)
 
     assert (
         determine_global_strategy(
@@ -62,13 +68,17 @@ def test_strategy(scanned_pdf, native_pdf):
         )
         == StrategyEnum.FAST
     )
+    pdf_doc.close()
 
-    with open(scanned_pdf, "rb") as f:
-        pages = processor.extract_page_strategies(f)
 
+def test_strategy_scanned(scanned_pdf):
+    processor = MegaParse()
+    pdf_doc = pypdfium2.PdfDocument(scanned_pdf)
+    pages = processor.extract_page_strategies(pdf_doc)
     assert (
         determine_global_strategy(
             pages, processor.config.auto_config.document_threshold
         )
         == StrategyEnum.HI_RES
     )
+    pdf_doc.close()

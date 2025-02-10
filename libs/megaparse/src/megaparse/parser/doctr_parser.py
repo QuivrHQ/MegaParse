@@ -1,13 +1,31 @@
 import logging
-from uuid import UUID
 import uuid
 import warnings
 from typing import Any, Dict, List, Tuple, Type
+from uuid import UUID
 
 import numpy as np
 import onnxruntime as rt
+from megaparse_sdk.schema.document import (
+    BBOX,
+    Block,
+    BlockLayout,
+    BlockType,
+    CaptionBlock,
+    FooterBlock,
+    HeaderBlock,
+    ImageBlock,
+    ListElementBlock,
+    Point2D,
+    SubTitleBlock,
+    TableBlock,
+    TextBlock,
+    TextDetection,
+    TitleBlock,
+    UndefinedBlock,
+)
+from megaparse_sdk.schema.document import Document as MPDocument
 from megaparse_sdk.schema.extensions import FileExtension
-from onnxtr.io import Block as DoctrBlock
 from onnxtr.io import Document
 from onnxtr.models import detection_predictor, recognition_predictor
 from onnxtr.models._utils import get_language
@@ -17,31 +35,9 @@ from onnxtr.utils.geometry import detach_scores
 from onnxtr.utils.repr import NestedObject
 
 from megaparse.configs.auto import DeviceEnum, TextDetConfig, TextRecoConfig
-from megaparse.layout_detection.models.output import LayoutDetectionOutput
-from megaparse.models.document import (
-    Block,
-    CaptionBlock,
-    FooterBlock,
-    HeaderBlock,
-    ImageBlock,
-    ListElementBlock,
-    SectionBlock,
-    SubTitleBlock,
-    TableBlock,
-    TextBlock,
-    TitleBlock,
-    UndefinedBlock,
-)
-from megaparse.models.document import Document as MPDocument
+from megaparse.layout_detection.output import LayoutDetectionOutput
 from megaparse.models.page import Page
-from megaparse.predictor.models.base import (
-    BBOX,
-    BlockLayout,
-    BlockType,
-    PageLayout,
-    Point2D,
-)
-from megaparse.utils.onnx import _get_providers
+from megaparse.utils.onnx import get_providers
 
 logger = logging.getLogger("megaparse")
 
@@ -75,7 +71,7 @@ class DoctrParser(NestedObject, _OCRPredictor):
     ):
         self.device = device
         general_options = rt.SessionOptions()
-        providers = _get_providers(self.device)
+        providers = get_providers(self.device)
         engine_config = EngineConfig(
             session_options=general_options,
             providers=providers,
@@ -206,7 +202,7 @@ class DoctrParser(NestedObject, _OCRPredictor):
                         block_type=BlockType.TEXT,
                     )
                 )
-            page.text_detections = PageLayout(
+            page.text_detections = TextDetection(
                 bboxes=block_layouts,
                 page_index=page_index,
                 dimensions=rast_page.shape[:2],
@@ -322,7 +318,6 @@ class DoctrParser(NestedObject, _OCRPredictor):
     def __to_elements_list(
         self, doctr_document: Document, layouts: List[List[LayoutDetectionOutput]]
     ) -> MPDocument:
-        print("Creating MPDocument ...")
         results = []
 
         for page_number, (page, layout) in enumerate(
