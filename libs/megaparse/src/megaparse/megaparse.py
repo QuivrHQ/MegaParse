@@ -40,6 +40,7 @@ class MegaParse:
             detect_orientation=self.config.doctr_config.detect_orientation,
             detect_language=self.config.doctr_config.detect_language,
         )
+        self.unstructured_parser = UnstructuredParser()
 
         self.layout_model = LayoutDetector()
         self.unstructured_parser = UnstructuredParser(unstructured_strategy)
@@ -101,6 +102,35 @@ class MegaParse:
                     pdfium_elements=pdfium_page,
                 )
             )
+            pages.append(
+                Page(
+                    strategy=StrategyEnum.AUTO,
+                    text_detections=None,
+                    rasterized=rasterized_page.to_pil(),
+                    page_size=PageDimension(
+                        width=pdfium_page.get_width() * rast_scale,
+                        height=pdfium_page.get_height() * rast_scale,
+                    ),
+                    page_index=i,
+                    pdfium_elements=pdfium_page,
+                )
+            )
+
+        # ----
+        # Get text detection for each page -> PAGE
+
+        pages = self.doctr_parser.get_text_detections(pages)
+
+        # ---
+
+        # Get strategy per page -> PAGE
+        for page in pages:
+            page.strategy = get_page_strategy(
+                page.pdfium_elements,
+                page.text_detections,
+                threshold=self.config.auto_config.page_threshold,
+            )
+        return pages
 
         pages = self.doctr_parser.get_text_detections(pages)
 

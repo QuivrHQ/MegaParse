@@ -1,0 +1,33 @@
+{
+  "editor.formatOnSave": true,
+  "editor.formatOnSaveMode": "file",
+  "files.exclude": {
+    "**/__pycache__": true,
+    "**/.benchmarks/": true,
+    "**/.cache/": true,
+    "**/.pytest_cache/": true,
+    "**/.next/": true,
+    "**/build/": true,
+    "**/.docusaurus/": true,
+    "**/node_modules/": true
+  },
+  "[python]": {
+    "editor.defaultFormatter": "charliermarsh.ruff",
+    "editor.formatOnSave": true,
+    "editor.codeActionsOnSave": {
+      "source.organizeImports": "explicit",
+      "source.fixAll": "explicit"
+    }
+  },
+  "python.testing.unittestEnabled": false,
+  "python.testing.pytestEnabled": true,
+  "python.testing.autoTestDiscoverOnSaveEnabled": true,
+  "python.analysis.autoImportCompletions": true,
+  "python.analysis.typeCheckingMode": "basic",
+  "python.analysis.diagnosticSeverityOverrides": {
+    "reportMissingImports": "error",
+    "reportUnusedImport": "warning",
+    "reportGeneralTypeIssues": "warning"
+  },
+  "makefile.configureOnOpen": false
+}
