@@ -1,5 +1,12 @@
 # Changelog
 
+## [0.0.54](https://github.com/QuivrHQ/MegaParse/compare/megaparse-v0.0.53...megaparse-v0.0.54) (2025-02-11)
+
+
+### Features
+
+* add_layout_detection ([#220](https://github.com/QuivrHQ/MegaParse/issues/220)) ([2d2d0b4](https://github.com/QuivrHQ/MegaParse/commit/2d2d0b42bba4c883db423568e932eda42edd60d7))
+
 ## [0.0.53](https://github.com/QuivrHQ/MegaParse/compare/megaparse-v0.0.52...megaparse-v0.0.53) (2025-01-16)
 
 
