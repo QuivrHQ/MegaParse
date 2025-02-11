@@ -4,8 +4,6 @@ from pathlib import Path
 
 import numpy as np
 from megaparse import MegaParse
-from megaparse.parser.unstructured_parser import UnstructuredParser
-from megaparse_sdk.schema.parser_config import StrategyEnum
 
 N_TRY = 1
 

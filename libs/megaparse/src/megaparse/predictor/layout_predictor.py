@@ -23,21 +23,3 @@ def extract_layout(
     page_image.show()
 
     return parsed_page
-
-
-if __name__ == "__main__":
-    import pypdfium2 as pdfium
-
-    file = "/Users/amine/Downloads/0168126.pdf"
-    pdfium_document = pdfium.PdfDocument(file)
-
-    page_number = 3
-    page = pdfium_document[page_number]
-
-    # Render the selected page to an image
-    pil_image = page.render(scale=2).to_pil()  # Increase scale for higher resolution
-
-    layout_result = extract_layout(page_number=page_number, page_image=pil_image)
-
-    # Output the layout result
-    print(layout_result)

@@ -11,6 +11,7 @@ from langchain_anthropic import ChatAnthropic
 from langchain_community.document_loaders import PlaywrightURLLoader
 from langchain_openai import ChatOpenAI
 from llama_parse.utils import Language
+from megaparse_sdk.schema.document import Document
 from megaparse_sdk.schema.parser_config import (
     ParserType,
     StrategyEnum,
@@ -67,7 +68,7 @@ async def parse_file(
     parsing_instruction: Optional[str] = Form(None),
     model_name: Optional[SupportedModel] = Form(SupportedModel.GPT_4O),
     parser_builder=Depends(parser_builder_dep),
-) -> dict[str, Any]:
+) -> dict[str, str | Document]:
     if not _check_free_memory():
         raise HTTPException(
             status_code=503, detail="Service unavailable due to low memory"
