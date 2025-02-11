@@ -14,14 +14,11 @@ from megaparse.configs.auto import (
 from megaparse.models.page import Page, PageDimension
 from megaparse.parser.doctr_parser import DoctrParser
 from megaparse.parser.unstructured_parser import UnstructuredParser
-from megaparse.predictor.models.base import BBOX, BlockLayout, BlockType, PageLayout
-from megaparse.utils.strategy_utils import need_hi_res
+from megaparse_sdk.schema.document import BBOX, BlockLayout, BlockType, TextDetection
 from megaparse_sdk.schema.extensions import FileExtension
 from megaparse_sdk.schema.parser_config import StrategyEnum
-from numpy.typing import NDArray
-from onnxtr.io import DocumentFile
 from onnxtr.models import detection_predictor, recognition_predictor
-from onnxtr.models.detection.predictor import DetectionPredictor
+from onnxtr.models.builder import DocumentBuilder
 from onnxtr.models.engine import EngineConfig
 from onnxtr.utils.geometry import (
     detach_scores,
@@ -29,11 +26,10 @@ from onnxtr.utils.geometry import (
     extract_rcrops,
 )
 from pypdfium2._helpers.page import PdfPage
-from onnxtr.models.builder import DocumentBuilder
 
 
 def get_strategy_page(
-    pdfium_page: PdfPage, onnxtr_page: PageLayout, page_threshold: float = 0.6
+    pdfium_page: PdfPage, onnxtr_page: TextDetection, page_threshold: float = 0.6
 ) -> StrategyEnum:
     # assert (
     #     p_width == onnxtr_page.dimensions[1]
@@ -157,7 +153,7 @@ def _generate_crops(
     if assume_straight_pages:
         crops = [
             extract_crops(page, _boxes[:, :4], channels_last=channels_last)
-            for page, _boxes in zip(pages, loc_preds)
+            for page, _boxes in zip(pages, loc_preds, strict=False)
         ]
     else:
         crops = [
@@ -167,7 +163,7 @@ def _generate_crops(
                 channels_last=channels_last,
                 assume_horizontal=assume_horizontal,
             )
-            for page, _boxes in zip(pages, loc_preds)
+            for page, _boxes in zip(pages, loc_preds, strict=False)
         ]
     return crops
 
@@ -188,10 +184,12 @@ def _prepare_crops(
         [all(s > 0 for s in crop.shape) for crop in page_crops] for page_crops in crops
     ]
     crops = [
-        [crop for crop, _kept in zip(page_crops, page_kept) if _kept]
-        for page_crops, page_kept in zip(crops, is_kept)
+        [crop for crop, _kept in zip(page_crops, page_kept, strict=False) if _kept]
+        for page_crops, page_kept in zip(crops, is_kept, strict=False)
     ]
-    loc_preds = [_boxes[_kept] for _boxes, _kept in zip(loc_preds, is_kept)]
+    loc_preds = [
+        _boxes[_kept] for _boxes, _kept in zip(loc_preds, is_kept, strict=False)
+    ]
 
     return crops, loc_preds
 
@@ -287,7 +285,7 @@ def main():
                         )
                     )
                 all_pages_layouts.append(
-                    PageLayout(
+                    TextDetection(
                         bboxes=block_layouts,
                         page_index=page_index,
                         dimensions=page.shape[:2],

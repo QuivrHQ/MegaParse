@@ -6,7 +6,7 @@ from typing import Optional
 from langchain_core.language_models.chat_models import BaseChatModel
 from langchain_core.prompts import ChatPromptTemplate
 from megaparse.formatter.table_formatter import TableFormatter
-from megaparse.models.document import Document, TableBlock
+from megaparse_sdk.schema.document import Document, TableBlock
 
 
 class SimpleMDTableFormatter(TableFormatter):

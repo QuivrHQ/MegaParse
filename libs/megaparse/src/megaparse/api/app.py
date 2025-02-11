@@ -1,7 +1,7 @@
 import io
 import os
 import tempfile
-from typing import Optional
+from typing import Any, Optional
 
 import httpx
 import psutil
@@ -11,8 +11,8 @@ from langchain_anthropic import ChatAnthropic
 from langchain_community.document_loaders import PlaywrightURLLoader
 from langchain_openai import ChatOpenAI
 from llama_parse.utils import Language
+from megaparse_sdk.schema.document import Document
 from megaparse_sdk.schema.parser_config import (
-    ParseFileConfig,
     ParserType,
     StrategyEnum,
 )
@@ -27,7 +27,6 @@ from megaparse.api.exceptions.megaparse_exceptions import (
     ParsingException,
 )
 from megaparse.parser.builder import ParserBuilder
-from megaparse.parser.unstructured_parser import UnstructuredParser
 
 app = FastAPI()
 
@@ -69,7 +68,7 @@ async def parse_file(
     parsing_instruction: Optional[str] = Form(None),
     model_name: Optional[SupportedModel] = Form(SupportedModel.GPT_4O),
     parser_builder=Depends(parser_builder_dep),
-) -> dict[str, str]:
+) -> dict[str, str | Document]:
     if not _check_free_memory():
         raise HTTPException(
             status_code=503, detail="Service unavailable due to low memory"
@@ -122,7 +121,7 @@ async def parse_file(
 )
 async def upload_url(
     url: str, playwright_loader=Depends(get_playwright_loader)
-) -> dict[str, str]:
+) -> dict[str, Any]:
     playwright_loader.urls = [url]
 
     if url.endswith(".pdf"):

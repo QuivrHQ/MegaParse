@@ -7,14 +7,13 @@ from typing import IO, List
 
 from langchain_core.language_models.chat_models import BaseChatModel
 from langchain_core.messages import HumanMessage
+from megaparse_sdk.schema.document import BBOX, Block, Point2D, TextBlock
+from megaparse_sdk.schema.document import Document as MPDocument
 from megaparse_sdk.schema.extensions import FileExtension
 from pdf2image import convert_from_path
 
-from megaparse.models.document import Block, TextBlock
-from megaparse.models.document import Document as MPDocument
 from megaparse.parser import BaseParser
 from megaparse.parser.entity import SupportedModel, TagEnum
-from megaparse.predictor.models.base import BBOX, Point2D
 
 # BASE_OCR_PROMPT = """
 # Transcribe the content of this file into markdown. Be mindful of the formatting.

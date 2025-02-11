@@ -4,30 +4,32 @@ from typing import IO, Dict, List
 
 from dotenv import load_dotenv
 from langchain_core.language_models.chat_models import BaseChatModel
-from megaparse_sdk.schema.extensions import FileExtension
-from megaparse_sdk.schema.parser_config import StrategyEnum
-from unstructured.documents.elements import Element
-from unstructured.partition.auto import partition
-
-from megaparse.models.document import (
+from megaparse_sdk.schema.document import (
+    BBOX,
     Block,
     FooterBlock,
     HeaderBlock,
     ImageBlock,
+    Point2D,
     SubTitleBlock,
     TableBlock,
     TextBlock,
     TitleBlock,
 )
-from megaparse.models.document import (
+from megaparse_sdk.schema.document import (
     Document as MPDocument,
 )
+from megaparse_sdk.schema.extensions import FileExtension
+from megaparse_sdk.schema.parser_config import StrategyEnum
+from unstructured.documents.elements import Element
+from unstructured.partition.auto import partition
+
 from megaparse.parser import BaseParser
-from megaparse.predictor.models.base import BBOX, Point2D
+
+load_dotenv()
 
 
 class UnstructuredParser(BaseParser):
-    load_dotenv()
     supported_extensions = [
         FileExtension.PDF,
         FileExtension.DOCX,
@@ -65,6 +67,7 @@ class UnstructuredParser(BaseParser):
             strategy=self.strategy,
             content_type=file_extension.mimetype if file_extension else None,
         )
+
         return self.__to_mp_document(elements)
 
     async def aconvert(

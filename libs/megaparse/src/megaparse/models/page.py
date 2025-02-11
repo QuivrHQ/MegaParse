@@ -1,5 +1,6 @@
 from typing import List
-from megaparse.predictor.models.base import PageLayout
+
+from megaparse_sdk.schema.document import TextDetection
 from megaparse_sdk.schema.parser_config import StrategyEnum
 from PIL.Image import Image as PILImage
 from pydantic import BaseModel, ConfigDict
@@ -21,7 +22,7 @@ class Page(BaseModel):
     """
 
     strategy: StrategyEnum
-    text_detections: PageLayout | None = None
+    text_detections: TextDetection | None = None
     rasterized: PILImage | None = None
     page_size: PageDimension
     page_index: int

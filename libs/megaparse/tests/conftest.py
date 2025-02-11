@@ -7,8 +7,9 @@ from langchain_community.document_loaders import PlaywrightURLLoader
 from langchain_core.documents import Document
 from megaparse.api.app import app, get_playwright_loader, parser_builder_dep
 from megaparse.parser.base import BaseParser
+from megaparse_sdk.schema.document import Document as MPDocument
+from megaparse_sdk.schema.document import TextBlock
 from megaparse_sdk.schema.extensions import FileExtension
-from megaparse.models.document import Document as MPDocument, TextBlock
 
 
 class FakeParserBuilder:

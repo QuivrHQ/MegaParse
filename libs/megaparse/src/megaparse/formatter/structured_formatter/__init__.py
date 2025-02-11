@@ -1,7 +1,8 @@
 from pathlib import Path
+
 from langchain_core.language_models.chat_models import BaseChatModel
 from megaparse.formatter.base import BaseFormatter
-from megaparse.models.document import Document
+from megaparse_sdk.schema.document import Document
 from pydantic import BaseModel
 
 

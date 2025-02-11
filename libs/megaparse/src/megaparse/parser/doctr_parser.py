@@ -1,9 +1,30 @@
 import logging
+import uuid
 import warnings
-from typing import Any, List
+from typing import Any, Dict, List, Tuple, Type
+from uuid import UUID
 
 import numpy as np
 import onnxruntime as rt
+from megaparse_sdk.schema.document import (
+    BBOX,
+    Block,
+    BlockLayout,
+    BlockType,
+    CaptionBlock,
+    FooterBlock,
+    HeaderBlock,
+    ImageBlock,
+    ListElementBlock,
+    Point2D,
+    SubTitleBlock,
+    TableBlock,
+    TextBlock,
+    TextDetection,
+    TitleBlock,
+    UndefinedBlock,
+)
+from megaparse_sdk.schema.document import Document as MPDocument
 from megaparse_sdk.schema.extensions import FileExtension
 from onnxtr.io import Document
 from onnxtr.models import detection_predictor, recognition_predictor
@@ -14,18 +35,25 @@ from onnxtr.utils.geometry import detach_scores
 from onnxtr.utils.repr import NestedObject
 
 from megaparse.configs.auto import DeviceEnum, TextDetConfig, TextRecoConfig
-from megaparse.models.document import Document as MPDocument
-from megaparse.models.document import ImageBlock, TextBlock
+from megaparse.layout_detection.output import LayoutDetectionOutput
 from megaparse.models.page import Page
-from megaparse.predictor.models.base import (
-    BBOX,
-    BlockLayout,
-    BlockType,
-    PageLayout,
-    Point2D,
-)
+from megaparse.utils.onnx import get_providers
 
 logger = logging.getLogger("megaparse")
+
+block_cls_map: Dict[int, Type[Block]] = {
+    0: CaptionBlock,
+    1: TextBlock,
+    2: TextBlock,
+    3: ListElementBlock,
+    4: FooterBlock,
+    5: HeaderBlock,
+    6: ImageBlock,
+    7: SubTitleBlock,
+    8: TableBlock,
+    9: TextBlock,
+    10: TitleBlock,
+}
 
 
 class DoctrParser(NestedObject, _OCRPredictor):
@@ -43,7 +71,7 @@ class DoctrParser(NestedObject, _OCRPredictor):
     ):
         self.device = device
         general_options = rt.SessionOptions()
-        providers = self._get_providers()
+        providers = get_providers(self.device)
         engine_config = EngineConfig(
             session_options=general_options,
             providers=providers,
@@ -173,7 +201,7 @@ class DoctrParser(NestedObject, _OCRPredictor):
                         block_type=BlockType.TEXT,
                     )
                 )
-            page.text_detections = PageLayout(
+            page.text_detections = TextDetection(
                 bboxes=block_layouts,
                 page_index=page_index,
                 dimensions=rast_page.shape[:2],
@@ -183,7 +211,9 @@ class DoctrParser(NestedObject, _OCRPredictor):
 
         return pages
 
-    def get_text_recognition(self, pages: List[Page], **kwargs) -> MPDocument:
+    def get_text_recognition(
+        self, pages: List[Page], layout: List[List[LayoutDetectionOutput]], **kwargs
+    ) -> MPDocument:
         assert any(
             page.text_detections is not None for page in pages
         ), "Text detections should be computed before running text recognition"
@@ -252,54 +282,100 @@ class DoctrParser(NestedObject, _OCRPredictor):
             orientations,
             languages_dict,
         )
-        return self.__to_elements_list(out)
+        return self.__to_elements_list(out, layout)
 
-    def __to_elements_list(self, doctr_document: Document) -> MPDocument:
-        result = []
+    def _get_block_cls(
+        self,
+        coordinates: tuple[float, float, float, float],
+        layout: List[LayoutDetectionOutput],
+        threshold: float = 0.6,
+    ) -> Tuple[UUID | None, Type[Block]]:
+        for det in layout:
+            x1, y1, x2, y2 = coordinates
+            X1, Y1, X2, Y2 = det.bbox.to_numpy()
 
-        for page_number, page in enumerate(doctr_document.pages):
+            assert x1 <= x2 and y1 <= y2, "bbox1 coordinates are invalid"
+            assert X1 <= X2 and Y1 <= Y2, "bbox2 coordinates are invalid"
+
+            union_x1 = max(x1, X1)
+            union_y1 = max(y1, Y1)
+            union_x2 = min(x2, X2)
+            union_y2 = min(y2, Y2)
+
+            union_width = max(0, union_x2 - union_x1)
+            union_height = max(0, union_y2 - union_y1)
+            union_area = union_width * union_height
+
+            detection_area = max(0, x2 - x1) * max(0, y2 - y1)
+
+            if union_area / detection_area > threshold:
+                # breakpoint()
+                return (det.bbox_id, block_cls_map[det.label])
+
+        return (uuid.uuid4(), UndefinedBlock)
+
+    def __to_elements_list(
+        self, doctr_document: Document, layouts: List[List[LayoutDetectionOutput]]
+    ) -> MPDocument:
+        results = []
+
+        for page_number, (page, layout) in enumerate(
+            zip(doctr_document.pages, layouts, strict=True)
+        ):
+            result = {}
             for block in page.blocks:
                 if len(block.lines) and len(block.artefacts) > 0:
                     raise ValueError(
                         "Block should not contain both lines and artefacts"
                     )
-                word_coordinates = [
-                    word.geometry for line in block.lines for word in line.words
-                ]
-                x0 = min(word[0][0] for word in word_coordinates)
-                y0 = min(word[0][1] for word in word_coordinates)
-                x1 = max(word[1][0] for word in word_coordinates)
-                y1 = max(word[1][1] for word in word_coordinates)
+                for line in block.lines:
+                    line_coordinates = [word.geometry for word in line.words]
+                    x0 = min(word[0][0] for word in line_coordinates)
+                    y0 = min(word[0][1] for word in line_coordinates)
+                    x1 = max(word[1][0] for word in line_coordinates)
+                    y1 = max(word[1][1] for word in line_coordinates)
 
-                result.append(
-                    TextBlock(
-                        text=block.render(),
-                        bbox=BBOX(
-                            top_left=Point2D(x=x0, y=y0),
-                            bottom_right=Point2D(x=x1, y=y1),
-                        ),
-                        metadata={},
-                        page_range=(page_number, page_number),
+                    block_id, block_cls = self._get_block_cls(
+                        coordinates=(x0, y0, x1, y1), layout=layout
                     )
-                )
+                    if block_id in result:
+                        bbx0, bby0, bbx1, bby1 = result[block_id].bbox.to_numpy()
+                        result[block_id].text += "\n" + line.render()
+                        result[block_id].bbox = BBOX(
+                            top_left=Point2D(x=min(x0, bbx0), y=min(y0, bby0)),
+                            bottom_right=Point2D(x=max(x1, bbx1), y=max(y1, bby1)),
+                        )
 
-                for artefact in block.artefacts:
-                    result.append(
-                        ImageBlock(
+                    elif issubclass(block_cls, TextBlock):
+                        result[block_id] = block_cls(
+                            text=line.render(),
                             bbox=BBOX(
-                                top_left=Point2D(
-                                    x=artefact.geometry[0][0], y=artefact.geometry[0][1]
-                                ),
-                                bottom_right=Point2D(
-                                    x=artefact.geometry[1][0], y=artefact.geometry[1][1]
-                                ),
+                                top_left=Point2D(x=x0, y=y0),
+                                bottom_right=Point2D(x=x1, y=y1),
                             ),
                             metadata={},
                             page_range=(page_number, page_number),
                         )
-                    )
+                # We add the Image Blocks to the MPDocument with the right order
+                for det in layout:
+                    if det.label in [6, 8]:
+                        x0, y0, x1, y1 = det.bbox.to_numpy()
+                        block_cls = block_cls_map[det.label]
+                        result[uuid.uuid4()] = block_cls(
+                            bbox=BBOX(
+                                top_left=Point2D(x=x0, y=y0),
+                                bottom_right=Point2D(x=x1, y=y1),
+                            ),
+                            metadata={},
+                            page_range=(page_number, page_number),
+                        )
+            sorted_page_blocks = sorted(
+                result.values(), key=lambda block: block.bbox.top_left.y
+            )
+
+            results += sorted_page_blocks
         return MPDocument(
             metadata={},
-            content=result,
+            content=results,
             detection_origin="doctr",
         )
