@@ -1,6 +1,6 @@
 from enum import Enum, auto
+from typing import Dict
 
-from llama_parse.base import Dict
 from pydantic import BaseModel, Field
 
 from megaparse_sdk.schema.document import Document
