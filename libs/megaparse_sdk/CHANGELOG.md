@@ -1,5 +1,20 @@
 # Changelog
 
+## [0.1.11](https://github.com/QuivrHQ/MegaParse/compare/megaparse-sdk-v0.1.10...megaparse-sdk-v0.1.11) (2025-02-11)
+
+
+### Features
+
+* add_layout_detection ([#220](https://github.com/QuivrHQ/MegaParse/issues/220)) ([2d2d0b4](https://github.com/QuivrHQ/MegaParse/commit/2d2d0b42bba4c883db423568e932eda42edd60d7))
+* Text detection in auto strategy ([#209](https://github.com/QuivrHQ/MegaParse/issues/209)) ([03c7ada](https://github.com/QuivrHQ/MegaParse/commit/03c7ada1dc245e13ef41ffd6fa3a8ed869269d37))
+
+
+### Bug Fixes
+
+* Add EngineConfig & StrategyHandler ([#211](https://github.com/QuivrHQ/MegaParse/issues/211)) ([2e1c6dd](https://github.com/QuivrHQ/MegaParse/commit/2e1c6ddd676227d1cbc4cff9771b20595259ba38))
+* add parse tests for every supported extensions ([#198](https://github.com/QuivrHQ/MegaParse/issues/198)) ([9dff0de](https://github.com/QuivrHQ/MegaParse/commit/9dff0de0c1de848151fe9a6519b658f0924c1228))
+* Strategy heuristic test & fix ([#203](https://github.com/QuivrHQ/MegaParse/issues/203)) ([7b7fb40](https://github.com/QuivrHQ/MegaParse/commit/7b7fb40cae4ed380a5f0ca0035a7bd2bcc9147c3))
+
 ## [0.1.10](https://github.com/QuivrHQ/MegaParse/compare/megaparse-sdk-v0.1.9...megaparse-sdk-v0.1.10) (2024-12-16)
 
 
