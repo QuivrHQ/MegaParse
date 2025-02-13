@@ -1,5 +1,12 @@
 # Changelog
 
+## [0.1.12](https://github.com/QuivrHQ/MegaParse/compare/megaparse-sdk-v0.1.11...megaparse-sdk-v0.1.12) (2025-02-13)
+
+
+### Features
+
+* add layout detection ([#228](https://github.com/QuivrHQ/MegaParse/issues/228)) ([77f7040](https://github.com/QuivrHQ/MegaParse/commit/77f7040c9c221a17effce089be7ec575cdd83468))
+
 ## [0.1.11](https://github.com/QuivrHQ/MegaParse/compare/megaparse-sdk-v0.1.10...megaparse-sdk-v0.1.11) (2025-02-11)
 
 
