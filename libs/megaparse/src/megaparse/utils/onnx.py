@@ -9,7 +9,7 @@ logger = logging.getLogger("megaparse")
 
 def get_providers(device: DeviceEnum) -> List[str]:
     prov = rt.get_available_providers()
-    logger.info("Available providers:", prov)
+    logger.info("Available providers: %s", prov)
     if device == DeviceEnum.CUDA:
         if "CUDAExecutionProvider" not in prov:
             raise ValueError(
