@@ -1,5 +1,12 @@
 # Changelog
 
+## [0.0.55](https://github.com/QuivrHQ/MegaParse/compare/megaparse-v0.0.54...megaparse-v0.0.55) (2025-02-14)
+
+
+### Features
+
+* remove tensorrt ([#230](https://github.com/QuivrHQ/MegaParse/issues/230)) ([8b8abbc](https://github.com/QuivrHQ/MegaParse/commit/8b8abbc6a2a1b33d4e921d55d2519b773ec062c8))
+
 ## [0.0.54](https://github.com/QuivrHQ/MegaParse/compare/megaparse-v0.0.53...megaparse-v0.0.54) (2025-02-11)
 
 
