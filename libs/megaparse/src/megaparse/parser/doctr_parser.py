@@ -1,6 +1,5 @@
 import logging
 import uuid
-import warnings
 from typing import Any, Dict, List, Tuple, Type
 from uuid import UUID
 
@@ -107,31 +106,6 @@ class DoctrParser(NestedObject, _OCRPredictor):
 
         self.detect_orientation = detect_orientation
         self.detect_language = detect_language
-
-    def _get_providers(self) -> List[str]:
-        prov = rt.get_available_providers()
-        if self.device == DeviceEnum.CUDA:
-            # TODO: support openvino, directml etc
-            if "CUDAExecutionProvider" not in prov:
-                raise ValueError(
-                    "onnxruntime can't find CUDAExecutionProvider in list of available providers"
-                )
-            return ["TensorrtExecutionProvider", "CUDAExecutionProvider"]
-        elif self.device == DeviceEnum.COREML:
-            if "CoreMLExecutionProvider" not in prov:
-                raise ValueError(
-                    "onnxruntime can't find CoreMLExecutionProvider in list of available providers"
-                )
-            return ["CoreMLExecutionProvider"]
-        elif self.device == DeviceEnum.CPU:
-            return ["CPUExecutionProvider"]
-        else:
-            warnings.warn(
-                "Device not supported, using CPU",
-                UserWarning,
-                stacklevel=2,
-            )
-            return ["CPUExecutionProvider"]
 
     def get_text_detections(self, pages: list[Page], **kwargs) -> List[Page]:
         rasterized_pages = [np.array(page.rasterized) for page in pages]
