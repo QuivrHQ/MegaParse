@@ -1,4 +1,3 @@
-import warnings
 from pathlib import Path
 from typing import IO, Any, List, Tuple
 
@@ -82,33 +81,6 @@ def get_strategy_page(
     if iou < page_threshold:
         return StrategyEnum.HI_RES
     return StrategyEnum.FAST
-
-
-def _get_providers(device=DeviceEnum.CPU) -> List[str]:
-    prov = rt.get_available_providers()
-    print("Available providers:", prov)
-    if device == DeviceEnum.CUDA:
-        # TODO: support openvino, directml etc
-        if "CUDAExecutionProvider" not in prov:
-            raise ValueError(
-                "onnxruntime can't find CUDAExecutionProvider in list of available providers"
-            )
-        return ["TensorrtExecutionProvider", "CUDAExecutionProvider"]
-    elif device == DeviceEnum.COREML:
-        if "CoreMLExecutionProvider" not in prov:
-            raise ValueError(
-                "onnxruntime can't find CoreMLExecutionProvider in list of available providers"
-            )
-        return ["CoreMLExecutionProvider"]
-    elif device == DeviceEnum.CPU:
-        return ["CPUExecutionProvider"]
-    else:
-        warnings.warn(
-            "Device not supported, using CPU",
-            UserWarning,
-            stacklevel=2,
-        )
-        return ["CPUExecutionProvider"]
 
 
 def validate_input(
@@ -238,7 +210,7 @@ def main():
         else:
             text_det_config = TextDetConfig()
             general_options = rt.SessionOptions()
-            providers = _get_providers(device=device)
+            providers = get_providers(device=device)
             engine_config = EngineConfig(
                 session_options=general_options,
                 providers=providers,

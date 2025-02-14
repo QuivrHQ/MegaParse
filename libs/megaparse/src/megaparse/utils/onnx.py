@@ -1,5 +1,4 @@
 import logging
-import warnings
 from typing import List
 
 import onnxruntime as rt
@@ -12,12 +11,11 @@ def get_providers(device: DeviceEnum) -> List[str]:
     prov = rt.get_available_providers()
     logger.info("Available providers:", prov)
     if device == DeviceEnum.CUDA:
-        # TODO: support openvino, directml etc
         if "CUDAExecutionProvider" not in prov:
             raise ValueError(
                 "onnxruntime can't find CUDAExecutionProvider in list of available providers"
             )
-        return ["TensorrtExecutionProvider", "CUDAExecutionProvider"]
+        return ["CUDAExecutionProvider"]
     elif device == DeviceEnum.COREML:
         if "CoreMLExecutionProvider" not in prov:
             raise ValueError(
@@ -27,9 +25,4 @@ def get_providers(device: DeviceEnum) -> List[str]:
     elif device == DeviceEnum.CPU:
         return ["CPUExecutionProvider"]
     else:
-        warnings.warn(
-            "Device not supported, using CPU",
-            UserWarning,
-            stacklevel=2,
-        )
-        return ["CPUExecutionProvider"]
+        raise ValueError("device not in (CUDA,CoreML,CPU)")
