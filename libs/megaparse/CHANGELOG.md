@@ -1,5 +1,12 @@
 # Changelog
 
+## [0.0.56](https://github.com/QuivrHQ/MegaParse/compare/megaparse-v0.0.55...megaparse-v0.0.56) (2025-02-21)
+
+
+### Features
+
+* fix logging message ([#234](https://github.com/QuivrHQ/MegaParse/issues/234)) ([ba9a24a](https://github.com/QuivrHQ/MegaParse/commit/ba9a24aec950d6cf14834b8e2e11f5725778f12e))
+
 ## [0.0.55](https://github.com/QuivrHQ/MegaParse/compare/megaparse-v0.0.54...megaparse-v0.0.55) (2025-02-14)
 
 
