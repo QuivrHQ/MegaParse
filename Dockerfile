@@ -3,7 +3,7 @@ FROM python:3.11.10-slim-bullseye
 WORKDIR /app
 
 # Install runtime dependencies
-RUN apt-get update && apt-get upgrade && apt-get install -y \
+RUN apt-get update && apt-get upgrade -y && apt-get install -y \
     libgeos-dev \
     libcurl4-openssl-dev \
     libssl-dev \
@@ -15,7 +15,6 @@ RUN apt-get update && apt-get upgrade && apt-get install -y \
     build-essential \
     libtool \
     python-dev \
-    build-essential \
     wget \
     gcc \
     # Additional dependencies for document handling
@@ -35,7 +34,7 @@ RUN pip install uv
 RUN uv pip install --no-cache --system -r requirements.lock
 
 RUN playwright install --with-deps
-RUN python3 - -m nltk.downloader all
+RUN python3 -m nltk.downloader all
 
 COPY . .
 
