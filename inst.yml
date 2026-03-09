@@ -1,0 +1,13 @@
+pip install megaparse
+from megaparse.parser.megaparse_vision import MegaParseVision
+
+model = ChatOpenAI(model="gpt-4o", api_key=os.getenv("OPENAI_API_KEY"))  # type: ignore
+parser = MegaParseVision(model=model)
+response = parser.convert("./test.pdf")
+print(response)
+from megaparse.parser.megaparse_vision import MegaParseVision
+
+model = ChatOpenAI(model="gpt-4o", api_key=os.getenv("OPENAI_API_KEY"))  # type: ignore
+parser = MegaParseVision(model=model)
+response = parser.convert("./test.pdf")
+print(response)

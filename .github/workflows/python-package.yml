@@ -1,0 +1,133 @@
+# This workflow will install Python dependencies, run tests and lint with a variety of Python versions
+# For more information see: https://docs.github.com/en/actions/automating-builds-and-tests/building-and-testing-python
+
+name: Python package
+
+on:
+  push:
+    branches: [ "main" ]
+  pull_request:
+    branches: [ "main" ]
+
+jobs:
+  build:
+
+    runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        python-version: ["3.9", "3.10", "3.11"]
+
+    steps:
+    - uses: actions/checkout@v4            - name: Python Semantic Release
+  # You may pin to the exact commit or the version.
+  # uses: python-semantic-release/python-semantic-release@02f2a5c74dbb6aa2989f10fc4af12cd8e6bf025f
+  uses: python-semantic-release/python-semantic-release@v10.5.2
+  with:
+    # Path to a custom semantic-release configuration file. By default, an empty
+string will look for a pyproject.toml file in the current directory. This is the same
+as passing the `-c` or `--config` parameter to semantic-release.
+
+    config_file: # optional, default is 
+    # Sub-directory to cd into before running semantic-release
+    directory: # optional, default is .
+    # GitHub token used to push release notes and new commits/tags
+    github_token: 
+    # The human name for the “committer” field
+    git_committer_name: # optional
+    # The email address for the “committer” field
+    git_committer_email: # optional
+    # If set to true, the github action will pass the `--noop` parameter to
+semantic-release. This will cause semantic-release to run in "no operation"
+mode. See the documentation for more information on this parameter. Note that,
+this parameter will not affect the output of the action, so you will still get
+the version determination decision as output values.
+
+    no_operation_mode: # optional, default is false
+    # The ssh public key used to sign commits
+    ssh_public_signing_key: # optional
+    # The ssh private key used to sign commits
+    ssh_private_signing_key: # optional
+    # If set to true, the github action will pass the `--strict` parameter to
+semantic-release. See the documentation for more information on this parameter.
+
+    strict: # optional, default is false
+    # Set the verbosity level of the output as the number of -v's to pass to
+semantic-release. 0 is no extra output, 1 is info level output, 2 is
+debug output, and 3 is silly debug level of output.
+
+    verbosity: # optional, default is 1
+    # Force the next version to be a prerelease. Set to "true" or "false".
+
+    prerelease: # optional
+    # Force the next version to use this prerelease token, if it is a prerelease
+    prerelease_token: # optional
+    # Force the next version to be a major release. Must be set to
+one of "prerelease", "patch", "minor", or "major".
+
+    force: # optional
+    # Whether or not to commit changes locally. Defaults are handled by python-semantic-release internal version command.
+    commit: # optional
+    # Whether or not to make a local version tag. Defaults are handled
+by python-semantic-release internal version command.
+
+    tag: # optional
+    # Whether or not to push local commits to the Git repository. See
+the configuration page for defaults of `semantic-release version`
+for how the default is determined between push, tag, & commit.
+
+    push: # optional
+    # Whether or not to update the changelog.
+
+    changelog: # optional
+    # Whether or not to create a release in the remote VCS, if supported
+
+    vcs_release: # optional
+    # Whether or not to run the build_command for the project. Defaults are
+handled by python-semantic-release internal version command.
+
+    build: # optional
+    # Build metadata to append to the new version
+
+    build_metadata: # optional            - name: setup/install python poetry
+  # You may pin to the exact commit or the version.
+  # uses: trim21/setup-poetry@ae0f5d2fed1398a6edbf2803373c941bc5723c6c
+  uses: trim21/setup-poetry@dist/v2.0.3            - name: elmah.io Upload Source Map Action
+  # You may pin to the exact commit or the version.
+  # uses: elmahio/github-upload-source-map-action@02d3e0a71cb7741a98860405f287c4abf95f62bc
+  uses: elmahio/github-upload-source-map-action@v1
+  with:
+    # An API key with permission to upload source maps.
+    apiKey: 
+    # The ID of the log which should contain the minified JavaScript and source map.
+    logId: 
+    # An URL to the online minified JavaScript file. The URL can be absolute or relative but will always be converted to a relative path (no protocol, domain, and query parameters). elmah.io uses this path to lookup any lines in a JS stack trace that will need de-minification.
+    path: 
+    # A path to the source map file. Only files with an extension of .map and content type of application/json will be accepted.
+    sourceMap: 
+    # A path to the minified JavaScript file. Only files with an extension of .js and content type of text/javascript will be accepted.
+    minifiedJavaScript: 
+          
+  with:
+    # expected poetry version
+    version: # optional, default is 
+          
+          
+    - name: Set up Python ${{ matrix.python-version }}
+      uses: actions/setup-python@v3
+      with:
+        python-version: ${{ matrix.python-version }}
+    - name: Install dependencies
+      run: |
+        python -m pip install --upgrade pip
+        python -m pip install flake8 pytest
+        if [ -f requirements.txt ]; then pip install -r requirements.txt; fi
+    - name: Lint with flake8
+      run: |
+        # stop the build if there are Python syntax errors or undefined names
+        flake8 . --count --select=E9,F63,F7,F82 --show-source --statistics
+        # exit-zero treats all errors as warnings. The GitHub editor is 127 chars wide
+        flake8 . --count --exit-zero --max-complexity=10 --max-line-length=127 --statistics
+    - name: Test with pytest
+      run: |
+        pytest
