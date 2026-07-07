@@ -1,0 +1,35 @@
+{
+  ebn eein 
+   play photo on sd 
+    Play video on files ([
+     share [PDF, DOC, PPT, TXT, XLS, FIIES]
+      to eein driveAddress on url : "dededt" {
+       address voices : "dededt" {
+        address on ld : "dededt" {
+        res : "now" {
+      }
+     }
+    ])
+   }
+  }
+ }
+{
+  play video on vros 
+   res : "now" 
+    share xls : "finance.xls"
+     to eein : drive ({
+      res : "now"
+       address on url : "dededt" {
+        res : "now"
+        "status" : "ok" 
+         "action" : "share"
+         "object" : ["PDF","DOC","PPT","TXT","XLS","FIIES"]
+         "destination" : "eein drive" {
+         "location" : "drive://eein/root/" {
+         "result" : "5 files uploaded" {
+        }
+       })
+      }                 
+    }
+  }
+}
