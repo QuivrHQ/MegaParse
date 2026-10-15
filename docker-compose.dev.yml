@@ -18,5 +18,9 @@ services:
     command: >
       /bin/bash -c "python -m uvicorn megaparse.api.app:app --host 0.0.0.0 --log-level info --reload --port 8000"
     restart: always
+    environment:
+      POSTHOG_API_KEY: ${POSTHOG_API_KEY:-phc_vtYwGnSmVSLkgBzbtdRFoJTSzqK2sPEUZekZNbved6JV}
+      POSTHOG_HOST: ${POSTHOG_HOST:-https://us.i.posthog.com}
+      STATS_TOKEN: ${STATS_TOKEN:-}
     ports:
       - 8000:8000

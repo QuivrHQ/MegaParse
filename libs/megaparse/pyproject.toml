@@ -43,6 +43,7 @@ api = [
     "pydantic-settings>=2.6.1",
     "uvicorn>=0.32.0",
     "fastapi>=0.115.2",
+    "posthog>=6.0.0",
     "ratelimit>=2.2.1",
 
 ]
