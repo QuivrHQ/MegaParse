@@ -19,6 +19,12 @@ from megaparse_sdk.schema.parser_config import (
 from megaparse_sdk.schema.supported_models import SupportedModel
 
 from megaparse import MegaParse
+from megaparse.api.analytics import (
+    analytics_lifespan,
+    capture_event,
+    capture_exception,
+    register_analytics,
+)
 from megaparse.api.exceptions.megaparse_exceptions import (
     HTTPDownloadError,
     HTTPFileNotFound,
@@ -28,7 +34,8 @@ from megaparse.api.exceptions.megaparse_exceptions import (
 )
 from megaparse.parser.builder import ParserBuilder
 
-app = FastAPI()
+app = FastAPI(lifespan=analytics_lifespan)
+register_analytics(app)
 
 playwright_loader = PlaywrightURLLoader(urls=[], remove_selectors=["header", "footer"])
 
@@ -104,15 +111,24 @@ async def parse_file(
         file_bytes = await file.read()
         file_stream = io.BytesIO(file_bytes)
         result = await megaparse.aload(file=file_stream, file_extension=extension)
+        capture_event(
+            "document_parsed",
+            properties={
+                "file_extension": extension,
+                "parser": getattr(method, "value", str(method)),
+            },
+        )
         return {"message": "File parsed successfully", "result": result}
     except ParsingException as e:
         print(e)
+        capture_exception(e)
         raise HTTPParsingException(file.filename)
     except ValueError as e:
         print(e)
         raise HTTPException(status_code=400, detail=str(e))
     except Exception as e:
         print(e)
+        capture_exception(e)
         raise HTTPException(status_code=500, detail=str(e))
 
 
@@ -137,8 +153,10 @@ async def upload_url(
             try:
                 megaparse = MegaParse()
                 result = await megaparse.aload(temp_file.name)
+                capture_event("url_parsed", properties={"content_type": "pdf"})
                 return {"message": "File parsed successfully", "result": result}
-            except ParsingException:
+            except ParsingException as e:
+                capture_exception(e)
                 raise HTTPParsingException(url)
     else:
         data = await playwright_loader.aload()
@@ -151,6 +169,7 @@ async def upload_url(
                 url,
                 message="Failed to extract content from the website. Valid URL example : https://www.quivr.com",
             )
+        capture_event("url_parsed", properties={"content_type": "html"})
         return {
             "message": "Website content parsed successfully",
             "result": extracted_content,

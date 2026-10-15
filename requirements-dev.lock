@@ -444,6 +444,8 @@ pluggy==1.5.0
     # via pytest
 portalocker==3.0.0
     # via iopath
+posthog==7.70.0
+    # via megaparse
 pre-commit==4.0.1
 prompt-toolkit==3.0.48
     # via ipython

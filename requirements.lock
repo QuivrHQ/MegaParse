@@ -372,6 +372,8 @@ playwright==1.48.0
     # via megaparse
 portalocker==3.0.0
     # via iopath
+posthog==7.70.0
+    # via megaparse
 propcache==0.2.0
     # via aiohttp
     # via yarl
